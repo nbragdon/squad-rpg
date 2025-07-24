@@ -1,0 +1,98 @@
+.App {
+    text-align: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: white;
+    font-family: 'Arial', sans-serif;
+}
+
+.App-header {
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.App-header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    background: linear-gradient(45deg, #ffd700, #ffed4e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.App-main {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Common button styles */
+button {
+    background: linear-gradient(45deg, #4CAF50, #45a049);
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+button:disabled {
+    background: #666;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+button.primary {
+    background: linear-gradient(45deg, #2196F3, #1976D2);
+}
+
+button.secondary {
+    background: linear-gradient(45deg, #FF9800, #F57C00);
+}
+
+button.danger {
+    background: linear-gradient(45deg, #f44336, #d32f2f);
+}
+
+/* Back button */
+.back-button {
+    background: linear-gradient(45deg, #666, #555);
+    font-size: 14px;
+    padding: 8px 16px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .App-main {
+        padding: 10px;
+    }
+
+    .App-header h1 {
+        font-size: 2rem;
+    }
+
+    button {
+        font-size: 14px;
+        padding: 10px 20px;
+    }
+}

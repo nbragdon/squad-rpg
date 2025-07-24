@@ -1,0 +1,67 @@
+Core Features of a Generic Tactical RPG (Inspired by "Mystic Mayhem"):
+Team-Based Tactical RPG Combat:
+
+Players assemble a team of legendary characters from various RPG character classes.
+
+Combat is dynamic, featuring semi-free movement and requiring tactical positioning on the battlefield.
+
+Different character classes possess unique movement abilities and attacks.
+
+Strategic play is crucial, often demanding careful team composition (e.g., combinations of tank, damage-dealer, and support classes) and coordinated attacks to prevent combat setbacks.
+
+Each character typically has a limited set of core skills to utilize.
+
+Powerful "Heroic Ultimates" or "Signature Abilities" are a key part of combat.
+
+Character Collection & Upgrade System (Gacha Mechanics):
+
+Players collect iconic characters, often through a randomized acquisition system.
+
+Upgrading Characters: This is a central progression mechanic. Characters can be enhanced through various means:
+
+Materials: Grinding dungeons or specific missions to acquire necessary crafting or upgrade materials.
+
+Gear/Artifacts: Special items or "artifacts" can be equipped to boost stats and provide unique effects.
+
+Skills and Talents: Individual character skills and innate talents can be leveled up.
+
+Duplicate Characters: Acquiring multiple copies of the same character allows players to "evolve" them, unlocking further potential and powerful perks.
+
+The system often involves limited currency for pulls and varying rarity rates, influencing player progression.
+
+Story and Setting:
+
+The narrative typically involves a powerful, dark force (e.g., "Nightmare" or a similar entity) invading the realm, twisting reality to reflect the deepest fears of its inhabitants.
+
+Players assemble their teams to survive these corrupted worlds and ultimately save the realm.
+
+The main story progression is often designed to be played at the player's own pace.
+
+Game Modes:
+
+The game features a variety of modes, which can sometimes be complex or repetitive in structure.
+
+These include daily challenges, resource-farming dungeons, and special event modes.
+
+Player-versus-Player (PvP) modes may exist, sometimes featuring randomly generated opposing teams rather than direct player-controlled rosters.
+
+Main Gameplay Loop:
+The primary gameplay loop is a typical mobile RPG progression cycle, centered on strengthening your team through combat and resource management:
+
+Assemble and Strategize: Players select and arrange a team of their available heroes, considering their unique classes, abilities, and tactical roles.
+
+Engage in Combat Missions: Players undertake various missions (e.g., story quests, daily dungeons, challenge modes) to battle waves of adversaries. Combat involves tactical positioning and the strategic use of character abilities.
+
+Acquire Resources: Successful completion of missions rewards players with essential materials, in-game currency, unique gear, and potentially duplicate character fragments.
+
+Character Development: Utilize the acquired resources (materials, shards, currency) to:
+
+Upgrade existing characters: Increase their level, core attributes, and enhance their skills and talents.
+
+Evolve characters: Use duplicate characters to unlock new perks and significantly boost their power.
+
+Acquire new characters: Use collected currency for randomized pulls to expand the roster of available heroes.
+
+Repeat: Players return to combat missions, often replaying previously completed levels ("grinding") to accumulate more resources. This continuous cycle of combat and upgrades enables progression to more challenging content.
+
+This loop is characteristic of many mobile RPGs, offering strategic depth but also a potential for repetition, with long-term engagement often dependent on consistent content updates and the introduction of new character classes or challenges.
