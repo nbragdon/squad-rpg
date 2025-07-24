@@ -125,6 +125,7 @@ export interface BattleCharacter extends PlayerCharacter {
     isAlive: boolean;
     maxLevel?: number;
     position?: Position;
+    activeEffects?: StatusEffect[];
     // Optionally: add status effects, buffs, etc.
 }
 
@@ -171,6 +172,14 @@ export interface PlayerProgress {
     soloProgress: number; // Highest unlocked solo stage (1 = chapter 1 stage 1)
     unlockedCharacters: string[]; // List of owned character IDs
     inventory: InventoryItem[]; // Player's inventory
+    characterProgress?: {
+        [characterId: string]: {
+            level: number;
+            xp: number;
+            xpToNextLevel: number;
+            shards: number;
+        }
+    };
 }
 
 export interface InventoryItem {

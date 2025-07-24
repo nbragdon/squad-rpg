@@ -7,7 +7,7 @@ export const BASELINE = {
         SPEED: 100,
         MAX_HEALTH: 500,
         MAX_ENERGY: 100,
-        ENERGY_GAIN: 10,
+        ENERGY_GAIN: 15,
     },
     UNCOMMON: {
         ATTACK: 120,
@@ -15,7 +15,7 @@ export const BASELINE = {
         SPEED: 110,
         MAX_HEALTH: 600,
         MAX_ENERGY: 110,
-        ENERGY_GAIN: 12,
+        ENERGY_GAIN: 18,
     },
     RARE: {
         ATTACK: 140,
@@ -23,7 +23,7 @@ export const BASELINE = {
         SPEED: 120,
         MAX_HEALTH: 700,
         MAX_ENERGY: 120,
-        ENERGY_GAIN: 14,
+        ENERGY_GAIN: 20,
     },
     EPIC: {
         ATTACK: 170,
@@ -31,7 +31,7 @@ export const BASELINE = {
         SPEED: 130,
         MAX_HEALTH: 850,
         MAX_ENERGY: 130,
-        ENERGY_GAIN: 16,
+        ENERGY_GAIN: 22,
     },
     LEGENDARY: {
         ATTACK: 200,
@@ -39,6 +39,6 @@ export const BASELINE = {
         SPEED: 140,
         MAX_HEALTH: 1000,
         MAX_ENERGY: 140,
-        ENERGY_GAIN: 18,
+        ENERGY_GAIN: 25,
     },
 };

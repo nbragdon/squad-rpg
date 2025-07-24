@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { BattleEngine } from '../battle';
+import { BattleState } from '../battle/battleTypes';
+import { useGame } from '../context/GameContext';
 import { gachaCharacters } from '../data/characters';
-import { BattleCharacter, BattleState, PlayerCharacter, Position, Team } from '../types/game';
+import { levelUp } from '../data/leveling';
+import { BattleCharacter, PlayerCharacter, Position, Team } from '../types/game';
+import BattleDisplay from './BattleDisplay';
 import './BattleScreen.css';
 
 interface BattleScreenProps {
@@ -9,9 +14,11 @@ interface BattleScreenProps {
 }
 
 const BattleScreen: React.FC<BattleScreenProps> = ({ playerTeam, onBack }) => {
+    const { playerProgress, setPlayerProgress } = useGame();
+    const [battleEngine, setBattleEngine] = useState<BattleEngine | null>(null);
     const [battleState, setBattleState] = useState<BattleState | null>(null);
     const [selectedCharacter, setSelectedCharacter] = useState<BattleCharacter | null>(null);
-    const [battleLog, setBattleLog] = useState<string[]>([]);
+    const [xpLogs, setXpLogs] = useState<string[]>([]);
 
     // Extend BattleCharacter to include maxLevel and position for compatibility
     function toBattleCharacter(pc: PlayerCharacter, position: Position = { x: 0, y: 0 }, maxLevel = 60): BattleCharacter {
@@ -54,17 +61,13 @@ const BattleScreen: React.FC<BattleScreenProps> = ({ playerTeam, onBack }) => {
             turnOrder,
             currentCharacterId: turnOrder[0],
             battlePhase: 'combat',
-            turnCount: 1
+            turnCount: 1,
+            battleLog: ['Battle begins!'], // <-- Add this line to satisfy BattleState type
         };
 
         setBattleState(initialBattleState);
-        addToBattleLog('Battle begins!');
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
-    const addToBattleLog = (message: string) => {
-        setBattleLog(prev => [...prev.slice(-9), message]); // Keep last 10 messages
-    };
 
     const getCurrentCharacter = (): BattleCharacter | null => {
         if (!battleState || !battleState.currentCharacterId) return null;
@@ -103,8 +106,6 @@ const BattleScreen: React.FC<BattleScreenProps> = ({ playerTeam, onBack }) => {
         const damage = Math.max(1, attacker.attack - target.defense);
         const newHealth = Math.max(0, target.health - damage);
 
-        addToBattleLog(`${attacker.name} attacks ${target.name} for ${damage} damage!`);
-
         // Update battle state
         const updatedBattleState = { ...battleState };
 
@@ -127,7 +128,7 @@ const BattleScreen: React.FC<BattleScreenProps> = ({ playerTeam, onBack }) => {
         }
 
         if (newHealth === 0) {
-            addToBattleLog(`${target.name} is defeated!`);
+            // addToBattleLog(`${target.name} is defeated!`);
         }
 
         // Move to next turn
@@ -155,57 +156,63 @@ const BattleScreen: React.FC<BattleScreenProps> = ({ playerTeam, onBack }) => {
 
         if (!playerAlive) {
             updatedBattleState.battlePhase = 'defeat';
-            addToBattleLog('Defeat! Your team has been defeated.');
+            // addToBattleLog('Defeat! Your team has been defeated.');
         } else if (!enemyAlive) {
             updatedBattleState.battlePhase = 'victory';
-            addToBattleLog('Victory! You have defeated the enemy team!');
+            // addToBattleLog('Victory! You have defeated the enemy team!');
+            // Award XP to all player characters
+            const playerChars = updatedBattleState.playerTeam.characters as PlayerCharacter[];
+            const enemyLevels = updatedBattleState.enemyTeam.characters.map(c => c.level || 1);
+            awardXpToTeam(playerChars, enemyLevels);
         }
-
         setBattleState(updatedBattleState);
     };
 
-    const renderBattlefield = () => {
-        if (!battleState) return null;
-
-        const gridSize = 8;
-        const grid = [];
-
-        for (let y = 0; y < gridSize; y++) {
-            for (let x = 0; x < gridSize; x++) {
-                // In renderBattlefield, ensure all characters in grid are BattleCharacter
-                const playerChar = battleState.playerTeam.characters.find(
-                    char => (char as BattleCharacter).position?.x === x && (char as BattleCharacter).position?.y === y && (char as BattleCharacter).isAlive
-                ) as BattleCharacter | undefined;
-                const enemyChar = battleState.enemyTeam.characters.find(
-                    char => (char as BattleCharacter).position?.x === x && (char as BattleCharacter).position?.y === y && (char as BattleCharacter).isAlive
-                ) as BattleCharacter | undefined;
-                const character = playerChar || enemyChar;
-
-                grid.push(
-                    <div
-                        key={`${x}-${y}`}
-                        className={`battlefield-cell ${character ? 'occupied' : ''} ${character && selectedCharacter?.id === character.id ? 'selected' : ''
-                            } ${character && battleState.currentCharacterId === character.id ? 'current-turn' : ''}`}
-                        onClick={() => character && handleCharacterClick(character)}
-                    >
-                        {character && (
-                            <div className={`character-token ${playerChar ? 'player' : 'enemy'}`}>
-                                <div className="character-avatar">{character.name.charAt(0)}</div>
-                                <div className="health-bar">
-                                    <div
-                                        className="health-fill"
-                                        style={{ width: `${(character.health / character.maxHealth) * 100}%` }}
-                                    />
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                );
+    // Award XP to all participating characters based on average enemy level
+    function awardXpToTeam(team: PlayerCharacter[], enemyLevels: number[]) {
+        const avgLevel = Math.round(enemyLevels.reduce((a, b) => a + b, 0) / enemyLevels.length);
+        const xpGained = 20 * avgLevel;
+        let updatedCharacterProgress = { ...(playerProgress.characterProgress || {}) };
+        let updatedTeam: PlayerCharacter[] = [];
+        let logs: string[] = [];
+        team.forEach(char => {
+            let updatedChar = { ...char, xp: (char.xp ?? 0) + xpGained };
+            const beforeLevel = updatedChar.level;
+            updatedChar = levelUp(updatedChar);
+            updatedCharacterProgress[updatedChar.id] = {
+                level: updatedChar.level,
+                xp: updatedChar.xp,
+                xpToNextLevel: updatedChar.xpToNextLevel,
+                shards: updatedChar.shards || 0
+            };
+            updatedTeam.push(updatedChar);
+            logs.push(`${updatedChar.name} gained ${xpGained} XP!`);
+            if (updatedChar.level > beforeLevel) {
+                logs.push(`${updatedChar.name} leveled up! Lv. ${updatedChar.level} (+${updatedChar.level - beforeLevel})`);
+                logs.push('Stats increased!');
             }
-        }
+        });
+        setPlayerProgress({ ...playerProgress, characterProgress: updatedCharacterProgress });
+        setXpLogs(logs);
+        return { updatedTeam, logs };
+    }
 
-        return <div className="battlefield-grid">{grid}</div>;
-    };
+    // Prepare player and enemy arrays for the engine
+    const playerArr = playerTeam.characters;
+    const enemyArr = [
+        { id: 'slime_green', level: 1 },
+        { id: 'rat_giant', level: 1 },
+        { id: 'bat_cave', level: 1 }
+    ]; // TODO: use real stage logic
+    const engine = new BattleEngine({ playerCharacters: playerArr, enemies: enemyArr });
+    setBattleEngine(engine);
+    setBattleState(engine.getState());
+
+    function handleBattleAction(action: any) {
+        if (!battleEngine) return;
+        // Example: battleEngine.attack(...)
+        // setBattleState(battleEngine.getState());
+    }
 
     if (!battleState) {
         return <div className="battle-screen">Loading battle...</div>;
@@ -213,59 +220,12 @@ const BattleScreen: React.FC<BattleScreenProps> = ({ playerTeam, onBack }) => {
 
     return (
         <div className="battle-screen">
-            <div className="battle-header">
-                <button className="back-button" onClick={onBack}>
-                    ← Back to Menu
-                </button>
-                <h2>Battle - Turn {battleState.turnCount}</h2>
-                <div className="turn-indicator">
-                    {battleState.currentTurn === 'player' ? 'Your Turn' : 'Enemy Turn'}
-                </div>
-            </div>
-
-            <div className="battle-content">
-                <div className="battlefield-container">
-                    <h3>Battlefield</h3>
-                    {renderBattlefield()}
-                </div>
-
-                <div className="battle-info">
-                    <div className="current-character">
-                        {getCurrentCharacter() && (
-                            <div>
-                                <h4>Current Turn: {getCurrentCharacter()?.name}</h4>
-                                <div>HP: {getCurrentCharacter()?.health}/{getCurrentCharacter()?.maxHealth}</div>
-                                <div>Energy: {getCurrentCharacter()?.energy}/{getCurrentCharacter()?.maxEnergy}</div>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="battle-log">
-                        <h4>Battle Log</h4>
-                        <div className="log-messages">
-                            {battleLog.map((message, index) => (
-                                <div key={index} className="log-message">
-                                    {message}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {battleState.battlePhase === 'victory' && (
-                <div className="battle-result victory">
-                    <h2>Victory!</h2>
-                    <button onClick={onBack}>Return to Menu</button>
-                </div>
-            )}
-
-            {battleState.battlePhase === 'defeat' && (
-                <div className="battle-result defeat">
-                    <h2>Defeat!</h2>
-                    <button onClick={onBack}>Return to Menu</button>
-                </div>
-            )}
+            <BattleDisplay
+                battleState={battleState}
+                onAction={handleBattleAction}
+                onVictory={onBack}
+                onDefeat={onBack}
+            />
         </div>
     );
 };

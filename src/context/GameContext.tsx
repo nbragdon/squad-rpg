@@ -25,7 +25,15 @@ const defaultProgress: PlayerProgress = {
     maxEnergy: 100,
     unlockedCharacters: ['warrior_1'], // Ironfoot unlocked by default
     inventory: [],
-    soloProgress: 1 // Added to match PlayerProgress interface
+    soloProgress: 1, // Added to match PlayerProgress interface
+    characterProgress: {
+        'warrior_1': {
+            level: 1,
+            xp: 0,
+            xpToNextLevel: 100,
+            shards: 0
+        }
+    }
 };
 
 const GameContext = createContext<GameContextType | undefined>(undefined);

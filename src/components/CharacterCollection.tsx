@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
+import { useGame } from '../context/GameContext';
+import { getXpToNextLevel } from '../data/leveling';
+import { calculateStat } from '../data/statUtils';
 import { PlayerCharacter, Rarity, Team } from '../types/game';
 import './CharacterCollection.css';
+import CharacterModal from './CharacterModal';
 
 interface CharacterCollectionProps {
     characters: PlayerCharacter[];
@@ -17,6 +21,7 @@ const CharacterCollection: React.FC<CharacterCollectionProps> = ({
     onBack,
     playerTeam
 }) => {
+    const { playerProgress } = useGame();
     const [modalCharacter, setModalCharacter] = useState<PlayerCharacter | null>(null);
 
     const getRarityColor = (rarity: Rarity): string => {
@@ -41,6 +46,8 @@ const CharacterCollection: React.FC<CharacterCollectionProps> = ({
     const canAddToTeam = (character: PlayerCharacter): boolean => {
         return !isCharacterInTeam(character.id) && playerTeam.characters.length < playerTeam.maxSize;
     };
+
+    const getCharacterProgress = (id: string) => playerProgress.characterProgress?.[id];
 
     return (
         <div className="character-collection">
@@ -78,90 +85,56 @@ const CharacterCollection: React.FC<CharacterCollectionProps> = ({
             </div>
 
             <div className="character-grid">
-                {characters.map(character => (
-                    <div
-                        key={character.id}
-                        className="character-card"
-                        style={{ borderColor: getRarityColor(character.rarity) }}
-                        onClick={() => setModalCharacter(character)}
-                    >
-                        <div className="character-portrait">
-                            <div className="character-avatar">
-                                {character.name.charAt(0)}
+                {characters.map(character => {
+                    const progress = getCharacterProgress(character.id);
+                    const displayChar = progress ? { ...character, ...progress } : character;
+                    return (
+                        <div
+                            key={character.id}
+                            className="character-card"
+                            style={{ borderColor: getRarityColor(character.rarity) }}
+                            onClick={() => setModalCharacter(displayChar)}
+                        >
+                            <div className="character-portrait">
+                                <div className="character-avatar">
+                                    {character.name.charAt(0)}
+                                </div>
+                            </div>
+                            <div className="character-info">
+                                <h3 className="character-name">{character.name}</h3>
+                                <div className="character-class">{character.class}</div>
+                                <div
+                                    className="character-rarity"
+                                    style={{ color: getRarityColor(character.rarity) }}
+                                >
+                                    {character.rarity.toUpperCase()}
+                                </div>
+                            </div>
+                            <div className="character-stats">
+                                <div className="stat-row">
+                                    <span>Level: {displayChar.level}</span>
+                                    <span>HP: {calculateStat({ base: displayChar.maxHealth, level: displayChar.level, shards: displayChar.shards, rarity: displayChar.rarity })}</span>
+                                </div>
+                                <div className="stat-row">
+                                    <span>XP: {typeof displayChar.xp === 'number' ? displayChar.xp : 0} / {getXpToNextLevel(displayChar.level || 1)}</span>
+                                </div>
+                            </div>
+                            <div className="character-actions">
+                                <button
+                                    className={`add-to-team-button ${canAddToTeam(character) ? 'enabled' : 'disabled'}`}
+                                    onClick={e => { e.stopPropagation(); canAddToTeam(character) && onAddToTeam(character); }}
+                                    disabled={!canAddToTeam(character)}
+                                >
+                                    {isCharacterInTeam(character.id) ? 'In Team' : 'Add to Team'}
+                                </button>
                             </div>
                         </div>
-                        <div className="character-info">
-                            <h3 className="character-name">{character.name}</h3>
-                            <div className="character-class">{character.class}</div>
-                            <div
-                                className="character-rarity"
-                                style={{ color: getRarityColor(character.rarity) }}
-                            >
-                                {character.rarity.toUpperCase()}
-                            </div>
-                        </div>
-                        <div className="character-stats">
-                            <div className="stat-row">
-                                <span>Level: {character.level}</span>
-                                <span>HP: {character.maxHealth}</span>
-                            </div>
-                        </div>
-                        <div className="character-actions">
-                            <button
-                                className={`add-to-team-button ${canAddToTeam(character) ? 'enabled' : 'disabled'}`}
-                                onClick={e => { e.stopPropagation(); canAddToTeam(character) && onAddToTeam(character); }}
-                                disabled={!canAddToTeam(character)}
-                            >
-                                {isCharacterInTeam(character.id) ? 'In Team' : 'Add to Team'}
-                            </button>
-                        </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             {modalCharacter && (
-                <div className="character-modal-overlay" onClick={() => setModalCharacter(null)}>
-                    <div className="character-modal" onClick={e => e.stopPropagation()}>
-                        <button className="character-modal-close" onClick={() => setModalCharacter(null)}>&times;</button>
-                        <div className="character-portrait" style={{ margin: '0 auto 1rem auto' }}>
-                            <div className="character-avatar">
-                                {modalCharacter.name.charAt(0)}
-                            </div>
-                        </div>
-                        <div className="character-info">
-                            <h2 className="character-name">{modalCharacter.name}</h2>
-                            <div className="character-class">{modalCharacter.class}</div>
-                            <div className="character-rarity" style={{ color: getRarityColor(modalCharacter.rarity) }}>
-                                {modalCharacter.rarity.toUpperCase()}
-                            </div>
-                        </div>
-                        <div className="character-stats">
-                            <div className="stat-row">
-                                <span>Level: {modalCharacter.level}</span>
-                                <span>HP: {modalCharacter.maxHealth}</span>
-                            </div>
-                            <div className="stat-row">
-                                <span>ATK: {modalCharacter.attack}</span>
-                                <span>DEF: {modalCharacter.defense}</span>
-                            </div>
-                            <div className="stat-row">
-                                <span>SPD: {modalCharacter.speed}</span>
-                                <span>Energy: {modalCharacter.maxEnergy}</span>
-                            </div>
-                        </div>
-                        <div className="character-skills">
-                            <div className="skills-title">Skills:</div>
-                            {modalCharacter.skills.map(skill => (
-                                <div key={skill.id} className="skill-item">
-                                    <strong>{skill.name}</strong>: {skill.description}
-                                </div>
-                            ))}
-                            <div className="skill-item ultimate">
-                                <strong>{modalCharacter.ultimateSkill.name}</strong> (Ultimate): {modalCharacter.ultimateSkill.description}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <CharacterModal character={modalCharacter} onClose={() => setModalCharacter(null)} getRarityColor={getRarityColor} />
             )}
         </div>
     );
