@@ -30,19 +30,29 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ character, onClose, get
                         <b>{skill.name}</b> {skill.isUltimate && <span style={{ color: '#ffd700' }}>(Ultimate)</span>}
                         <div style={{ fontSize: 13, color: '#ccc', marginBottom: 2 }}>{skill.description}</div>
                         <div style={{ fontSize: 12, color: '#aaa' }}>
-                            {typeof skill.damage === 'number' && (
-                                <span>Damage: {skill.damage} (scales with Attack)</span>
+                            {skill.damageCalc && (
+                                <span>
+                                    {skill.damageCalc.type === 'stat' && `Damage: scales with ${skill.damageCalc.stat} (x${skill.damageCalc.multiplier})`}
+                                    {skill.damageCalc.type === 'average' && `Damage: scales with avg(${skill.damageCalc.stats.join(', ')}) (x${skill.damageCalc.multiplier})`}
+                                </span>
                             )}
-                            {typeof skill.healing === 'number' && (
-                                <span>Healing: {skill.healing} (scales with Attack)</span>
+                            {skill.costType && skill.costType !== 'none' && (
+                                <span> &nbsp;|&nbsp; Cost: {skill.costAmount} {skill.costType.charAt(0).toUpperCase() + skill.costType.slice(1)}</span>
                             )}
-                            {skill.manaCost > 0 && (
-                                <span> &nbsp;|&nbsp; Energy Cost: {skill.manaCost}</span>
-                            )}
-                            {skill.statusEffect && (
-                                <span> &nbsp;|&nbsp; {skill.statusEffect.type.charAt(0).toUpperCase() + skill.statusEffect.type.slice(1)}: {skill.statusEffect.value} ({skill.statusEffect.duration} turn{skill.statusEffect.duration > 1 ? 's' : ''})</span>
+                            {typeof skill.cooldownTurns === 'number' && skill.cooldownTurns > 0 && (
+                                <span> &nbsp;|&nbsp; Cooldown: {skill.cooldownTurns} turn{skill.cooldownTurns > 1 ? 's' : ''}</span>
                             )}
                         </div>
+                        {skill.statusEffectsApplied && skill.statusEffectsApplied.length > 0 && (
+                            <div style={{ fontSize: 12, color: '#b2f7ef', marginTop: 2 }}>
+                                {skill.statusEffectsApplied.map(se => (
+                                    <div key={se.id}>
+                                        <span>{se.name} ({se.type.charAt(0).toUpperCase() + se.type.slice(1)}): {se.value} for {se.duration} turn{se.duration > 1 ? 's' : ''}</span>
+                                        {se.description && <span> - {se.description}</span>}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>

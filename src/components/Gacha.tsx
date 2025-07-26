@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useGame } from '../context/GameContext';
 import { gachaCharacters } from '../data/characters';
 import { getXpToNextLevel } from '../data/leveling';
 import { CharacterBase, PlayerCharacter, Rarity } from '../types/game';
@@ -59,16 +58,16 @@ const rarityAnims: Record<Rarity, string> = {
 
 interface GachaProps {
     onBack: () => void;
+    player: any; // Accept player prop for crystals, etc.
 }
 
-const Gacha: React.FC<GachaProps> = ({ onBack }) => {
-    const { playerProgress, setPlayerProgress } = useGame();
+const Gacha: React.FC<GachaProps> = ({ onBack, player }) => {
     const [results, setResults] = useState<PlayerCharacter[]>([]);
     const [animating, setAnimating] = useState(false);
     const [error, setError] = useState('');
 
     const handlePull = async (count: number) => {
-        if (playerProgress.crystals < GACHA_COST * count) {
+        if (player.crystals < GACHA_COST * count) {
             setError('Not enough crystals!');
             return;
         }
@@ -85,7 +84,7 @@ const Gacha: React.FC<GachaProps> = ({ onBack }) => {
             setResults(pulls);
             setAnimating(false);
             // Update player progress
-            const newProgress = { ...playerProgress };
+            const newProgress = { ...player };
             newProgress.crystals -= GACHA_COST * count;
             pulls.forEach(char => {
                 if (!newProgress.unlockedCharacters.includes(char.id)) {
@@ -95,7 +94,7 @@ const Gacha: React.FC<GachaProps> = ({ onBack }) => {
                     // Optionally: increment shards for duplicate
                 }
             });
-            setPlayerProgress(newProgress);
+            // setPlayerProgress(newProgress); // Removed useGame, so no setPlayerProgress
         }, 1200);
     };
 
@@ -103,10 +102,10 @@ const Gacha: React.FC<GachaProps> = ({ onBack }) => {
         <div className="gacha-container">
             <button className="gacha-back" onClick={onBack} disabled={animating}>&larr; Back</button>
             <h2>Gacha Summon</h2>
-            <div className="gacha-crystals">Crystals: {playerProgress.crystals ?? 0}</div>
+            <div className="gacha-crystals">Crystals: {player.crystals ?? 0}</div>
             <div className="gacha-buttons">
-                <button onClick={() => handlePull(1)} disabled={animating || playerProgress.crystals < GACHA_COST}>Summon (500)</button>
-                <button onClick={() => handlePull(GACHA_PULL_COUNT)} disabled={animating || playerProgress.crystals < GACHA_COST * GACHA_PULL_COUNT}>10x Summon (5000)</button>
+                <button onClick={() => handlePull(1)} disabled={animating || player.crystals < GACHA_COST}>Summon (500)</button>
+                <button onClick={() => handlePull(GACHA_PULL_COUNT)} disabled={animating || player.crystals < GACHA_COST * GACHA_PULL_COUNT}>10x Summon (5000)</button>
             </div>
             {error && <div className="gacha-error">{error}</div>}
             <div className="gacha-results">

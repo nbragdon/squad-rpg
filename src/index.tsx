@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import { GameProvider } from './context/GameContext';
+import { GameEngineProvider } from './context/GameEngineContext';
 import './index.css';
 
 const root = ReactDOM.createRoot(
@@ -9,8 +9,8 @@ const root = ReactDOM.createRoot(
 );
 root.render(
     <React.StrictMode>
-        <GameProvider>
+        <GameEngineProvider>
             <App />
-        </GameProvider>
+        </GameEngineProvider>
     </React.StrictMode>
 );

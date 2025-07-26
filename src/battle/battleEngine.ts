@@ -1,8 +1,8 @@
-import { getEnemyById } from '../data/enemies/getEnemyById';
-import { getXpToNextLevel, levelUp } from '../data/leveling';
+import { getXpToNextLevel } from '../data/leveling';
 import { calculateDamage, calculateEnemyStat, calculateStat } from '../data/statUtils';
 import { EnemyCharacter, EnemySkill } from '../types/enemy';
-import { BattleCharacter, CharacterClass, PlayerCharacter, Skill, Team } from '../types/game';
+import { BattleCharacter, CharacterClass, PlayerCharacter, Team } from '../types/game';
+import { CostType, Skill, SkillType, StatusEffectType, TargetType } from '../types/skillTypes';
 import { BattleInitOptions, BattleState } from './battleTypes';
 
 function enemySkillToSkill(skill: EnemySkill): Skill {
@@ -10,13 +10,21 @@ function enemySkillToSkill(skill: EnemySkill): Skill {
         id: skill.id,
         name: skill.name,
         description: skill.description,
-        damage: skill.damage,
-        healing: skill.healing,
-        cooldown: 0,
-        range: 1,
-        manaCost: skill.energyCost || 0,
+        damageCalc: skill.damage !== undefined ? { type: 'stat', stat: 'attack', multiplier: skill.damage / 100 } : undefined,
+        cooldownTurns: 0,
+        costType: skill.energyCost ? CostType.Energy : CostType.None,
+        costAmount: skill.energyCost || 0,
         isUltimate: false,
-        statusEffect: skill.statusEffect,
+        type: SkillType.Attack,
+        targetType: TargetType.SingleEnemy,
+        statusEffectsApplied: skill.statusEffect ? [{
+            id: skill.statusEffect.type,
+            name: skill.statusEffect.type,
+            type: StatusEffectType.Debuff,
+            duration: skill.statusEffect.duration,
+            value: skill.statusEffect.value,
+            description: skill.statusEffect.type
+        }] : [],
     };
 }
 
@@ -62,7 +70,7 @@ export class BattleEngine {
             id: 'enemy_team',
             name: 'Enemy Team',
             characters: options.enemies.map(e => {
-                const base = getEnemyById(e.id);
+                const base = e.id;
                 // Defensive: if not found, skip
                 if (!base) throw new Error(`Enemy not found: ${e.id}`);
                 return toBattleCharacter({ ...base, level: e.level }, false);
@@ -80,17 +88,33 @@ export class BattleEngine {
             enemyTeam: { ...enemyTeam, characters: enemyChars },
             turnOrder,
             currentCharacterId: turnOrder[0],
-            currentTurn: 'player',
+            currentTurn: this.getCurrentTeamTurn(playerChars, turnOrder[0]),
             battlePhase: 'combat',
             turnCount: 1,
             battleLog: ['Battle begins!'],
             xpLogs: []
         };
+        if (this.state.currentTurn === 'enemy') {
+            this.processEnemyTurn();
+        }
     }
 
     getState(): BattleState {
         // Return a shallow copy to trigger React updates
         return { ...this.state };
+    }
+
+    private checkBattleEnd() {
+        const playerAlive = (this.state.playerTeam.characters as BattleCharacter[]).some(c => c.isAlive);
+        const enemyAlive = (this.state.enemyTeam.characters as BattleCharacter[]).some(c => c.isAlive);
+        if (!playerAlive && this.state.battlePhase !== 'defeat') {
+            this.state.battlePhase = 'defeat';
+            this.state.battleLog.push('Defeat! Your team has been defeated.');
+        }
+        if (!enemyAlive && this.state.battlePhase !== 'victory') {
+            this.state.battlePhase = 'victory';
+            this.state.battleLog.push('Victory! You have defeated the enemy team!');
+        }
     }
 
     attack(attackerId: string, targetId: string) {
@@ -108,7 +132,8 @@ export class BattleEngine {
         if (!target.isAlive) {
             this.state.battleLog.push(`${target.name} is defeated!`);
         }
-        this.nextTurn();
+        this.checkBattleEnd();
+        if (this.state.battlePhase === 'combat') this.nextTurn();
     }
 
     useSkill(skillId: string, attackerId: string, targetId: string) {
@@ -118,12 +143,18 @@ export class BattleEngine {
         if (!attacker || !target || !attacker.isAlive || !target.isAlive) return;
         const skill = (attacker.skills || []).find(s => s.id === skillId);
         if (!skill) return;
-        if ((attacker.energy || 0) < (skill.manaCost || 0)) return;
-        // Apply skill effect (damage, healing, status, etc.)
-        if (skill.damage) {
-            const attackVal = attacker.shards !== undefined ? calculateStat({ base: skill.damage, level: attacker.level, shards: attacker.shards, rarity: attacker.rarity }) : calculateEnemyStat(skill.damage, attacker.level, attacker.rarity);
-            const defenseVal = target.shards !== undefined ? calculateStat({ base: target.defense, level: target.level, shards: target.shards, rarity: target.rarity }) : calculateEnemyStat(target.defense, target.level, target.rarity);
-            const dmg = Math.max(0, attackVal - defenseVal);
+        if (skill.costType && skill.costAmount && (attacker.energy || 0) < skill.costAmount) return;
+        // Damage calculation using damageCalc
+        if (skill.damageCalc) {
+            let dmg = 0;
+            if (skill.damageCalc.type === 'stat') {
+                dmg = Math.floor((attacker[skill.damageCalc.stat] || 0) * skill.damageCalc.multiplier);
+            } else if (skill.damageCalc.type === 'average') {
+                const stats = skill.damageCalc.stats.map(stat => attacker[stat] || 0);
+                const avg = stats.reduce((a, b) => a + b, 0) / stats.length;
+                dmg = Math.floor(avg * skill.damageCalc.multiplier);
+            }
+            // Optionally apply defense, resistances, etc. here
             target.health = Math.max(0, target.health - dmg);
             if (target.health === 0) target.isAlive = false;
             this.state.battleLog.push(`${attacker.name} uses ${skill.name} on ${target.name} for ${dmg} damage!`);
@@ -131,15 +162,20 @@ export class BattleEngine {
                 this.state.battleLog.push(`${target.name} is defeated!`);
             }
         }
-        // Apply status effect if present
-        if (skill.statusEffect) {
-            if (!target.activeEffects) target.activeEffects = [];
-            target.activeEffects.push({ ...skill.statusEffect });
-            this.state.battleLog.push(`${target.name} is affected by ${skill.statusEffect.type}!`);
+        // Apply all status effects
+        if (skill.statusEffectsApplied && skill.statusEffectsApplied.length > 0) {
+            if (!Array.isArray(target.activeEffects)) target.activeEffects = [];
+            skill.statusEffectsApplied.forEach(effect => {
+                target.activeEffects!.push({ ...effect });
+                this.state.battleLog.push(`${target.name} is affected by ${effect.name}!`);
+            });
         }
         // Subtract energy
-        attacker.energy = Math.max(0, (attacker.energy || 0) - (skill.manaCost || 0));
-        this.nextTurn();
+        if (skill.costType && skill.costAmount) {
+            attacker.energy = Math.max(0, (attacker.energy || 0) - skill.costAmount);
+        }
+        this.checkBattleEnd();
+        if (this.state.battlePhase === 'combat') this.nextTurn();
     }
 
     useUltimate(skillId: string, attackerId: string, targetId: string) {
@@ -149,12 +185,17 @@ export class BattleEngine {
         if (!attacker || !target || !attacker.isAlive || !target.isAlive) return;
         const skill = attacker.ultimateSkill && attacker.ultimateSkill.id === skillId ? attacker.ultimateSkill : undefined;
         if (!skill) return;
-        if ((attacker.energy || 0) < (skill.manaCost || 0)) return;
-        // Apply ultimate effect (damage, healing, status, etc.)
-        if (skill.damage) {
-            const attackVal = attacker.shards !== undefined ? calculateStat({ base: skill.damage, level: attacker.level, shards: attacker.shards, rarity: attacker.rarity }) : calculateEnemyStat(skill.damage, attacker.level, attacker.rarity);
-            const defenseVal = target.shards !== undefined ? calculateStat({ base: target.defense, level: target.level, shards: target.shards, rarity: target.rarity }) : calculateEnemyStat(target.defense, target.level, target.rarity);
-            const dmg = Math.max(0, attackVal - defenseVal);
+        if (skill.costType && skill.costAmount && (attacker.energy || 0) < skill.costAmount) return;
+        // Damage calculation using damageCalc
+        if (skill.damageCalc) {
+            let dmg = 0;
+            if (skill.damageCalc.type === 'stat') {
+                dmg = Math.floor((attacker[skill.damageCalc.stat] || 0) * skill.damageCalc.multiplier);
+            } else if (skill.damageCalc.type === 'average') {
+                const stats = skill.damageCalc.stats.map(stat => attacker[stat] || 0);
+                const avg = stats.reduce((a, b) => a + b, 0) / stats.length;
+                dmg = Math.floor(avg * skill.damageCalc.multiplier);
+            }
             target.health = Math.max(0, target.health - dmg);
             if (target.health === 0) target.isAlive = false;
             this.state.battleLog.push(`${attacker.name} unleashes ${skill.name} on ${target.name} for ${dmg} damage!`);
@@ -162,48 +203,63 @@ export class BattleEngine {
                 this.state.battleLog.push(`${target.name} is defeated!`);
             }
         }
-        // Apply status effect if present
-        if (skill.statusEffect) {
-            if (!target.activeEffects) target.activeEffects = [];
-            target.activeEffects.push({ ...skill.statusEffect });
-            this.state.battleLog.push(`${target.name} is affected by ${skill.statusEffect.type}!`);
+        // Apply all status effects
+        if (skill.statusEffectsApplied && skill.statusEffectsApplied.length > 0) {
+            target.activeEffects = target.activeEffects || [];
+            skill.statusEffectsApplied.forEach(effect => {
+                target.activeEffects!.push({ ...effect });
+                this.state.battleLog.push(`${target.name} is affected by ${effect.name}!`);
+            });
         }
         // Subtract energy
-        attacker.energy = Math.max(0, (attacker.energy || 0) - (skill.manaCost || 0));
-        this.nextTurn();
+        if (skill.costType && skill.costAmount) {
+            attacker.energy = Math.max(0, (attacker.energy || 0) - skill.costAmount);
+        }
+        this.checkBattleEnd();
+        if (this.state.battlePhase === 'combat') this.nextTurn();
     }
 
-    // Process status effects at the start of each turn
+    // Enhanced status effect processing
     processStatusEffects(char: BattleCharacter) {
         if (!char.activeEffects || !char.isAlive) return;
         let effectsToRemove: number[] = [];
         char.activeEffects.forEach((effect, idx) => {
-            if (effect.type === 'burn' || effect.type === 'poison') {
-                char.health = Math.max(0, char.health - effect.value);
-                this.state.battleLog.push(`${char.name} takes ${effect.value} ${effect.type} damage!`);
-                if (char.health === 0) char.isAlive = false;
-            }
-            if (effect.type === 'attack_up') {
-                char.attack += effect.value;
-                this.state.battleLog.push(`${char.name}'s attack increased by ${effect.value}!`);
-            }
-            if (effect.type === 'defense_up') {
-                char.defense += effect.value;
-                this.state.battleLog.push(`${char.name}'s defense increased by ${effect.value}!`);
-            }
-            if (effect.type === 'attack_down') {
-                char.attack -= effect.value;
-                this.state.battleLog.push(`${char.name}'s attack decreased by ${effect.value}!`);
-            }
-            if (effect.type === 'defense_down') {
-                char.defense -= effect.value;
-                this.state.battleLog.push(`${char.name}'s defense decreased by ${effect.value}!`);
+            switch (effect.type) {
+                case 'dot':
+                    char.health = Math.max(0, char.health - (effect.value || 0));
+                    this.state.battleLog.push(`${char.name} takes ${effect.value} damage from ${effect.name}!`);
+                    if (char.health === 0) char.isAlive = false;
+                    break;
+                case 'hot':
+                    char.health = Math.min(char.maxHealth, char.health + (effect.value || 0));
+                    this.state.battleLog.push(`${char.name} heals ${effect.value} from ${effect.name}!`);
+                    break;
+                case 'buff':
+                    if (effect.targetStat && effect.value) {
+                        char[effect.targetStat] = (char[effect.targetStat] || 0) + effect.value;
+                        this.state.battleLog.push(`${char.name}'s ${effect.targetStat} increased by ${effect.value} from ${effect.name}!`);
+                    }
+                    break;
+                case 'debuff':
+                    if (effect.targetStat && effect.value) {
+                        char[effect.targetStat] = (char[effect.targetStat] || 0) + effect.value;
+                        this.state.battleLog.push(`${char.name}'s ${effect.targetStat} changed by ${effect.value} from ${effect.name}!`);
+                    }
+                    break;
+                case 'cc':
+                    // Example: prevents actions
+                    if (effect.preventsActions) {
+                        this.state.battleLog.push(`${char.name} is prevented from acting by ${effect.name}!`);
+                    }
+                    break;
+                // ...other effect types as needed...
             }
             effect.duration -= 1;
             if (effect.duration <= 0) effectsToRemove.push(idx);
         });
         // Remove expired effects
         char.activeEffects = char.activeEffects.filter((_, idx) => !effectsToRemove.includes(idx));
+        this.checkBattleEnd();
     }
 
     processEnemyTurn() {
@@ -215,6 +271,10 @@ export class BattleEngine {
         if (!player) return;
         // For now, enemy always does a basic attack
         this.attack(enemy.id, player.id);
+    }
+
+    getCurrentTeamTurn(playerCharacters: BattleCharacter[], currentCharacterId: string | null): 'player' | 'enemy' {
+        return playerCharacters.some(c => c.id === currentCharacterId) ? 'player' : 'enemy';
     }
 
     nextTurn() {
@@ -229,7 +289,6 @@ export class BattleEngine {
         if (!enemyAlive) {
             this.state.battlePhase = 'victory';
             this.state.battleLog.push('Victory! You have defeated the enemy team!');
-            this.awardXp();
             return;
         }
         // Energy gain for the character who just acted
@@ -247,27 +306,22 @@ export class BattleEngine {
         // Advance turn
         const nextIdx = (idx + 1) % this.state.turnOrder.length;
         this.state.currentCharacterId = this.state.turnOrder[nextIdx];
-        this.state.currentTurn = (this.state.playerTeam.characters as BattleCharacter[]).some(c => c.id === this.state.currentCharacterId) ? 'player' : 'enemy';
+        this.state.currentTurn = this.getCurrentTeamTurn(this.state.playerTeam.characters as BattleCharacter[], this.state.currentCharacterId);
         if (nextIdx === 0) this.state.turnCount += 1;
     }
+}
 
-    awardXp() {
-        // Award XP to all player characters based on average enemy level
-        const playerChars = this.state.playerTeam.characters as PlayerCharacter[];
-        const enemyLevels = (this.state.enemyTeam.characters as BattleCharacter[]).map(c => c.level || 1);
-        const avgLevel = Math.round(enemyLevels.reduce((a, b) => a + b, 0) / enemyLevels.length);
-        const xpGained = 20 * avgLevel;
-        let logs: string[] = [];
-        playerChars.forEach(char => {
-            let updatedChar = { ...char, xp: (char.xp ?? 0) + xpGained };
-            const beforeLevel = updatedChar.level;
-            updatedChar = levelUp(updatedChar);
-            logs.push(`${updatedChar.name} gained ${xpGained} XP!`);
-            if (updatedChar.level > beforeLevel) {
-                logs.push(`${updatedChar.name} leveled up! Lv. ${updatedChar.level} (+${updatedChar.level - beforeLevel})`);
-                logs.push('Stats increased!');
-            }
-        });
-        this.state.xpLogs = logs;
+// Helper: calculate XP gain for each character based on average levels
+export function calculateBattleXp(playerChars: BattleCharacter[], enemyChars: BattleCharacter[]): number {
+    if (!playerChars.length || !enemyChars.length) return 0;
+    const avgPlayerLevel = playerChars.reduce((sum, c) => sum + (c.level || 1), 0) / playerChars.length;
+    const avgEnemyLevel = enemyChars.reduce((sum, c) => sum + (c.level || 1), 0) / enemyChars.length;
+    let xp = 10;
+    const diff = avgPlayerLevel - avgEnemyLevel;
+    if (diff > 0) {
+        xp = xp * Math.pow(0.5, diff); // reduce by 50% per level above
+    } else if (diff < 0) {
+        xp = xp * Math.pow(1.5, -diff); // increase by 50% per level below
     }
+    return Math.max(1, Math.round(xp));
 }

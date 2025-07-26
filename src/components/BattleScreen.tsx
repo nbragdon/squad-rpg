@@ -3,7 +3,6 @@ import { BattleEngine } from '../battle';
 import { BattleState } from '../battle/battleTypes';
 import { useGame } from '../context/GameContext';
 import { gachaCharacters } from '../data/characters';
-import { levelUp } from '../data/leveling';
 import { BattleCharacter, PlayerCharacter, Position, Team } from '../types/game';
 import BattleDisplay from './BattleDisplay';
 import './BattleScreen.css';
@@ -153,60 +152,20 @@ const BattleScreen: React.FC<BattleScreenProps> = ({ playerTeam, onBack }) => {
         // Check for battle end conditions
         const playerAlive = updatedBattleState.playerTeam.characters.some(char => (char as BattleCharacter).isAlive);
         const enemyAlive = updatedBattleState.enemyTeam.characters.some(char => (char as BattleCharacter).isAlive);
-
+        let updatedCharacterProgress = null;
         if (!playerAlive) {
             updatedBattleState.battlePhase = 'defeat';
             // addToBattleLog('Defeat! Your team has been defeated.');
         } else if (!enemyAlive) {
             updatedBattleState.battlePhase = 'victory';
             // addToBattleLog('Victory! You have defeated the enemy team!');
-            // Award XP to all player characters
-            const playerChars = updatedBattleState.playerTeam.characters as PlayerCharacter[];
-            const enemyLevels = updatedBattleState.enemyTeam.characters.map(c => c.level || 1);
-            awardXpToTeam(playerChars, enemyLevels);
+            // XP gain now handled in BattleDisplay
+        }
+        if (updatedCharacterProgress) {
+            setPlayerProgress({ ...playerProgress, characterProgress: updatedCharacterProgress });
         }
         setBattleState(updatedBattleState);
     };
-
-    // Award XP to all participating characters based on average enemy level
-    function awardXpToTeam(team: PlayerCharacter[], enemyLevels: number[]) {
-        const avgLevel = Math.round(enemyLevels.reduce((a, b) => a + b, 0) / enemyLevels.length);
-        const xpGained = 20 * avgLevel;
-        let updatedCharacterProgress = { ...(playerProgress.characterProgress || {}) };
-        let updatedTeam: PlayerCharacter[] = [];
-        let logs: string[] = [];
-        team.forEach(char => {
-            let updatedChar = { ...char, xp: (char.xp ?? 0) + xpGained };
-            const beforeLevel = updatedChar.level;
-            updatedChar = levelUp(updatedChar);
-            updatedCharacterProgress[updatedChar.id] = {
-                level: updatedChar.level,
-                xp: updatedChar.xp,
-                xpToNextLevel: updatedChar.xpToNextLevel,
-                shards: updatedChar.shards || 0
-            };
-            updatedTeam.push(updatedChar);
-            logs.push(`${updatedChar.name} gained ${xpGained} XP!`);
-            if (updatedChar.level > beforeLevel) {
-                logs.push(`${updatedChar.name} leveled up! Lv. ${updatedChar.level} (+${updatedChar.level - beforeLevel})`);
-                logs.push('Stats increased!');
-            }
-        });
-        setPlayerProgress({ ...playerProgress, characterProgress: updatedCharacterProgress });
-        setXpLogs(logs);
-        return { updatedTeam, logs };
-    }
-
-    // Prepare player and enemy arrays for the engine
-    const playerArr = playerTeam.characters;
-    const enemyArr = [
-        { id: 'slime_green', level: 1 },
-        { id: 'rat_giant', level: 1 },
-        { id: 'bat_cave', level: 1 }
-    ]; // TODO: use real stage logic
-    const engine = new BattleEngine({ playerCharacters: playerArr, enemies: enemyArr });
-    setBattleEngine(engine);
-    setBattleState(engine.getState());
 
     function handleBattleAction(action: any) {
         if (!battleEngine) return;

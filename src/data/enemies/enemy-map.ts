@@ -12,7 +12,7 @@ import {
 } from './common-enemies';
 
 // Map of chapter 1 stage number (1-10) to a unique enemy
-export const CHAPTER1_STAGE_ENEMY = {
+export const STAGE_ENEMY = {
     1: ENEMY_SLIME_GREEN,
     2: ENEMY_RAT_GIANT,
     3: ENEMY_BAT_CAVE,
@@ -24,3 +24,8 @@ export const CHAPTER1_STAGE_ENEMY = {
     9: ENEMY_BEETLE_IRON,
     10: ENEMY_MIMIC_CHEST
 };
+
+export function getEnemyByChapterAndStage(chapter: number, stage: number) {
+    const enemyId = STAGE_ENEMY[stage as keyof typeof STAGE_ENEMY];
+    return [{ id: enemyId, level: stage }]
+}

@@ -1,3 +1,6 @@
+import type { Skill } from './skillTypes';
+import { StatusEffect as SkillStatusEffect } from './skillTypes';
+
 export enum CharacterClass {
     WARRIOR = 'warrior',
     ROGUE = 'rogue',
@@ -72,26 +75,6 @@ export interface Position {
     y: number;
 }
 
-export interface StatusEffect {
-    type: string; // e.g. 'poison', 'burn', 'chill', 'freeze', 'attack_up', etc.
-    duration: number; // in turns
-    value: number; // effect magnitude (damage per turn, stat change, etc.)
-}
-
-export interface Skill {
-    id: string;
-    name: string;
-    description: string;
-    damage?: number;
-    healing?: number;
-    cooldown: number;
-    range: number;
-    manaCost: number;
-    isUltimate: boolean;
-    statusEffect?: StatusEffect;
-}
-
-// The static/gacha character definition (for gacha pool, base stats)
 export interface CharacterBase {
     id: string;
     name: string;
@@ -125,8 +108,8 @@ export interface BattleCharacter extends PlayerCharacter {
     isAlive: boolean;
     maxLevel?: number;
     position?: Position;
-    activeEffects?: StatusEffect[];
-    // Optionally: add status effects, buffs, etc.
+    activeEffects?: SkillStatusEffect[];
+    [key: string]: any; // <-- allow dynamic stat access
 }
 
 export interface Team {
@@ -162,6 +145,13 @@ export interface Reward {
     rarity?: Rarity;
 }
 
+export interface CharacterProgress {
+    level: number;
+    xp: number;
+    xpToNextLevel: number;
+    shards: number;
+}
+
 export interface PlayerProgress {
     level: number;
     experience: number;
@@ -173,12 +163,7 @@ export interface PlayerProgress {
     unlockedCharacters: string[]; // List of owned character IDs
     inventory: InventoryItem[]; // Player's inventory
     characterProgress?: {
-        [characterId: string]: {
-            level: number;
-            xp: number;
-            xpToNextLevel: number;
-            shards: number;
-        }
+        [characterId: string]: CharacterProgress
     };
 }
 

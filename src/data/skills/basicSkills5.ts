@@ -1,60 +1,105 @@
-import { Skill } from '../../types/game';
+import { CostType, Skill, SkillType, StatusEffectType, TargetType } from '../../types/skillTypes';
 
 // Unique skills for legendary/epic/rare characters
 export const astralNova: Skill = {
     id: 'astral_nova',
     name: 'Astral Nova',
     description: 'Deal massive cosmic damage to all enemies and reduce their attack.',
-    damage: 160,
-    cooldown: 4,
-    range: 999,
-    manaCost: 28,
+    damageCalc: { type: 'stat', stat: 'magic', multiplier: 2.0 },
+    cooldownTurns: 4,
+    costType: CostType.Mana,
+    costAmount: 28,
     isUltimate: false,
-    statusEffect: { type: 'attack_down', duration: 2, value: -25 }
+    type: SkillType.AoeAttack,
+    targetType: TargetType.AllEnemies,
+    statusEffectsApplied: [{
+        id: 'attack_down',
+        name: 'Attack Down',
+        type: StatusEffectType.Debuff,
+        duration: 2,
+        value: -25,
+        description: 'Reduces attack.'
+    }]
 };
 
 export const voidPulse: Skill = {
     id: 'void_pulse',
     name: 'Void Pulse',
     description: 'Deal void damage to a single enemy and silence them for 1 turn.',
-    damage: 120,
-    cooldown: 3,
-    range: 3,
-    manaCost: 20,
+    damageCalc: { type: 'stat', stat: 'magic', multiplier: 1.5 },
+    cooldownTurns: 3,
+    costType: CostType.Mana,
+    costAmount: 20,
     isUltimate: false,
-    statusEffect: { type: 'silence', duration: 1, value: 1 }
+    type: SkillType.Attack,
+    targetType: TargetType.SingleEnemy,
+    statusEffectsApplied: [{
+        id: 'silence',
+        name: 'Silence',
+        type: StatusEffectType.Debuff,
+        duration: 1,
+        value: 1,
+        description: 'Prevents skill usage.'
+    }]
 };
 
 export const soulRend: Skill = {
     id: 'soul_rend',
     name: 'Soul Rend',
     description: 'Deal damage and apply Fear to a single enemy (chance to skip turn).',
-    damage: 110,
-    cooldown: 3,
-    range: 2,
-    manaCost: 18,
+    damageCalc: { type: 'stat', stat: 'attack', multiplier: 1.3 },
+    cooldownTurns: 3,
+    costType: CostType.Mana,
+    costAmount: 18,
     isUltimate: false,
-    statusEffect: { type: 'fear', duration: 2, value: 0.3 }
+    type: SkillType.Attack,
+    targetType: TargetType.SingleEnemy,
+    statusEffectsApplied: [{
+        id: 'fear',
+        name: 'Fear',
+        type: StatusEffectType.Cc,
+        duration: 2,
+        value: 0.3,
+        description: 'Chance to skip turn.'
+    }]
 };
 
 export const miasmaCloud: Skill = {
     id: 'miasma_cloud',
     name: 'Miasma Cloud',
     description: 'Poison all enemies and reduce their healing for 2 turns.',
-    cooldown: 4,
-    range: 999,
-    manaCost: 22,
+    cooldownTurns: 4,
+    costType: CostType.Mana,
+    costAmount: 22,
     isUltimate: false,
-    statusEffect: { type: 'heal_down', duration: 2, value: -30 }
+    type: SkillType.AoeAttack,
+    targetType: TargetType.AllEnemies,
+    statusEffectsApplied: [{
+        id: 'heal_down',
+        name: 'Heal Down',
+        type: StatusEffectType.Debuff,
+        duration: 2,
+        value: -30,
+        description: 'Reduces healing received.'
+    }]
 };
 
 export const timeLoop: Skill = {
     id: 'time_loop',
     name: 'Time Loop',
     description: 'Repeat the last skill used by this character.',
-    cooldown: 5,
-    range: 0,
-    manaCost: 25,
+    cooldownTurns: 5,
+    costType: CostType.Mana,
+    costAmount: 25,
     isUltimate: false,
-    statusEffect: { type: 'repeat_skill', duration: 1, value: 1 }
+    type: SkillType.Utility,
+    targetType: TargetType.Self,
+    statusEffectsApplied: [{
+        id: 'repeat_skill',
+        name: 'Repeat Skill',
+        type: StatusEffectType.Buff,
+        duration: 1,
+        value: 1,
+        description: 'Repeats last skill.'
+    }]
 };

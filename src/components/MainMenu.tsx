@@ -1,12 +1,15 @@
 import React from 'react';
 import { GameScreen } from '../App';
 // Ensure GameScreen is an enum or union type that includes 'solo', 'dungeon', 'raid', 'collection', 'gacha'
-import { PlayerProgress } from '../types/game';
 import './MainMenu.css';
 
 interface MainMenuProps {
     onNavigate: (screen: GameScreen) => void;
-    playerProgress: PlayerProgress;
+    playerProgress: {
+        level?: number;
+        crystals: number;
+        // Add more as needed
+    };
 }
 
 const MainMenu: React.FC<MainMenuProps> = ({ onNavigate, playerProgress }) => {
@@ -19,7 +22,7 @@ const MainMenu: React.FC<MainMenuProps> = ({ onNavigate, playerProgress }) => {
                 </p>
             </div>
             <div className="main-menu-stats" style={{ background: '#223366', color: '#fff', borderRadius: '1rem', padding: '1.2rem', margin: '0 auto 2rem auto', maxWidth: 480, boxShadow: '0 2px 12px #0002' }}>
-                <span style={{ marginRight: 32 }}>Level: <b>{playerProgress.level}</b></span>
+                <span style={{ marginRight: 32 }}>Level: <b>{playerProgress.level ?? 1}</b></span>
                 <span>Crystals: <b>{playerProgress.crystals}</b></span>
             </div>
             <button className="menu-button primary" onClick={() => onNavigate(GameScreen.SOLO)}>Solo</button>

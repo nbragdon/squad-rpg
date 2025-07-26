@@ -4,7 +4,7 @@ import { PlayerCharacter, Team } from '../types/game';
 export type BattleParticipant = PlayerCharacter | EnemyCharacter;
 
 export interface BattleInitEnemy {
-    id: string;
+    id: EnemyCharacter;
     level: number;
 }
 

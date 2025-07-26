@@ -1,4 +1,5 @@
-import { Rarity, StatusEffect } from './game';
+import { Rarity } from './game';
+import type { StatusEffect } from './skillTypes';
 
 export interface EnemySkill {
     id: string;

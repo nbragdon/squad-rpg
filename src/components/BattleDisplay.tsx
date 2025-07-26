@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { calculateBattleXp } from '../battle/battleEngine';
 import { BattleState } from '../battle/battleTypes';
+import { useGameEngine } from '../context/GameEngineContext';
+import { levelUp } from '../data/leveling';
 import { BattleCharacter } from '../types/game';
 
 interface BattleDisplayProps {
@@ -12,6 +15,7 @@ interface BattleDisplayProps {
 
 const BattleDisplay: React.FC<BattleDisplayProps> = ({ battleState, onAction, onVictory, onDefeat, onFlee }) => {
     const [auto, setAuto] = useState(false);
+    const { gameEngine, updateGameEngine } = useGameEngine();
 
     // Auto mode effect
     useEffect(() => {
@@ -75,8 +79,8 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({ battleState, onAction, on
                     const enemy = (battleState.enemyTeam.characters as BattleCharacter[]).find(c => c.isAlive);
                     if (enemy) onAction({ type: 'skill', skillId: skill.id, attackerId: player.id, targetId: enemy.id });
                 },
-                disabled: player.energy < (skill.manaCost || 0),
-                desc: `${skill.description} (Cost: ${skill.manaCost || 0} energy)`,
+                disabled: player.energy < (skill.costAmount || 0),
+                desc: `${skill.description} (Cost: ${skill.costAmount || 0} energy)`,
                 style: { background: '#666', color: '#fff' }
             }))),
             ...(player.ultimateSkill ? [{
@@ -86,8 +90,8 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({ battleState, onAction, on
                     const enemy = (battleState.enemyTeam.characters as BattleCharacter[]).find(c => c.isAlive);
                     if (enemy) onAction({ type: 'ultimate', skillId: player.ultimateSkill.id, attackerId: player.id, targetId: enemy.id });
                 },
-                disabled: player.energy < (player.ultimateSkill.manaCost || 0),
-                desc: `${player.ultimateSkill.description} (Cost: ${player.ultimateSkill.manaCost || 0} energy)`,
+                disabled: player.energy < (player.ultimateSkill.costAmount || 0),
+                desc: `${player.ultimateSkill.description} (Cost: ${player.ultimateSkill.costAmount || 0} energy)`,
                 style: { background: '#ffe066', color: '#222' }
             }] : [])
         ];
@@ -114,14 +118,48 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({ battleState, onAction, on
     // Only show the result message and continue button if battle is over
     const isBattleOver = battleState.battlePhase === 'victory' || battleState.battlePhase === 'defeat';
 
+    // Helper: calculate XP gain for victory
+    function getVictoryXp() {
+        const playerChars = battleState.playerTeam.characters as BattleCharacter[];
+        const enemyChars = battleState.enemyTeam.characters as BattleCharacter[];
+        return calculateBattleXp(playerChars, enemyChars);
+    }
+
     if (isBattleOver) {
+        const handleVictory = () => {
+            const xpGained = getVictoryXp();
+            updateGameEngine(engine => {
+                // Update XP/level for each character in player's team
+                console.log(engine.player.team.characters);
+                // loop through battle characters and find the matching id in the character collection and update their xp
+                const updatedCharacterProgress = { ...engine.player.characterProgress };
+                battleState.playerTeam.characters.forEach(char => {
+                    let characterToUpdate = updatedCharacterProgress[char.id];
+                    characterToUpdate.xp = (characterToUpdate.xp || 0) + xpGained;
+                    characterToUpdate = levelUp(characterToUpdate);
+                    updatedCharacterProgress[char.id] = characterToUpdate;
+                });
+
+                return {
+                    ...engine,
+                    player: {
+                        ...engine.player,
+                        characterProgress: updatedCharacterProgress
+                    }
+                };
+            });
+            if (onVictory) onVictory();
+        };
         return (
             <div className="battle-display" style={{ maxWidth: 900, margin: '0 auto', padding: 24 }}>
                 {battleState.battlePhase === 'victory' && (
                     <div className="battle-result victory" style={{ textAlign: 'center', marginTop: 32 }}>
                         <h2 style={{ color: '#ffd700', marginBottom: 12 }}>Victory!</h2>
+                        <div style={{ marginBottom: 8 }}>
+                            {`Each character gained ${getVictoryXp()} XP!`}
+                        </div>
                         {battleState.xpLogs && battleState.xpLogs.map((msg, i) => <div key={i}>{msg}</div>)}
-                        {onVictory && <button onClick={onVictory} style={{ marginTop: 16, background: '#ffd700', color: '#222', fontWeight: 'bold', borderRadius: 8, minWidth: 120, minHeight: 40, border: 'none', cursor: 'pointer' }}>Continue</button>}
+                        <button onClick={handleVictory} style={{ marginTop: 16, background: '#ffd700', color: '#222', fontWeight: 'bold', borderRadius: 8, minWidth: 120, minHeight: 40, border: 'none', cursor: 'pointer' }}>Continue</button>
                     </div>
                 )}
                 {battleState.battlePhase === 'defeat' && (

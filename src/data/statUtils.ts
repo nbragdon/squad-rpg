@@ -1,6 +1,7 @@
 import { CharacterBase, Rarity } from '../types/game';
-import { STAT_GROWTH_PER_LEVEL } from './leveling';
 import { BASELINE } from './statBaselines';
+
+const STAT_GROWTH_PER_LEVEL = 1.05;
 
 // Shard bonus per rarity
 const SHARD_BONUS: Record<Rarity, number> = {

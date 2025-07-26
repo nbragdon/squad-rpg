@@ -1,5 +1,6 @@
 import { EnemyCharacter } from '../../types/enemy';
 import { Rarity } from '../../types/game';
+import { StatusEffectType } from '../../types/skillTypes';
 import { BASELINE } from '../statBaselines';
 
 export const ENEMY_SLIME_GREEN: EnemyCharacter = {
@@ -19,7 +20,7 @@ export const ENEMY_SLIME_GREEN: EnemyCharacter = {
             description: 'Splashes goo at the target, dealing moderate damage and reducing their speed for 1 turn.',
             damage: 110,
             energyCost: 25,
-            statusEffect: { type: 'slow', value: 20, duration: 1 },
+            statusEffect: { id: 'slow', name: 'Slow', type: StatusEffectType.Debuff, value: 20, duration: 1 },
         },
     ],
 };
@@ -63,7 +64,7 @@ export const ENEMY_BAT_CAVE: EnemyCharacter = {
             description: 'Lets out a piercing screech, damaging and lowering the target’s attack for 2 turns.',
             damage: 90,
             energyCost: 22,
-            statusEffect: { type: 'attackDown', value: 15, duration: 2 },
+            statusEffect: { id: 'attackDown', name: 'Attack Down', type: StatusEffectType.Debuff, value: 15, duration: 2 },
         },
     ],
 };
@@ -85,7 +86,7 @@ export const ENEMY_GOBLIN_SNEAK: EnemyCharacter = {
             description: 'Stabs the target and increases its own speed for 1 turn.',
             damage: 120,
             energyCost: 28,
-            statusEffect: { type: 'selfSpeedUp', value: 20, duration: 1 },
+            statusEffect: { id: 'selfSpeedUp', name: 'Speed Up', type: StatusEffectType.Buff, value: 20, duration: 1 },
         },
     ],
 };
@@ -107,7 +108,7 @@ export const ENEMY_FUNGUS_SPORELING: EnemyCharacter = {
             description: 'Releases spores, damaging and poisoning the target for 2 turns.',
             damage: 95,
             energyCost: 24,
-            statusEffect: { type: 'poison', value: 15, duration: 2 },
+            statusEffect: { id: 'poison', name: 'Poison', type: StatusEffectType.Dot, value: 15, duration: 2 },
         },
     ],
 };
@@ -129,7 +130,7 @@ export const ENEMY_SKELETON_MINI: EnemyCharacter = {
             description: 'Throws a bone, dealing damage and lowering the target’s defense for 1 turn.',
             damage: 100,
             energyCost: 23,
-            statusEffect: { type: 'defenseDown', value: 20, duration: 1 },
+            statusEffect: { id: 'defenseDown', name: 'Defense Down', type: StatusEffectType.Debuff, value: 20, duration: 1 },
         },
     ],
 };
@@ -151,7 +152,7 @@ export const ENEMY_WOLF_CUB: EnemyCharacter = {
             description: 'Howls to call its pack, increasing its own attack for 2 turns and dealing damage.',
             damage: 100,
             energyCost: 26,
-            statusEffect: { type: 'selfAttackUp', value: 20, duration: 2 },
+            statusEffect: { id: 'selfAttackUp', name: 'Attack Up', type: StatusEffectType.Buff, value: 20, duration: 2 },
         },
     ],
 };
@@ -173,7 +174,7 @@ export const ENEMY_IMP_FIRE: EnemyCharacter = {
             description: 'Shoots a burst of embers, dealing damage and burning the target for 2 turns.',
             damage: 115,
             energyCost: 30,
-            statusEffect: { type: 'burn', value: 18, duration: 2 },
+            statusEffect: { id: 'burn', name: 'Burn', type: StatusEffectType.Dot, value: 18, duration: 2 },
         },
     ],
 };
@@ -195,7 +196,7 @@ export const ENEMY_BEETLE_IRON: EnemyCharacter = {
             description: 'Charges and slams, dealing damage and increasing its own defense for 2 turns.',
             damage: 90,
             energyCost: 22,
-            statusEffect: { type: 'selfDefenseUp', value: 25, duration: 2 },
+            statusEffect: { id: 'selfDefenseUp', name: 'Defense Up', type: StatusEffectType.Buff, value: 25, duration: 2 },
         },
     ],
 };
@@ -217,7 +218,7 @@ export const ENEMY_MIMIC_CHEST: EnemyCharacter = {
             description: 'Springs open and bites, dealing heavy damage and stunning the target for 1 turn.',
             damage: 130,
             energyCost: 35,
-            statusEffect: { type: 'stun', value: 1, duration: 1 },
+            statusEffect: { id: 'stun', name: 'Stun', type: StatusEffectType.Cc, value: 1, duration: 1 },
         },
     ],
 };

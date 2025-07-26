@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { BattleEngine } from '../battle';
 import { BattleState } from '../battle/battleTypes';
-import { useGame } from '../context/GameContext';
+import { useGameEngine } from '../context/GameEngineContext';
 import { gachaCharacters } from '../data/characters';
+import { getEnemyByChapterAndStage } from '../data/enemies/enemy-map';
 import { getXpToNextLevel } from '../data/leveling';
 import { PlayerCharacter } from '../types/game';
 import BattleDisplay from './BattleDisplay';
@@ -10,6 +11,26 @@ import CharacterModal from './CharacterModal';
 
 const CHAPTERS = 5;
 const STAGES_PER_CHAPTER = 10;
+
+function getCrystalReward(chapter: number, stage: number, currentSoloProgress: number, newSoloProgress: number) {
+    // Simple reward logic: 10 crystals per stage, bonus for chapter completion
+    let reward = 10 * chapter;
+    if (newSoloProgress > currentSoloProgress) {
+        if (chapter === 1) {
+            reward += 250
+        } else if (chapter === 2) {
+            reward += 500
+        } else if (chapter === 3) {
+            reward += 750
+        } else if (chapter === 4) {
+            reward += 1000
+        } else if (chapter === 5) {
+            reward += 1250
+        }
+    }
+
+    return reward;
+}
 
 function getSoloStageNumber(chapter: number, stage: number) {
     return (chapter - 1) * STAGES_PER_CHAPTER + stage;
@@ -22,7 +43,7 @@ function isUnlocked(chapter: number, stage: number, soloProgress?: number) {
 }
 
 const SoloMode: React.FC<{ onBack: () => void }> = ({ onBack }) => {
-    const { playerProgress, setPlayerProgress } = useGame();
+    const { gameEngine, updateGameEngine } = useGameEngine();
     const [chapter, setChapter] = useState(1);
     const [stage, setStage] = useState(1);
     const [selectedChar, setSelectedChar] = useState<PlayerCharacter | null>(null);
@@ -34,9 +55,9 @@ const SoloMode: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     // Get owned characters (should be PlayerCharacter[])
     const ownedChars: PlayerCharacter[] = gachaCharacters
-        .filter(c => playerProgress.unlockedCharacters && playerProgress.unlockedCharacters.includes(c.id))
+        .filter(c => gameEngine.player.unlockedCharacters && gameEngine.player.unlockedCharacters.includes(c.id))
         .map(base => {
-            const progress = playerProgress.characterProgress?.[base.id];
+            const progress = gameEngine.player.characterProgress?.[base.id];
             return progress ? { ...base, ...progress } : {
                 ...base,
                 level: 1,
@@ -56,7 +77,7 @@ const SoloMode: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         if (!selectedChar) return;
         // Prepare player and enemy arrays for the engine
         const playerArr = [selectedChar];
-        const enemyArr = [{ id: 'slime_green', level: 1 }]; // TODO: use real stage logic
+        const enemyArr = getEnemyByChapterAndStage(chapter, stage);
         const engine = new BattleEngine({ playerCharacters: playerArr, enemies: enemyArr });
         setBattleEngine(engine);
         setBattleState(engine.getState());
@@ -105,10 +126,10 @@ const SoloMode: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             borderRadius: 8,
                             margin: 2,
                             padding: '6px 16px',
-                            cursor: isUnlocked(i + 1, 1, playerProgress.soloProgress) ? 'pointer' : 'not-allowed',
+                            cursor: isUnlocked(i + 1, 1, gameEngine.player.soloProgress) ? 'pointer' : 'not-allowed',
                         }}
                         onClick={() => { setChapter(i + 1); setStage(1); setSelectedChar(null); resetBattle(); }}
-                        disabled={!isUnlocked(i + 1, 1, playerProgress.soloProgress)}
+                        disabled={!isUnlocked(i + 1, 1, gameEngine.player.soloProgress)}
                     >
                         Chapter {i + 1}
                     </button>
@@ -116,7 +137,7 @@ const SoloMode: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             </div>
             <div className="solo-stage-select">
                 {Array.from({ length: STAGES_PER_CHAPTER }, (_, i) => {
-                    const unlocked = isUnlocked(chapter, i + 1, playerProgress.soloProgress);
+                    const unlocked = isUnlocked(chapter, i + 1, gameEngine.player.soloProgress);
                     const selected = stage === i + 1;
                     let bg = '#888', color = '#fff', border = '1px solid #888', fontWeight = 'normal';
                     if (selected) {
@@ -214,6 +235,29 @@ const SoloMode: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     battleState={battleState}
                     onAction={handleBattleAction}
                     onVictory={() => {
+                        // Calculate current stage number
+                        const currentStageNum = getSoloStageNumber(chapter, stage);
+                        const crystalReward = getCrystalReward(chapter, stage, gameEngine.player.soloProgress, currentStageNum);
+                        // If player completed the highest unlocked stage, unlock the next
+                        updateGameEngine(engine => {
+                            let nextStageNum = currentStageNum + 1;
+                            let newProgress = engine.player.soloProgress;
+                            // If stage 10 of a chapter, unlock stage 1 of next chapter
+                            if (stage === STAGES_PER_CHAPTER) {
+                                nextStageNum = getSoloStageNumber(chapter + 1, 1);
+                            }
+                            if (nextStageNum > engine.player.soloProgress) {
+                                newProgress = nextStageNum;
+                            }
+                            return {
+                                ...engine,
+                                player: {
+                                    ...engine.player,
+                                    soloProgress: newProgress,
+                                    crystals: engine.player.crystals + crystalReward
+                                }
+                            };
+                        });
                         setBattleState(null);
                         setBattleEngine(null);
                         setSelectedChar(null);
