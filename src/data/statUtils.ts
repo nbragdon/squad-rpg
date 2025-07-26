@@ -1,8 +1,11 @@
-import { CharacterBase } from "../types/character";
+import { BattleCharacter } from "../battle/battleTypes";
+import { AffinityType } from "../types/affinity";
 import { Rarity } from "../types/rarity";
+import { AdjustStatSkillEffect, ModifierType } from "../types/skillTypes";
 import { AllStats, StatType } from "../types/stats";
-import { BASELINE } from "./statBaselines";
+import { StatusEffectType } from "../types/statusEffects";
 
+const AFFINITY_DAMAGE_MULT = 1.25;
 const STAT_GROWTH_PER_LEVEL = 1.05;
 
 // Shard bonus per rarity
@@ -19,6 +22,14 @@ export interface CalculableStats {
   level: number;
   rarity: Rarity;
   shards?: number;
+  statusEffects?: {
+    [key in StatusEffectType]?: {
+      type: StatusEffectType;
+      duration: number;
+      value: number;
+    };
+  };
+  statAdjustments?: AdjustStatSkillEffect[];
 }
 
 // Calculate stat for a character (player or enemy)
@@ -33,27 +44,63 @@ export function calculateStat(
   // Shard bonus (player only)
   stat *=
     1 + (calculableStats.shards || 0) * SHARD_BONUS[calculableStats.rarity];
+
+  if (calculableStats.statAdjustments) {
+    // Apply stat adjustments
+    for (const adjustment of calculableStats.statAdjustments) {
+      if (adjustment.stat === statType) {
+        if (adjustment.modifierType === ModifierType.Flat) {
+          stat += adjustment.modifierValue;
+        } else if (adjustment.modifierType === ModifierType.Percentage) {
+          stat *= 1 + adjustment.modifierValue;
+        }
+      }
+    }
+  }
+
   // Equipment bonus (player only)
   return Math.round(stat);
 }
 
-// For enemies: only base, level, rarity
-export function calculateEnemyStat(
-  base: number,
-  level: number,
-  rarity: Rarity,
-) {
-  return Math.round(base * Math.pow(STAT_GROWTH_PER_LEVEL, level - 1));
-}
-
-// Utility to get base stats for a character by rarity
-export function getBaseStats(character: CharacterBase) {
-  return BASELINE[character.rarity.toUpperCase() as keyof typeof BASELINE];
+/**
+ * Determines if a critical hit occurs based on the provided critical chance.
+ * @param critChance The critical hit chance as a number between 0 and 100.
+ * @returns True if a critical hit occurs, false otherwise.
+ */
+export function didCrit(critChance: number): boolean {
+  // Generate a random number between 0 (inclusive) and 100 (exclusive)
+  const randomNumber = Math.random() * 100;
+  // A critical hit occurs if the random number is less than the critChance
+  return randomNumber < critChance;
 }
 
 // Damage calculation (defense scaling)
 // Suggestion: Use a more impactful formula
 // New: damage = attack * (100 / (100 + defense * 2))
-export function calculateDamage(attack: number, defense: number) {
-  return Math.max(1, Math.round(attack * (100 / (100 + defense * 2))));
+export function calculateDamage(
+  attacker: BattleCharacter,
+  target: BattleCharacter,
+  attackStat: StatType,
+  defenseStat: StatType,
+  damageAffinity: AffinityType[],
+  battleLog?: string[],
+): number {
+  const attackVal = calculateStat(attackStat, attacker);
+  const defenseVal = calculateStat(defenseStat, target);
+  let dmg = attackVal * (100 / (100 + defenseVal * 2));
+  // affinity bonus
+  damageAffinity.forEach((a) => {
+    if (attacker.weakAffinities.includes(a)) {
+      dmg *= AFFINITY_DAMAGE_MULT;
+    }
+  });
+  // crit
+  const isShocked = target.statusEffects?.[StatusEffectType.shock];
+  if (!isShocked && didCrit(attacker.stats[StatType.critChance])) {
+    dmg *= 1 + attacker.stats[StatType.critDamage];
+    if (battleLog) {
+      battleLog.push(`${attacker.name} crits ${target.name}!`);
+    }
+  }
+  return Math.max(1, Math.round(dmg));
 }

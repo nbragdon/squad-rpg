@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import './App.css';
-import BattleScreen from './components/BattleScreen';
 import CharacterCollection from './components/CharacterCollection';
 import Gacha from './components/Gacha';
 import MainMenu from './components/MainMenu';
@@ -16,7 +15,6 @@ export enum GameScreen {
     MENU = 'menu',
     COLLECTION = 'collection',
     TEAM = 'team',
-    BATTLE = 'battle',
     GACHA = 'gacha'
 }
 
@@ -38,7 +36,7 @@ function App() {
     const renderScreen = () => {
         switch (currentScreen) {
             case 'menu':
-                return <MainMenu onNavigate={handleNavigate} playerProgress={gameEngine.player} />;
+                return <MainMenu onNavigate={handleNavigate} />;
             case 'collection':
                 return (
                     <CharacterCollection
@@ -53,17 +51,12 @@ function App() {
                         onBack={() => handleNavigate(GameScreen.MENU)}
                     />
                 );
-            case 'battle':
-                return (
-                    <BattleScreen
-                        onBack={() => handleNavigate(GameScreen.MENU)} playerTeam={[]}                    />
-                );
             case 'solo':
                 return <SoloMode onBack={() => handleNavigate(GameScreen.MENU)} />;
             case 'gacha':
-                return <Gacha onBack={() => handleNavigate(GameScreen.MENU)} player={gameEngine.player} />;
+                return <Gacha onBack={() => handleNavigate(GameScreen.MENU)} />;
             default:
-                return <MainMenu onNavigate={handleNavigate} playerProgress={gameEngine.player} />;
+                return <MainMenu onNavigate={handleNavigate} />;
         }
     };
 

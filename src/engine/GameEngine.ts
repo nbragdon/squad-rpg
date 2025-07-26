@@ -1,23 +1,11 @@
 import { BattleEngine } from "../battle/battleEngine";
-import { InventoryItem } from "../types/game";
+import { PlayerProgress } from "../types/game";
 
 export interface GameEngine {
-  player: {
+  player: PlayerProgress & {
     id: string;
     name: string;
-    crystals: number;
-    items: InventoryItem[];
     autoBattle: boolean;
-    soloProgress: number;
-    unlockedCharacters: string[];
-    characterProgress?: {
-      [characterId: string]: {
-        level: number;
-        xp: number;
-        xpToNextLevel: number;
-        shards: number;
-      };
-    };
     // Add more player properties as needed
   };
   battleEngine: BattleEngine | null;
@@ -33,12 +21,12 @@ export function createDefaultGameEngine(): GameEngine {
       id: "player_1",
       name: "Player",
       crystals: 0,
-      items: [],
+      inventory: [],
       autoBattle: false,
       soloProgress: 1,
       unlockedCharacters: ["ironfoot"],
       characterProgress: {
-        warrior_1: {
+        ironfoot: {
           level: 1,
           xp: 0,
           xpToNextLevel: 100,

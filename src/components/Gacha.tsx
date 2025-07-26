@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useGameEngine } from '../context/GameEngineContext';
 import { gachaCharacters } from '../data/characters';
 import { getXpToNextLevel } from '../data/leveling';
 import { CharacterBase, PlayerCharacter } from '../types/character';
@@ -59,13 +60,15 @@ const rarityAnims: Record<Rarity, string> = {
 
 interface GachaProps {
     onBack: () => void;
-    player: any; // Accept player prop for crystals, etc.
 }
 
-const Gacha: React.FC<GachaProps> = ({ onBack, player }) => {
+const Gacha: React.FC<GachaProps> = ({ onBack }) => {
+    const { gameEngine, updateGameEngine } = useGameEngine();
     const [results, setResults] = useState<PlayerCharacter[]>([]);
     const [animating, setAnimating] = useState(false);
     const [error, setError] = useState('');
+
+    const player = gameEngine.player;
 
     const handlePull = async (count: number) => {
         if (player.crystals < GACHA_COST * count) {
@@ -92,10 +95,16 @@ const Gacha: React.FC<GachaProps> = ({ onBack, player }) => {
                     newProgress.unlockedCharacters.push(char.id);
                     // Optionally: add to collection with level/shards
                 } else {
-                    // Optionally: increment shards for duplicate
+                    // increase shards of existing character
+                    const existingChar = newProgress.unlockedCharacters.find(id => id === char.id);
+                    if (existingChar) {
+                        if (newProgress && newProgress.characterProgress && newProgress.characterProgress[existingChar]) {
+                            newProgress.characterProgress[existingChar].shards += 1;   
+                        }
+                    }
                 }
             });
-            // setPlayerProgress(newProgress); // Removed useGame, so no setPlayerProgress
+            updateGameEngine(engine => ({ ...engine, player: { ...engine.player, ...newProgress }}));
         }, 1200);
     };
 

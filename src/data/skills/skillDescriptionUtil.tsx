@@ -68,7 +68,7 @@ export const SkillDescriptionCard: React.FC<{ skill: Skill }> = ({ skill }) => {
             switch (effect.type) {
               case SkillEffectType.damage:
                 const damageEffect = effect as DamageSkillEffect;
-                effectDescription = `Deals ${damageEffect.damageMultiplier * 100}% of ${damageEffect.damageStat} as ${damageEffect.affinity} damage to ${targetDesc}.`;
+                effectDescription = `Deals ${damageEffect.damageMultiplier * 100}% of ${damageEffect.damageStat} as ${damageEffect.affinities.join(", ")} damage to ${targetDesc}.`;
                 if (damageEffect.duration !== undefined) {
                   effectDescription += ` This effect lasts for ${damageEffect.duration} turns.`;
                 }
@@ -76,7 +76,7 @@ export const SkillDescriptionCard: React.FC<{ skill: Skill }> = ({ skill }) => {
 
               case SkillEffectType.heal:
                 const healEffect = effect as HealSkillEffect;
-                effectDescription = `Heals ${targetDesc} for ${healEffect.healMultiplier * 100}% of ${healEffect.healStat} as ${healEffect.affinity} healing.`;
+                effectDescription = `Heals ${targetDesc} for ${healEffect.healMultiplier * 100}% of ${healEffect.healStat} as ${healEffect.affinities.join(", ")} healing.`;
                 if (healEffect.duration !== undefined) {
                   effectDescription += ` This effect lasts for ${healEffect.duration} turns.`;
                 }
@@ -106,7 +106,7 @@ export const SkillDescriptionCard: React.FC<{ skill: Skill }> = ({ skill }) => {
                 break;
 
               default:
-                effectDescription = `Performs an unknown ${effect.affinity} effect on ${targetDesc}.`;
+                effectDescription = `Performs an unknown ${effect.affinities.join(", ")} effect on ${targetDesc}.`;
                 break;
             }
 

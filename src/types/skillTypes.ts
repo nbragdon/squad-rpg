@@ -29,7 +29,7 @@ export interface SkillEffect {
   id: string;
   name: string;
   type: SkillEffectType;
-  affinity: AffinityType;
+  affinities: AffinityType[];
   targetType: TargetType;
 }
 

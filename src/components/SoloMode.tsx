@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { BattleEngine } from '../battle';
-import { BattleState } from '../battle/battleTypes';
 import { useGameEngine } from '../context/GameEngineContext';
 import { gachaCharacters } from '../data/characters';
 import { getEnemyByChapterAndStage } from '../data/enemies/enemy-map';
@@ -14,8 +13,8 @@ const STAGES_PER_CHAPTER = 10;
 
 function getCrystalReward(chapter: number, stage: number, currentSoloProgress: number, newSoloProgress: number) {
     // Simple reward logic: 10 crystals per stage, bonus for chapter completion
-    let reward = 10 * chapter;
-    if (newSoloProgress > currentSoloProgress) {
+    let reward = 50 * chapter;
+    if (newSoloProgress >= currentSoloProgress) {
         if (chapter === 1) {
             reward += 250
         } else if (chapter === 2) {
@@ -47,11 +46,9 @@ const SoloMode: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [chapter, setChapter] = useState(1);
     const [stage, setStage] = useState(1);
     const [selectedChar, setSelectedChar] = useState<PlayerCharacter | null>(null);
-    const [battleEngine, setBattleEngine] = useState<BattleEngine | null>(null);
-    const [battleState, setBattleState] = useState<BattleState | null>(null);
     const [modalCharacter, setModalCharacter] = useState<PlayerCharacter | null>(null);
-    const [soloTeam, setSoloTeam] = useState<PlayerCharacter[]>([]);
-    const [selectedSkill, setSelectedSkill] = useState<any>(null);
+
+    const battleEngine = gameEngine.battleEngine;
 
     // Get owned characters (should be PlayerCharacter[])
     const ownedChars: PlayerCharacter[] = gachaCharacters
@@ -69,36 +66,23 @@ const SoloMode: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     // Helper to reset battle state
     function resetBattle() {
-        setSoloTeam([]);
+        updateGameEngine(engine => ({
+            ...engine,
+            battleEngine: null,
+        }));
     }
 
     // Start battle
     function startBattle() {
         if (!selectedChar) return;
         // Prepare player and enemy arrays for the engine
-        const playerArr = [selectedChar];
+        const playerArr = [{...selectedChar}];
         const enemyArr = getEnemyByChapterAndStage(chapter, stage);
-        const engine = new BattleEngine({ playerCharacters: playerArr, enemies: enemyArr });
-        setBattleEngine(engine);
-        setBattleState(engine.getState());
-    }
-
-    function handleBattleAction(action: any) {
-        if (!battleEngine) return;
-        if (action.type === 'attack') {
-            battleEngine.attack(action.attackerId);
-        } else if (action.type === 'skill') {
-            if (typeof battleEngine.useSkill === 'function') {
-                battleEngine.useSkill(action.skillId, action.attackerId);
-            }
-        }
-        // After player action, process enemy turn if needed
-        let state = battleEngine.getState();
-        if (state.currentTurn === 'enemy' && typeof battleEngine.processEnemyTurn === 'function' && state.battlePhase === 'combat') {
-            battleEngine.processEnemyTurn();
-            state = battleEngine.getState();
-        }
-        setBattleState(state);
+        const newBattleEngine = new BattleEngine({ playerCharacters: playerArr, enemies: enemyArr });
+        updateGameEngine(engine => ({
+            ...engine,
+            battleEngine: newBattleEngine
+        }))
     }
 
     // UI rendering
@@ -165,7 +149,7 @@ const SoloMode: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     );
                 })}
             </div>
-            {battleState === null && (
+            {battleEngine === null && (
                 <div className="solo-char-select">
                     <h3>Choose Your Fighter</h3>
                     <button
@@ -226,10 +210,8 @@ const SoloMode: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     )}
                 </div>
             )}
-            {battleState && (
+            {battleEngine && (
                 <BattleDisplay
-                    battleState={battleState}
-                    onAction={handleBattleAction}
                     onVictory={() => {
                         // Calculate current stage number
                         const currentStageNum = getSoloStageNumber(chapter, stage);
@@ -251,16 +233,17 @@ const SoloMode: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     ...engine.player,
                                     soloProgress: newProgress,
                                     crystals: engine.player.crystals + crystalReward
-                                }
+                                },
+                                battleEngine: null
                             };
                         });
-                        setBattleState(null);
-                        setBattleEngine(null);
                         setSelectedChar(null);
                     }}
                     onDefeat={() => {
-                        setBattleState(null);
-                        setBattleEngine(null);
+                        updateGameEngine(engine => ({
+                            ...engine,
+                            battleEngine: null
+                        }))
                         setSelectedChar(null);
                     }}
                 />

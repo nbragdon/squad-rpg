@@ -20,19 +20,26 @@ function toBattleCharacter(
   if (isPlayer) {
     return {
       ...(char as PlayerCharacter),
+      stats: {
+        ...char.stats,
+      },
       isAlive: true,
       statusEffects: {},
+      statAdjustments: [],
       damage: 0,
     };
   } else {
     const enemy = char as EnemyCharacter & { level: number };
-    console.log(enemy);
     return {
       ...enemy,
+      stats: {
+        ...enemy.stats,
+      },
       isAlive: true,
       level: enemy.level,
       shards: 0,
       statusEffects: {},
+      statAdjustments: [],
       damage: 0,
     };
   }
@@ -109,23 +116,14 @@ export function getTargetId(
   }
 }
 
-/**
- * Determines if a critical hit occurs based on the provided critical chance.
- * @param critChance The critical hit chance as a number between 0 and 100.
- * @returns True if a critical hit occurs, false otherwise.
- */
-export function didCrit(critChance: number): boolean {
-  // Generate a random number between 0 (inclusive) and 100 (exclusive)
-  const randomNumber = Math.random() * 100;
-  // A critical hit occurs if the random number is less than the critChance
-  return randomNumber < critChance;
-}
-
 export class BattleEngine {
   private state: BattleState;
 
-  constructor(options: BattleInitOptions) {
-    console.log(options.enemies);
+  constructor(options: BattleInitOptions | { state: BattleState }) {
+    if ("state" in options) {
+      this.state = options.state;
+      return;
+    }
     // Generate player team
     const playerTeam = options.playerCharacters.map((c) =>
       toBattleCharacter(c, true),
@@ -138,30 +136,66 @@ export class BattleEngine {
       return toBattleCharacter({ ...base, level: e.level }, false);
     });
 
-    // Calculate turn order
-    const allChars = [...playerTeam, ...enemyTeam];
-    const turnOrder = allChars
-      .sort((a, b) => b.stats[StatType.speed] - a.stats[StatType.speed])
-      .map((c) => c.id);
     this.state = {
       playerTeam: playerTeam,
       enemyTeam: enemyTeam,
-      turnOrder,
-      currentCharacterId: turnOrder[0],
-      currentTurn: this.getCurrentTeamTurn(playerTeam, turnOrder[0]),
+      activatedCharactersThisRound: [],
       battlePhase: "combat",
       turnCount: 1,
       battleLog: ["Battle begins!"],
       xpLogs: [],
     };
-    if (this.state.currentTurn === "enemy") {
+    if (this.getCurrentTeamTurn() === "enemy") {
       this.processEnemyTurn();
     }
+  }
+
+  getNewInstance() {
+    return new BattleEngine({ state: this.state });
   }
 
   getState(): BattleState {
     // Return a shallow copy to trigger React updates
     return { ...this.state };
+  }
+
+  /**
+   * Determines the ID of the next character to take a turn in battle.
+   * It considers character speed and who has already acted this round.
+   * This function re-sorts eligible characters by speed on each call
+   * to account for dynamic speed changes during a round.
+   *
+   * @param allCharacters An array of all BattleCharacter objects in the battle (both alive and dead).
+   * @param charactersAlreadyActedThisRound An array of IDs of characters who have already completed their turn(s) this round.
+   * @returns The ID of the next character to take a turn, or null if no one can act (e.g., all characters are dead or have acted).
+   */
+  getCurrentTurnCharacter(): BattleCharacter | null {
+    const playerAlive = this.state.playerTeam.filter((c) => c.isAlive);
+    const enemyAlive = this.state.enemyTeam.filter((c) => c.isAlive);
+    // 1. Filter for alive characters
+    const aliveCharacters = [...playerAlive, ...enemyAlive];
+
+    if (aliveCharacters.length === 0) {
+      return null; // No one alive to take a turn
+    }
+
+    // 2. Filter for characters who have not yet acted this round
+    const eligibleCharacters = aliveCharacters.filter(
+      (char) => !this.state.activatedCharactersThisRound.includes(char.id),
+    );
+
+    if (eligibleCharacters.length === 0) {
+      return null; // All alive characters have acted this round
+    }
+
+    // 3. Sort the eligible characters by speed (descending)
+    const sortedEligibleCharacters = [...eligibleCharacters].sort(
+      (a, b) =>
+        calculateStat(StatType.speed, b) - calculateStat(StatType.speed, a),
+    );
+
+    // 4. Return the ID of the character with the highest speed among those who haven't acted
+    return sortedEligibleCharacters[0];
   }
 
   private checkBattleEnd() {
@@ -192,13 +226,14 @@ export class BattleEngine {
     const target = allChars.find((c) => targetId.includes(c.id));
     if (!attacker || !target || !attacker.isAlive || !target.isAlive) return;
     // Calculate damage
-    const attackVal = calculateStat(StatType.strength, attacker);
-    const defenseVal = calculateStat(StatType.defense, target);
-    let dmg = calculateDamage(attackVal, defenseVal);
-    if (didCrit(attacker.stats[StatType.critChance])) {
-      dmg *= attacker.stats[StatType.critDamage];
-      this.state.battleLog.push(`${attacker.name} crits ${target.name}!`);
-    }
+    let dmg = calculateDamage(
+      attacker,
+      target,
+      StatType.strength,
+      StatType.defense,
+      attacker.strongAffinities,
+      this.state.battleLog,
+    );
     // Apply damage
     target.damage += dmg;
     if (target.damage >= target.stats[StatType.health]) target.isAlive = false;
@@ -238,15 +273,16 @@ export class BattleEngine {
         // Handle damage effects
         if (effect.type === "damage") {
           const damageEffect = effect as DamageSkillEffect;
-          const attackVal =
-            calculateStat(damageEffect.damageStat, attacker) *
-            damageEffect.damageMultiplier;
-          const defenseVal = calculateStat(damageEffect.defenseStat, target);
-          let dmg = calculateDamage(attackVal, defenseVal);
-          if (didCrit(attacker.stats[StatType.critChance])) {
-            dmg *= attacker.stats[StatType.critDamage];
-            this.state.battleLog.push(`${attacker.name} crits ${target.name}!`);
-          }
+          let dmg = calculateDamage(
+            attacker,
+            target,
+            damageEffect.damageStat,
+            damageEffect.defenseStat,
+            effect.affinities,
+            this.state.battleLog,
+          );
+          dmg *= damageEffect.damageMultiplier || 1;
+          dmg = Math.floor(dmg);
           target.damage += dmg;
           if (target.damage >= target.stats[StatType.health])
             target.isAlive = false;
@@ -277,7 +313,7 @@ export class BattleEngine {
             (attacker.stats[healEffect.healStat] || 0) *
               healEffect.healMultiplier,
           );
-          target.stats[StatType.health] = Math.max(
+          target.damage = Math.max(
             target.damage - healAmount,
             0, // Max health
           );
@@ -288,18 +324,18 @@ export class BattleEngine {
         // Handle stat adjustments
         if (effect.type === "adjustStat") {
           const adjustEffect = effect as AdjustStatSkillEffect;
+          target.statAdjustments.push(adjustEffect);
           const currentStat = target.stats[adjustEffect.stat] || 0;
-          let newStat = currentStat;
+          let flatValue = 0;
 
           if (adjustEffect.modifierType === ModifierType.Flat) {
-            newStat += adjustEffect.modifierValue || 0;
+            flatValue = adjustEffect.modifierValue || 0;
           } else if (adjustEffect.modifierType === ModifierType.Percentage) {
-            newStat += currentStat * (1 + (adjustEffect.modifierValue || 0));
+            flatValue = currentStat * (1 + (adjustEffect.modifierValue || 0));
           }
 
-          target.stats[adjustEffect.stat] = Math.max(newStat, 0);
           this.state.battleLog.push(
-            `${target.name}'s ${adjustEffect.stat} adjusted by ${newStat - currentStat}!`,
+            `${target.name}'s ${adjustEffect.stat} adjusted by ${flatValue}!`,
           );
         }
       });
@@ -312,6 +348,22 @@ export class BattleEngine {
     );
     this.checkBattleEnd();
     if (this.state.battlePhase === "combat") this.nextTurn();
+  }
+
+  reduceStatAdjustmentDurations(battleChar: BattleCharacter) {
+    battleChar.statAdjustments.forEach((adj) => {
+      if (!adj.duration) return;
+      adj.duration -= 1;
+      if (adj.duration <= 0) {
+        // Remove the adjustment from the character
+        battleChar.statAdjustments = battleChar.statAdjustments.filter(
+          (a) => a.id !== adj.id,
+        );
+        this.state.battleLog.push(
+          `${battleChar.name}'s ${adj.stat} adjustment expired!`,
+        );
+      }
+    });
   }
 
   // Enhanced status effect processing
@@ -359,7 +411,7 @@ export class BattleEngine {
   processEnemyTurn() {
     // Find the current enemy
     const enemy = this.state.enemyTeam.find(
-      (c) => c.id === this.state.currentCharacterId && c.isAlive,
+      (c) => c.id === this.getCurrentTurnCharacter()?.id && c.isAlive,
     );
     if (!enemy) return;
     // Find a living player target
@@ -370,7 +422,6 @@ export class BattleEngine {
     const skill = enemy.skills.find(
       (s) => s.cost <= enemy.stats[s.costStat || StatType.energy],
     );
-    console.log(enemy.skills, skill);
     if (skill) {
       this.useSkill(skill.id, enemy.id);
     } else {
@@ -378,10 +429,10 @@ export class BattleEngine {
     }
   }
 
-  getCurrentTeamTurn(
-    playerCharacters: BattleCharacter[],
-    currentCharacterId: string | null,
-  ): "player" | "enemy" {
+  getCurrentTeamTurn(): "player" | "enemy" {
+    const currentCharacterId = this.getCurrentTurnCharacter()?.id;
+    if (!currentCharacterId) return "player"; // Default to player if no character is found
+    const playerCharacters = this.state.playerTeam;
     return playerCharacters.some((c) => c.id === currentCharacterId)
       ? "player"
       : "enemy";
@@ -402,26 +453,29 @@ export class BattleEngine {
       return;
     }
     // Energy gain for the character who just acted
-    const idx = this.state.turnOrder.indexOf(this.state.currentCharacterId!);
-    const actedIdx = idx === 0 ? this.state.turnOrder.length - 1 : idx - 1;
-    const actedId = this.state.turnOrder[actedIdx];
-    const allChars = [...this.state.playerTeam, ...this.state.enemyTeam];
-    const actedChar = allChars.find((c) => c.id === actedId);
+    const actedChar = this.getCurrentTurnCharacter();
     if (actedChar && actedChar.isAlive) {
       // Process status effects for the character who just acted
       this.processStatusEffects(actedChar);
       const gain = actedChar.stats[StatType.energyGain];
       actedChar.stats[StatType.energy] =
         (actedChar.stats[StatType.energy] || 0) + gain;
+      // Reduce stat adjustments durations
+      this.reduceStatAdjustmentDurations(actedChar);
+      this.state.activatedCharactersThisRound.push(actedChar.id);
+      this.state.turnCount += 1;
+      if (
+        this.state.activatedCharactersThisRound.length >=
+        this.state.playerTeam.length + this.state.enemyTeam.length
+      ) {
+        // Reset for the next round
+        this.state.activatedCharactersThisRound = [];
+      }
     }
-    // Advance turn
-    const nextIdx = (idx + 1) % this.state.turnOrder.length;
-    this.state.currentCharacterId = this.state.turnOrder[nextIdx];
-    this.state.currentTurn = this.getCurrentTeamTurn(
-      this.state.playerTeam,
-      this.state.currentCharacterId,
-    );
-    if (nextIdx === 0) this.state.turnCount += 1;
+    if (this.getCurrentTeamTurn() === "enemy") {
+      // Process enemy turn
+      this.processEnemyTurn();
+    }
   }
 }
 

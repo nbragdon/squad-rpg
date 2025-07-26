@@ -5,7 +5,9 @@ function loadGameEngine(): GameEngine {
     const raw = localStorage.getItem('squadRpgGameEngine');
     if (!raw) return createDefaultGameEngine();
     try {
-        return JSON.parse(raw);
+        const gameEngine: GameEngine = JSON.parse(raw);
+        gameEngine.battleEngine = null;
+        return gameEngine;
     } catch {
         return createDefaultGameEngine();
     }
