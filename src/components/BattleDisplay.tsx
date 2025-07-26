@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { calculateBattleXp } from '../battle/battleEngine';
-import { BattleState } from '../battle/battleTypes';
+import { BattleCharacter, BattleState } from '../battle/battleTypes';
 import { useGameEngine } from '../context/GameEngineContext';
 import { levelUp } from '../data/leveling';
-import { BattleCharacter } from '../types/game';
+import { StatType } from '../types/stats';
 
 interface BattleDisplayProps {
     battleState: BattleState;
@@ -20,8 +20,8 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({ battleState, onAction, on
     // Auto mode effect
     useEffect(() => {
         if (auto && battleState.battlePhase === 'combat' && battleState.currentTurn === 'player') {
-            const player = (battleState.playerTeam.characters as BattleCharacter[]).find(c => c.id === battleState.currentCharacterId);
-            const enemy = (battleState.enemyTeam.characters as BattleCharacter[]).find(c => c.isAlive);
+            const player = (battleState.playerTeam).find(c => c.id === battleState.currentCharacterId);
+            const enemy = (battleState.enemyTeam).find(c => c.isAlive);
             if (player && enemy) {
                 setTimeout(() => onAction({ type: 'attack', attackerId: player.id, targetId: enemy.id }), 700);
             }
@@ -30,19 +30,19 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({ battleState, onAction, on
 
     if (!battleState) return null;
 
-    const player = (battleState.playerTeam.characters as BattleCharacter[]).find(c => c.id === battleState.currentCharacterId);
+    const player = (battleState.playerTeam).find(c => c.id === battleState.currentCharacterId);
     const isPlayerTurn = battleState.currentTurn === 'player' && player && !auto;
 
     // Timeline: show turn order and who has acted this round
     const timeline = battleState.turnOrder.map((id, idx) => {
-        const char = [...(battleState.playerTeam.characters as BattleCharacter[]), ...(battleState.enemyTeam.characters as BattleCharacter[])].find(c => c.id === id);
+        const char = [...(battleState.playerTeam), ...(battleState.enemyTeam)].find(c => c.id === id);
         const acted = idx < battleState.turnOrder.indexOf(battleState.currentCharacterId || '');
         return (
             <span key={id} style={{
                 marginRight: 8,
                 opacity: acted ? 0.5 : 1,
                 fontWeight: id === battleState.currentCharacterId ? 'bold' : 'normal',
-                color: (battleState.playerTeam.characters as BattleCharacter[]).some(pc => pc.id === id) ? '#ffd700' : '#ff6666',
+                color: (battleState.playerTeam).some(pc => pc.id === id) ? '#ffd700' : '#ff6666',
                 textShadow: id === battleState.currentCharacterId ? '0 0 8px #fff' : undefined
             }}>
                 {char ? char.name : id}
@@ -54,7 +54,7 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({ battleState, onAction, on
     const renderCharInfo = (char: BattleCharacter) => (
         <div key={char.id} style={{ marginBottom: 6, color: char.isAlive ? '#fff' : '#888', textAlign: 'center', fontWeight: battleState.currentCharacterId === char.id ? 'bold' : 'normal', background: battleState.currentCharacterId === char.id ? 'rgba(255,255,255,0.08)' : 'none', borderRadius: 6, padding: 4 }}>
             {char.name} (Lv.{char.level})<br />
-            HP: {char.health}/{char.maxHealth} &nbsp;|&nbsp; Energy: {char.energy}/{char.maxEnergy} {char.isAlive ? '' : '(KO)'}
+            HP: {char.stats[StatType.health] - char.damage}/{char.stats[StatType.health]} &nbsp;|&nbsp; Energy: {char.stats[StatType.energy]} {char.isAlive ? '' : '(KO)'}
         </div>
     );
 
@@ -65,35 +65,24 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({ battleState, onAction, on
                 key: 'basic',
                 name: 'Basic Attack',
                 onClick: () => {
-                    const enemy = (battleState.enemyTeam.characters as BattleCharacter[]).find(c => c.isAlive);
+                    const enemy = (battleState.enemyTeam).find(c => c.isAlive);
                     if (enemy) onAction({ type: 'attack', attackerId: player.id, targetId: enemy.id });
                 },
                 disabled: false,
-                desc: `Basic Attack: ${player.attack} damage`,
+                desc: `Basic Attack: ${player.stats[StatType.strength]} damage`,
                 style: { background: '#4caf50', color: '#fff' }
             },
             ...((player.skills || []).map(skill => ({
                 key: skill.id,
                 name: skill.name,
                 onClick: () => {
-                    const enemy = (battleState.enemyTeam.characters as BattleCharacter[]).find(c => c.isAlive);
+                    const enemy = (battleState.enemyTeam).find(c => c.isAlive);
                     if (enemy) onAction({ type: 'skill', skillId: skill.id, attackerId: player.id, targetId: enemy.id });
                 },
-                disabled: player.energy < (skill.costAmount || 0),
-                desc: `${skill.description} (Cost: ${skill.costAmount || 0} energy)`,
+                disabled: player.stats[skill.costStat || StatType.energy] < (skill.cost || 0),
+                desc: `(Cost: ${skill.cost || 0} ${skill.costStat || 'energy'})`,
                 style: { background: '#666', color: '#fff' }
-            }))),
-            ...(player.ultimateSkill ? [{
-                key: player.ultimateSkill.id,
-                name: player.ultimateSkill.name,
-                onClick: () => {
-                    const enemy = (battleState.enemyTeam.characters as BattleCharacter[]).find(c => c.isAlive);
-                    if (enemy) onAction({ type: 'ultimate', skillId: player.ultimateSkill.id, attackerId: player.id, targetId: enemy.id });
-                },
-                disabled: player.energy < (player.ultimateSkill.costAmount || 0),
-                desc: `${player.ultimateSkill.description} (Cost: ${player.ultimateSkill.costAmount || 0} energy)`,
-                style: { background: '#ffe066', color: '#222' }
-            }] : [])
+            })))
         ];
         // Pad to 4 columns
         while (abilities.length < 4) abilities.push({ key: `empty${abilities.length}`, name: '', onClick: () => { }, disabled: true, desc: '', style: { background: 'none', color: '#fff' } });
@@ -120,8 +109,8 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({ battleState, onAction, on
 
     // Helper: calculate XP gain for victory
     function getVictoryXp() {
-        const playerChars = battleState.playerTeam.characters as BattleCharacter[];
-        const enemyChars = battleState.enemyTeam.characters as BattleCharacter[];
+        const playerChars = battleState.playerTeam;
+        const enemyChars = battleState.enemyTeam;
         return calculateBattleXp(playerChars, enemyChars);
     }
 
@@ -129,11 +118,9 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({ battleState, onAction, on
         const handleVictory = () => {
             const xpGained = getVictoryXp();
             updateGameEngine(engine => {
-                // Update XP/level for each character in player's team
-                console.log(engine.player.team.characters);
                 // loop through battle characters and find the matching id in the character collection and update their xp
                 const updatedCharacterProgress = { ...engine.player.characterProgress };
-                battleState.playerTeam.characters.forEach(char => {
+                battleState.playerTeam.forEach((char: { id: string | number; }) => {
                     let characterToUpdate = updatedCharacterProgress[char.id];
                     characterToUpdate.xp = (characterToUpdate.xp || 0) + xpGained;
                     characterToUpdate = levelUp(characterToUpdate);
@@ -180,11 +167,11 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({ battleState, onAction, on
             <div style={{ display: 'flex', justifyContent: 'center', gap: 64, marginBottom: 18 }}>
                 <div>
                     <h4 style={{ textAlign: 'center', marginBottom: 8 }}>Your Team</h4>
-                    {(battleState.playerTeam.characters as BattleCharacter[]).map(renderCharInfo)}
+                    {(battleState.playerTeam).map(renderCharInfo)}
                 </div>
                 <div>
                     <h4 style={{ textAlign: 'center', marginBottom: 8 }}>Enemies</h4>
-                    {(battleState.enemyTeam.characters as BattleCharacter[]).map(renderCharInfo)}
+                    {(battleState.enemyTeam).map(renderCharInfo)}
                 </div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'center', gap: 24, margin: '18px 0' }}>

@@ -1,3 +1,4 @@
+/*
 import { CostType, Skill, SkillType, StatusEffectType, TargetType } from '../../types/skillTypes';
 
 // 10 unique basic skills (41-50)
@@ -211,3 +212,5 @@ export const drainingArrow: Skill = {
         description: 'Heals for a percentage of damage dealt.'
     }]
 };
+*/
+export {};

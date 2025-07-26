@@ -1,3 +1,4 @@
+/*
 import { CostType, Skill, SkillType, StatusEffectType, TargetType } from '../../types/skillTypes';
 
 // Unique skills for legendary/epic/rare characters
@@ -103,3 +104,6 @@ export const timeLoop: Skill = {
         description: 'Repeats last skill.'
     }]
 };
+*/
+
+export {};

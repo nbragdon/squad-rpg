@@ -1,3 +1,4 @@
+/*
 import { CostType, Skill, SkillType, StatusEffectType, TargetType } from '../../types/skillTypes';
 
 // 20 new unique basic skills (51-70)
@@ -327,3 +328,6 @@ export const dispel: Skill = {
         description: 'Removes all buffs and slows.'
     }]
 };
+*/
+
+export {};

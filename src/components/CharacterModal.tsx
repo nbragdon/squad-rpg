@@ -1,7 +1,10 @@
 import React from 'react';
 import { getXpToNextLevel } from '../data/leveling';
+import { SkillDescriptionCard } from '../data/skills/skillDescriptionUtil';
 import { calculateStat } from '../data/statUtils';
-import { PlayerCharacter, Rarity } from '../types/game';
+import { PlayerCharacter } from '../types/character';
+import { Rarity } from '../types/rarity';
+import { StatType } from '../types/stats';
 
 interface CharacterModalProps {
     character: PlayerCharacter;
@@ -15,45 +18,23 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ character, onClose, get
             <div className="character-modal" onClick={e => e.stopPropagation()} style={{ background: '#23232b', color: '#fff', borderRadius: 14, padding: 28, maxWidth: 370, width: '90%', boxShadow: '0 8px 32px #0008', position: 'relative' }}>
                 <button style={{ position: 'absolute', top: 10, right: 14, fontSize: 22, background: 'none', border: 'none', color: '#ffd700', cursor: 'pointer' }} onClick={onClose}>&times;</button>
                 <h2 style={{ marginTop: 0, marginBottom: 8 }}>{character.name}</h2>
-                <div style={{ marginBottom: 6 }}>Class: <b>{character.class}</b></div>
+                <div style={{ marginBottom: 6 }}>Strong Affinities: <b>{character.strongAffinities.join(', ')}</b></div>
+                <div style={{ marginBottom: 6 }}>Weak Affinities: <b>{character.weakAffinities.join(', ')}</b></div>
                 <div style={{ marginBottom: 6 }}>Rarity: <b style={{ color: getRarityColor ? getRarityColor(character.rarity) : '#ffd700' }}>{character.rarity}</b></div>
                 <div style={{ marginBottom: 6 }}>Level: <b>{character.level}</b></div>
-                <div style={{ marginBottom: 6 }}>HP: <b>{calculateStat({ base: character.maxHealth, level: character.level, shards: character.shards, rarity: character.rarity })}</b></div>
-                <div style={{ marginBottom: 6 }}>ATK: <b>{calculateStat({ base: character.attack, level: character.level, shards: character.shards, rarity: character.rarity })}</b></div>
-                <div style={{ marginBottom: 6 }}>DEF: <b>{calculateStat({ base: character.defense, level: character.level, shards: character.shards, rarity: character.rarity })}</b></div>
-                <div style={{ marginBottom: 6 }}>SPD: <b>{calculateStat({ base: character.speed, level: character.level, shards: character.shards, rarity: character.rarity })}</b></div>
-                <div style={{ marginBottom: 10 }}>Energy: <b>{character.maxEnergy}</b></div>
+                <div style={{ marginBottom: 6 }}>Health: <b>{calculateStat(StatType.health, { stats: character.stats, level: character.level, shards: character.shards, rarity: character.rarity })}</b></div>
+                <div style={{ marginBottom: 6 }}>Energy: <b>{calculateStat(StatType.energy, { stats: character.stats, level: character.level, shards: character.shards, rarity: character.rarity })}</b></div>
+                <div style={{ marginBottom: 6 }}>Strength: <b>{calculateStat(StatType.strength, { stats: character.stats, level: character.level, shards: character.shards, rarity: character.rarity })}</b></div>
+                <div style={{ marginBottom: 6 }}>Defense: <b>{calculateStat(StatType.defense, { stats: character.stats, level: character.level, shards: character.shards, rarity: character.rarity })}</b></div>
+                <div style={{ marginBottom: 6 }}>Magic: <b>{calculateStat(StatType.magic, { stats: character.stats, level: character.level, shards: character.shards, rarity: character.rarity })}</b></div>
+                <div style={{ marginBottom: 6 }}>Magic Defense: <b>{calculateStat(StatType.magicDefense, { stats: character.stats, level: character.level, shards: character.shards, rarity: character.rarity })}</b></div>
+                <div style={{ marginBottom: 6 }}>Speed: <b>{calculateStat(StatType.speed, { stats: character.stats, level: character.level, shards: character.shards, rarity: character.rarity })}</b></div>
+                <div style={{ marginBottom: 6 }}>Crit Chance: <b>{calculateStat(StatType.critChance, { stats: character.stats, level: character.level, shards: character.shards, rarity: character.rarity })}</b></div>
+                <div style={{ marginBottom: 6 }}>Crit Damage: <b>{calculateStat(StatType.critDamage, { stats: character.stats, level: character.level, shards: character.shards, rarity: character.rarity })}</b></div>
                 <div style={{ marginBottom: 10 }}>XP: <b>{typeof character.xp === 'number' ? character.xp : 0} / {getXpToNextLevel(character.level || 1)}</b></div>
                 <div style={{ marginTop: 10, marginBottom: 4 }}><b>Abilities:</b></div>
                 {[...character.skills, { ...character.ultimateSkill, isUltimate: true }].map(skill => (
-                    <div key={skill.id} style={{ marginBottom: 10, padding: 7, background: skill.isUltimate ? '#333' : 'none', borderRadius: 7 }}>
-                        <b>{skill.name}</b> {skill.isUltimate && <span style={{ color: '#ffd700' }}>(Ultimate)</span>}
-                        <div style={{ fontSize: 13, color: '#ccc', marginBottom: 2 }}>{skill.description}</div>
-                        <div style={{ fontSize: 12, color: '#aaa' }}>
-                            {skill.damageCalc && (
-                                <span>
-                                    {skill.damageCalc.type === 'stat' && `Damage: scales with ${skill.damageCalc.stat} (x${skill.damageCalc.multiplier})`}
-                                    {skill.damageCalc.type === 'average' && `Damage: scales with avg(${skill.damageCalc.stats.join(', ')}) (x${skill.damageCalc.multiplier})`}
-                                </span>
-                            )}
-                            {skill.costType && skill.costType !== 'none' && (
-                                <span> &nbsp;|&nbsp; Cost: {skill.costAmount} {skill.costType.charAt(0).toUpperCase() + skill.costType.slice(1)}</span>
-                            )}
-                            {typeof skill.cooldownTurns === 'number' && skill.cooldownTurns > 0 && (
-                                <span> &nbsp;|&nbsp; Cooldown: {skill.cooldownTurns} turn{skill.cooldownTurns > 1 ? 's' : ''}</span>
-                            )}
-                        </div>
-                        {skill.statusEffectsApplied && skill.statusEffectsApplied.length > 0 && (
-                            <div style={{ fontSize: 12, color: '#b2f7ef', marginTop: 2 }}>
-                                {skill.statusEffectsApplied.map(se => (
-                                    <div key={se.id}>
-                                        <span>{se.name} ({se.type.charAt(0).toUpperCase() + se.type.slice(1)}): {se.value} for {se.duration} turn{se.duration > 1 ? 's' : ''}</span>
-                                        {se.description && <span> - {se.description}</span>}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                    <SkillDescriptionCard key={skill.id} skill={skill} />
                 ))}
             </div>
         </div>

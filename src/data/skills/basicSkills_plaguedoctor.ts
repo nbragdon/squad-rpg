@@ -1,3 +1,4 @@
+/*
 import { CostType, Skill, SkillType, StatusEffectType, TargetType } from '../../types/skillTypes';
 
 // Plague Doctor themed skills
@@ -41,3 +42,5 @@ export const epidemic: Skill = {
         description: 'Spreads all debuffs from one enemy to all enemies.'
     }]
 };
+*/
+export {};

@@ -1,93 +1,74 @@
-// Enums for fixed string sets
-export enum StatusEffectType {
-    Buff = 'buff',
-    Debuff = 'debuff',
-    Dot = 'dot',
-    Hot = 'hot',
-    Cc = 'cc',
-    Passive = 'passive'
-}
+import { AffinityType } from "./affinity";
+import { StatType } from "./stats";
+import { StatusEffectType } from "./statusEffects";
 
-export enum SkillType {
-    Attack = 'attack',
-    Heal = 'heal',
-    Buff = 'buff',
-    Debuff = 'debuff',
-    Utility = 'utility',
-    Movement = 'movement',
-    AoeAttack = 'aoe_attack',
-    AoeHeal = 'aoe_heal',
-    Passive = 'passive',
-    Ultimate = 'ultimate'
+// Enums for fixed string sets
+export enum SkillEffectType {
+  damage = "damage",
+  heal = "heal",
+  applyStatusEffect = "applyStatusEffect",
+  adjustStat = "adjustStat",
 }
 
 export enum TargetType {
-    Self = 'self',
-    SingleAlly = 'singleAlly',
-    AllAllies = 'allAllies',
-    SingleEnemy = 'singleEnemy',
-    AllEnemies = 'allEnemies',
-    SpecificType = 'specificType'
+  self = "self",
+  randomAlly = "randomAlly",
+  allAllies = "allAllies",
+  randomEnemy = "randomEnemy",
+  allEnemies = "allEnemies",
+  lowestHealthAlly = "lowestHealthAlly",
+  lowestHealthEnemy = "lowestHealthEnemy",
 }
 
 export enum ModifierType {
-    Flat = 'flat',
-    Percentage = 'percentage'
+  Flat = "flat",
+  Percentage = "percentage",
 }
 
-export enum EffectTrigger {
-    OnTurnStart = 'onTurnStart',
-    OnTurnEnd = 'onTurnEnd',
-    OnHit = 'onHit',
-    OnTakeDamage = 'onTakeDamage',
-    OnAbilityUse = 'onAbilityUse'
+export interface SkillEffect {
+  id: string;
+  name: string;
+  type: SkillEffectType;
+  affinity: AffinityType;
+  targetType: TargetType;
 }
 
-export enum CostType {
-    Mana = 'mana',
-    Energy = 'energy',
-    Rage = 'rage',
-    Hp = 'hp',
-    None = 'none'
+export interface DamageSkillEffect extends SkillEffect {
+  type: SkillEffectType.damage;
+  damageMultiplier: number;
+  damageStat: StatType;
+  defenseStat: StatType;
+  duration?: number; // Optional duration for damage over time effects
 }
 
-// Type-safe damage calculation structure
-export type DamageCalc =
-    | { type: 'stat'; stat: string; multiplier: number }
-    | { type: 'average'; stats: string[]; multiplier: number };
+export interface HealSkillEffect extends SkillEffect {
+  type: SkillEffectType.heal;
+  healMultiplier: number;
+  healStat: StatType;
+  duration?: number; // Optional duration for damage over time effects
+}
 
-export interface StatusEffect {
-    id: string;
-    name: string;
-    description?: string;
-    type: StatusEffectType;
-    duration: number;
-    value?: number;
-    valueCalc?: DamageCalc;
-    targetStat?: string;
-    modifierType?: ModifierType;
-    damageType?: string;
-    effectTrigger?: EffectTrigger;
-    isStackable?: boolean;
-    isRemovable?: boolean;
-    preventsActions?: boolean;
-    preventsMovement?: boolean;
-    statusEffectLevelScaling?: number;
+export interface ApplyStatusEffectSkillEffect extends SkillEffect {
+  type: SkillEffectType.applyStatusEffect;
+  statusEffectType: StatusEffectType;
+  value?: number; // Optional value for the status effect
+  duration?: number; // Optional duration for damage over time effects
+  stackable?: boolean; // Whether the status effect can stack
+}
+
+export interface AdjustStatSkillEffect extends SkillEffect {
+  type: SkillEffectType.adjustStat;
+  stat: StatType;
+  modifierType: ModifierType;
+  modifierValue: number;
+  duration?: number; // Optional duration for damage over time effects
 }
 
 export interface Skill {
-    id: string;
-    name: string;
-    description: string;
-    type: SkillType;
-    damageCalc?: DamageCalc;
-    damageType?: string;
-    targetType: TargetType;
-    costType?: CostType;
-    costAmount?: number;
-    cooldownTurns?: number;
-    statusEffectsApplied?: StatusEffect[];
-    isUltimate?: boolean;
-    levelScaling?: number;
-    aiTargetingPriority?: string;
+  id: string;
+  name: string;
+  cost: number;
+  costStat: StatType;
+  cooldownTurns?: number; // Optional cooldown turns
+  effects: SkillEffect[];
 }

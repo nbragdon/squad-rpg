@@ -7,7 +7,7 @@ import MainMenu from './components/MainMenu';
 import SoloMode from './components/SoloMode';
 import { useGameEngine } from './context/GameEngineContext';
 import { gachaCharacters } from './data/characters';
-import { PlayerCharacter } from './types/game';
+import { PlayerCharacter } from './types/character';
 
 export enum GameScreen {
     SOLO = 'solo',
@@ -49,7 +49,6 @@ function App() {
                             xpToNextLevel: 100,
                             shards: 0
                         }))}
-                        playerTeam={gameEngine.player.team}
                         player={gameEngine.player}
                         onBack={() => handleNavigate(GameScreen.MENU)}
                     />
@@ -57,9 +56,7 @@ function App() {
             case 'battle':
                 return (
                     <BattleScreen
-                        playerTeam={gameEngine.player.team}
-                        onBack={() => handleNavigate(GameScreen.MENU)}
-                    />
+                        onBack={() => handleNavigate(GameScreen.MENU)} playerTeam={[]}                    />
                 );
             case 'solo':
                 return <SoloMode onBack={() => handleNavigate(GameScreen.MENU)} />;

@@ -1,3 +1,4 @@
+/*
 import { CostType, Skill, SkillType, StatusEffectType, TargetType } from '../../types/skillTypes';
 
 // Soulreaper/Death themed skills
@@ -41,3 +42,6 @@ export const spiritShackle: Skill = {
         description: 'Immobilizes the target.'
     }]
 };
+*/
+
+export {};

@@ -1,3 +1,4 @@
+/*
 import { CostType, Skill, SkillType, StatusEffectType, TargetType } from '../../types/skillTypes';
 
 // Unique skills for Uncommon and Rare characters
@@ -169,3 +170,6 @@ export const frostGuard: Skill = {
 // Fix invalid StatusEffectType enums in basicSkills6.ts
 // Replace StatusEffectType.Control with StatusEffectType.Cc
 // Replace StatusEffectType.Heal with StatusEffectType.Hot
+*/
+
+export {};

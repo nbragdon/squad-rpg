@@ -1,25 +1,11 @@
-import { Rarity } from './game';
-import type { StatusEffect } from './skillTypes';
-
-export interface EnemySkill {
-    id: string;
-    name: string;
-    description: string;
-    damage?: number;
-    healing?: number;
-    energyCost?: number;
-    statusEffect?: StatusEffect;
-}
+import { Rarity } from './rarity';
+import type { Skill } from './skillTypes';
+import { AllStats } from './stats';
 
 export interface EnemyCharacter {
     id: string;
     name: string;
     rarity: Rarity;
-    maxHealth: number;
-    attack: number;
-    defense: number;
-    speed: number;
-    maxEnergy: number;
-    energyGain: number;
-    skills: EnemySkill[];
+    stats: AllStats
+    skills: Skill[];
 }

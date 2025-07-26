@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { gachaCharacters } from '../data/characters';
 import { getXpToNextLevel } from '../data/leveling';
-import { CharacterBase, PlayerCharacter, Rarity } from '../types/game';
+import { CharacterBase, PlayerCharacter } from '../types/character';
+import { Rarity } from '../types/rarity';
 import './Gacha.css';
 
 const RARITY_DROP_RATES = [
@@ -114,7 +115,7 @@ const Gacha: React.FC<GachaProps> = ({ onBack, player }) => {
                         <div className="gacha-card-avatar">{char.name.charAt(0)}</div>
                         <div className="gacha-card-info">
                             <div className="gacha-card-name">{char.name}</div>
-                            <div className="gacha-card-class">{char.class}</div>
+                            <div className="gacha-card-class">{char.strongAffinities.join(', ')}</div>
                             <div className="gacha-card-rarity" style={{ color: rarityColors[char.rarity] }}>{char.rarity.toUpperCase()}</div>
                         </div>
                     </div>

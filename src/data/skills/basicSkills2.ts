@@ -1,3 +1,4 @@
+/*
 import { CostType, Skill, SkillType, StatusEffectType, TargetType } from '../../types/skillTypes';
 
 // 20 unique basic skills (21-40)
@@ -389,3 +390,6 @@ export const drainingMist: Skill = {
         description: 'Reduces the healing received by the target.'
     }]
 };
+*/
+
+export {};

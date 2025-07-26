@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { getXpToNextLevel } from '../data/leveling';
-import { calculateStat } from '../data/statUtils';
-import { PlayerCharacter, Team } from '../types/game';
+import { PlayerCharacter } from '../types/character';
 import './CharacterCollection.css';
 import CharacterModal from './CharacterModal';
 import { getRarityColor } from './utils';
@@ -9,25 +8,15 @@ import { getRarityColor } from './utils';
 interface CharacterCollectionProps {
     characters: PlayerCharacter[];
     onBack: () => void;
-    playerTeam: Team;
     player?: any; // Add player prop for crystals, etc.
 }
 
 const CharacterCollection: React.FC<CharacterCollectionProps> = ({
     characters,
     onBack,
-    playerTeam,
     player
 }) => {
     const [modalCharacter, setModalCharacter] = useState<PlayerCharacter | null>(null);
-
-    const isCharacterInTeam = (characterId: string): boolean => {
-        return playerTeam.characters.some(char => char.id === characterId);
-    };
-
-    const canAddToTeam = (character: PlayerCharacter): boolean => {
-        return !isCharacterInTeam(character.id) && playerTeam.characters.length < playerTeam.maxSize;
-    };
 
     return (
         <div className="character-collection">
@@ -57,7 +46,7 @@ const CharacterCollection: React.FC<CharacterCollectionProps> = ({
                             </div>
                             <div className="character-info">
                                 <h3 className="character-name">{character.name}</h3>
-                                <div className="character-class">{character.class}</div>
+                                <div className="character-class">{character.strongAffinities.join(', ')}</div>
                                 <div
                                     className="character-rarity"
                                     style={{ color: getRarityColor(character.rarity) }}
@@ -68,10 +57,11 @@ const CharacterCollection: React.FC<CharacterCollectionProps> = ({
                             <div className="character-stats">
                                 <div className="stat-row">
                                     <span>Level: {displayChar.level}</span>
-                                    <span>HP: {calculateStat({ base: displayChar.maxHealth, level: displayChar.level, shards: displayChar.shards, rarity: displayChar.rarity })}</span>
+                                    <span>XP: {typeof displayChar.xp === 'number' ? displayChar.xp : 0} / {getXpToNextLevel(displayChar.level || 1)}</span>
                                 </div>
                                 <div className="stat-row">
-                                    <span>XP: {typeof displayChar.xp === 'number' ? displayChar.xp : 0} / {getXpToNextLevel(displayChar.level || 1)}</span>
+                                    <span>Strong Affinities: {character.strongAffinities.join(', ')}</span>
+                                    <span>Weak Affinities: {character.weakAffinities.join(', ')}</span>
                                 </div>
                             </div>
                         </div>

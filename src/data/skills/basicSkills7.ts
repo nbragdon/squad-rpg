@@ -1,3 +1,4 @@
+/*
 import { CostType, Skill, SkillType, StatusEffectType, TargetType } from '../../types/skillTypes';
 
 // Unique skills for Rare characters
@@ -118,3 +119,6 @@ export const shadowHeal: Skill = {
         description: 'Increases evasion.'
     }]
 };
+*/
+
+export {};

@@ -5,7 +5,7 @@ import { useGameEngine } from '../context/GameEngineContext';
 import { gachaCharacters } from '../data/characters';
 import { getEnemyByChapterAndStage } from '../data/enemies/enemy-map';
 import { getXpToNextLevel } from '../data/leveling';
-import { PlayerCharacter } from '../types/game';
+import { PlayerCharacter } from '../types/character';
 import BattleDisplay from './BattleDisplay';
 import CharacterModal from './CharacterModal';
 
@@ -86,14 +86,10 @@ const SoloMode: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     function handleBattleAction(action: any) {
         if (!battleEngine) return;
         if (action.type === 'attack') {
-            battleEngine.attack(action.attackerId, action.targetId);
+            battleEngine.attack(action.attackerId);
         } else if (action.type === 'skill') {
             if (typeof battleEngine.useSkill === 'function') {
-                battleEngine.useSkill(action.skillId, action.attackerId, action.targetId);
-            }
-        } else if (action.type === 'ultimate') {
-            if (typeof battleEngine.useUltimate === 'function') {
-                battleEngine.useUltimate(action.skillId, action.attackerId, action.targetId);
+                battleEngine.useSkill(action.skillId, action.attackerId);
             }
         }
         // After player action, process enemy turn if needed
@@ -214,7 +210,7 @@ const SoloMode: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                 }}
                             >
                                 <div style={{ fontWeight: 'bold', fontSize: 17, marginBottom: 2 }}>{char.name}</div>
-                                <div style={{ fontSize: 13, marginBottom: 2 }}>{char.class}</div>
+                                <div style={{ fontSize: 13, marginBottom: 2 }}>{char.strongAffinities.join(', ')}</div>
                                 <div style={{ fontSize: 12, color: '#aaa', marginBottom: 4 }}>Lv. {char.level}</div>
                                 <button
                                     style={{ marginTop: 4, fontSize: 12, background: '#333', color: '#ffd700', border: '1px solid #ffd700', borderRadius: 6, padding: '3px 10px', cursor: 'pointer' }}
