@@ -51,9 +51,61 @@ export interface HealSkillEffect extends SkillEffect {
 export interface ApplyStatusEffectSkillEffect extends SkillEffect {
   type: SkillEffectType.applyStatusEffect;
   statusEffectType: StatusEffectType;
+  modifierType?: ModifierType;
+  stat?: StatType;
   value?: number; // Optional value for the status effect
   duration?: number; // Optional duration for damage over time effects
   stackable?: boolean; // Whether the status effect can stack
+}
+
+export interface ApplyPoisonStatusEffectSkillEffect
+  extends ApplyStatusEffectSkillEffect {
+  statusEffectType: StatusEffectType.poison;
+  modifierType: ModifierType;
+  stat: StatType;
+  value: number; // Optional value for the status effect
+  duration: number; // Optional duration for damage over time effects
+  stackable: false;
+}
+
+export interface ApplyBurnStatusEffectSkillEffect
+  extends ApplyStatusEffectSkillEffect {
+  statusEffectType: StatusEffectType.burn;
+  value: number; // Optional value for the status effect
+  duration: undefined; // Optional duration for damage over time effects
+  stackable: true;
+}
+
+export interface ApplyShockStatusEffectSkillEffect
+  extends ApplyStatusEffectSkillEffect {
+  statusEffectType: StatusEffectType.shock;
+  value: number; // Optional value for the status effect
+  duration: undefined; // Optional duration for damage over time effects
+  stackable: true;
+}
+
+export interface ApplyBleedStatusEffectSkillEffect
+  extends ApplyStatusEffectSkillEffect {
+  statusEffectType: StatusEffectType.bleed;
+  value: number; // Optional value for the status effect
+  duration: undefined; // Optional duration for damage over time effects
+  stackable: true;
+}
+
+export interface ApplyFreezeStatusEffectSkillEffect
+  extends ApplyStatusEffectSkillEffect {
+  statusEffectType: StatusEffectType.freeze;
+  value: number; // Optional value for the status effect
+  duration: undefined; // Optional duration for damage over time effects
+  stackable: true;
+}
+
+export interface ApplyStunStatusEffectSkillEffect
+  extends ApplyStatusEffectSkillEffect {
+  statusEffectType: StatusEffectType.stun;
+  value: number; // Optional value for the status effect
+  duration: undefined; // Optional duration for damage over time effects
+  stackable: false;
 }
 
 export interface AdjustStatSkillEffect extends SkillEffect {

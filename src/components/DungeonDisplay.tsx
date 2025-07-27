@@ -1,0 +1,371 @@
+import React, { useEffect, useState } from "react";
+import { useGameEngine } from "../context/GameEngineContext";
+import { gachaCharacters } from "../data/characters";
+import { getXpToNextLevel } from "../data/leveling";
+import { PlayerCharacter } from "../types/character";
+import { EquipmentType } from "../types/inventory";
+import { Rarity } from "../types/rarity";
+
+// Reusable rarity to color mapping
+const RARITY_COLORS: Record<Rarity, string> = {
+  [Rarity.COMMON]: "border-gray-500", // Grey
+  [Rarity.UNCOMMON]: "border-green-500", // Green
+  [Rarity.RARE]: "border-blue-500", // Blue
+  [Rarity.EPIC]: "border-purple-500", // Purple
+  [Rarity.LEGENDARY]: "border-yellow-500", // Gold/Yellow
+};
+
+// Define the order of rarities for progression logic
+const RARITY_ORDER = [
+  Rarity.COMMON,
+  Rarity.UNCOMMON,
+  Rarity.RARE,
+  Rarity.EPIC,
+  Rarity.LEGENDARY,
+];
+
+interface DungeonProps {
+  onBack: () => void;
+}
+
+const DungeonMode: React.FC<DungeonProps> = ({ onBack }) => {
+  const { gameEngine, updateGameEngine } = useGameEngine();
+  const [selectedRarity, setSelectedRarity] = useState<Rarity | null>(null);
+  const [selectedDropPreference, setSelectedDropPreference] =
+    useState<EquipmentType | null>(null);
+  const [selectedCharacters, setSelectedCharacters] = useState<
+    PlayerCharacter[]
+  >([]);
+  // go through dungeon progress and if all 3 dungeon types for a single rarity are true, then that rarity is completed
+  const getCompltedRarities = () => {
+    const completedRarities: Rarity[] = [];
+    for (const rarity of RARITY_ORDER) {
+      const isCompleted = Object.values(
+        gameEngine.player.dungeonProgress[rarity],
+      ).every((completed) => completed);
+      if (isCompleted) {
+        completedRarities.push(rarity);
+      }
+    }
+    return completedRarities;
+  };
+  // Simulate completed rarities. Start with COMMON completed.
+  const [completedRarities, setCompletedRarities] = useState<Rarity[]>(
+    getCompltedRarities(),
+  );
+
+  const ownedChars: PlayerCharacter[] = gachaCharacters
+    .filter(
+      (c) =>
+        gameEngine.player.unlockedCharacters &&
+        gameEngine.player.unlockedCharacters.includes(c.id),
+    )
+    .map((base) => {
+      const progress = gameEngine.player.characterProgress?.[base.id];
+      return progress
+        ? { ...base, ...progress }
+        : {
+            ...base,
+            level: 1,
+            xp: 0,
+            xpToNextLevel: getXpToNextLevel(1),
+            shards: 0,
+          };
+    });
+
+  // Pagination state for characters
+  const [currentPage, setCurrentPage] = useState(1);
+  const charactersPerPage = 8; // Adjust as needed
+
+  // Calculate total pages
+  const totalPages = Math.ceil(
+    gameEngine.player.unlockedCharacters.length / charactersPerPage,
+  );
+
+  // Get characters for the current page
+  const indexOfLastCharacter = currentPage * charactersPerPage;
+  const indexOfFirstCharacter = indexOfLastCharacter - charactersPerPage;
+  const currentCharacters = ownedChars.slice(
+    indexOfFirstCharacter,
+    indexOfLastCharacter,
+  );
+
+  useEffect(() => {
+    // Set initial selected rarity to the lowest completed one if none is selected
+    if (!selectedRarity) {
+      setSelectedRarity(completedRarities[0] || Rarity.COMMON);
+    }
+  }, [selectedRarity, completedRarities]);
+
+  const handleRaritySelect = (rarity: Rarity) => {
+    setSelectedRarity(rarity);
+  };
+
+  const handleDropPreferenceSelect = (type: EquipmentType) => {
+    setSelectedDropPreference(type);
+  };
+
+  const handleCharacterSelect = (character: PlayerCharacter) => {
+    setSelectedCharacters((prevSelected) => {
+      if (prevSelected.some((char) => char.id === character.id)) {
+        // Deselect if already selected
+        return prevSelected.filter((char) => char.id !== character.id);
+      } else {
+        // Select if not selected, up to 3 characters
+        if (prevSelected.length < 3) {
+          return [...prevSelected, character];
+        } else {
+          // Optionally, show a message that max characters are selected
+          console.log("Maximum 3 characters can be selected.");
+          return prevSelected;
+        }
+      }
+    });
+  };
+
+  const isRarityDisabled = (rarity: Rarity): boolean => {
+    const rarityIndex = RARITY_ORDER.indexOf(rarity);
+    if (rarityIndex === 0) return false; // Common is never disabled
+
+    const previousRarity = RARITY_ORDER[rarityIndex - 1];
+    // A rarity is disabled if the previous one is not yet completed
+    return !completedRarities.includes(previousRarity);
+  };
+
+  // Simulate completing a dungeon (for demonstration purposes)
+  const simulateDungeonCompletion = (rarity: Rarity) => {
+    if (!completedRarities.includes(rarity)) {
+      setCompletedRarities((prev) => [...prev, rarity]);
+      console.log(`Simulated completion of ${rarity} dungeon.`);
+    }
+  };
+
+  const handleStartDungeon = () => {
+    if (
+      !selectedRarity ||
+      !selectedDropPreference ||
+      selectedCharacters.length === 0
+    ) {
+      // Replaced alert with console.error for better practice in React
+      console.error(
+        "Please select a rarity, equipment preference, and at least one character.",
+      );
+      return;
+    }
+    console.log("Starting Dungeon with:", {
+      rarity: selectedRarity,
+      dropPreference: selectedDropPreference,
+      characters: selectedCharacters.map((c) => c.name),
+    });
+    // In a real app, you would navigate to the dungeon battle scene here
+    // For demonstration, let's simulate completion of the selected rarity
+    simulateDungeonCompletion(selectedRarity);
+  };
+
+  // Pagination handlers
+  const goToNextPage = () => {
+    setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages));
+  };
+
+  const goToPrevPage = () => {
+    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+  };
+
+  return (
+    <div className="min-h-screen bg-blue-900 text-white font-inter flex flex-col items-center p-8">
+      {/* Back Button */}
+      <div className="w-full max-w-4xl flex justify-start mb-8">
+        <button
+          onClick={onBack}
+          className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors duration-200"
+        >
+          &larr; Back
+        </button>
+      </div>
+
+      <h1 className="text-4xl font-bold mb-8 text-yellow-400">Dungeon Mode</h1>
+
+      {/* Rarity Selection */}
+      <div className="w-full max-w-4xl mb-8">
+        <h2 className="text-2xl font-semibold mb-4 text-white text-center">
+          Select Dungeon Rarity
+        </h2>
+        <div className="flex flex-wrap justify-center gap-4">
+          {RARITY_ORDER.map((rarity) => {
+            const isDisabled = isRarityDisabled(rarity);
+            const isSelected = selectedRarity === rarity;
+            const isCompleted = completedRarities.includes(rarity);
+
+            return (
+              <button
+                key={rarity}
+                onClick={() => handleRaritySelect(rarity)}
+                disabled={isDisabled}
+                className={`
+                  py-3 px-6 rounded-lg shadow-lg font-bold text-lg transition-all duration-200
+                  ${
+                    isDisabled
+                      ? "bg-gray-700 text-gray-400 cursor-not-allowed opacity-60"
+                      : isSelected
+                        ? "bg-yellow-500 text-gray-900 border-2 border-yellow-300 transform scale-105"
+                        : "bg-yellow-600 hover:bg-yellow-700 text-white"
+                  }
+                  ${isCompleted ? "border-2 border-green-500" : ""}
+                `}
+              >
+                {rarity.toUpperCase()}
+                {isCompleted && (
+                  <span className="ml-2 text-green-300">&#10003;</span>
+                )}{" "}
+                {/* Checkmark for completed */}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Equipment Drop Preference */}
+      <div className="w-full max-w-4xl mb-8">
+        <h2 className="text-2xl font-semibold mb-4 text-white text-center">
+          Likely Equipment Drop
+        </h2>
+        <div className="flex flex-wrap justify-center gap-6">
+          {Object.values(EquipmentType).map((type) => {
+            const isSelected = selectedDropPreference === type;
+            return (
+              <div
+                key={type}
+                onClick={() => handleDropPreferenceSelect(type)}
+                className={`
+                  relative bg-gray-800 rounded-xl p-6 flex flex-col items-center justify-center
+                  shadow-xl cursor-pointer transition-all duration-200
+                  ${isSelected ? "border-2 border-blue-400 transform scale-105" : "border-2 border-transparent hover:border-blue-600"}
+                `}
+              >
+                {/* Placeholder for icon - you can replace with actual SVG/Lucide icons */}
+                <div className="text-5xl mb-3">
+                  {type === EquipmentType.weapon && "⚔️"}
+                  {type === EquipmentType.armor && "🛡️"}
+                  {type === EquipmentType.trinket && "💎"}
+                </div>
+                <span className="text-xl font-semibold capitalize">
+                  {type} Focus
+                </span>
+                {isSelected && (
+                  <div className="absolute top-2 right-2 text-green-400 text-3xl">
+                    &#10003;
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Character Selection */}
+      <div className="w-full max-w-6xl mb-8">
+        <h2 className="text-2xl font-semibold mb-4 text-white text-center">
+          Choose Your Fighters ({selectedCharacters.length}/3)
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {currentCharacters.map((character) => {
+            const isSelected = selectedCharacters.some(
+              (char) => char.id === character.id,
+            );
+            const isDisabled = selectedCharacters.length >= 3 && !isSelected;
+            // Get the rarity color class
+            const rarityBorderClass =
+              RARITY_COLORS[character.rarity] || "border-gray-500"; // Fallback to gray
+
+            return (
+              <div
+                key={character.id}
+                onClick={() => !isDisabled && handleCharacterSelect(character)}
+                className={`
+                  bg-gray-800 rounded-xl p-4 flex flex-col items-center text-center
+                  shadow-xl transition-all duration-200 border-2
+                  ${rarityBorderClass} {/* Apply rarity border here */}
+                  ${
+                    isSelected
+                      ? "ring-4 ring-offset-2 ring-offset-gray-800 ring-green-400 transform scale-105" // Use ring for selection
+                      : isDisabled
+                        ? "opacity-50 cursor-not-allowed"
+                        : "hover:ring-2 hover:ring-offset-2 hover:ring-offset-gray-800 hover:ring-green-600 cursor-pointer" // Hover ring
+                  }
+                `}
+              >
+                <img
+                  src={""}
+                  alt={character.name}
+                  className="w-24 h-24 rounded-full mb-3 border-2 border-gray-600 object-cover"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = `https://placehold.co/100x100/6B7280/FFFFFF?text=${character.name.charAt(0)}`;
+                  }}
+                />
+                <h3 className="text-xl font-bold text-yellow-300">
+                  {character.name}
+                </h3>
+                <p className="text-gray-300 text-sm">Lv. {character.level}</p>
+                <p className="text-gray-400 text-xs capitalize">
+                  {character.strongAffinities.join(", ")}
+                </p>
+                <button className="mt-4 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold py-2 px-4 rounded-md shadow transition-colors duration-200">
+                  View Details
+                </button>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Pagination Controls */}
+        {ownedChars.length > charactersPerPage && (
+          <div className="flex justify-center items-center gap-4 mt-8">
+            <button
+              onClick={goToPrevPage}
+              disabled={currentPage === 1}
+              className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+            >
+              Previous
+            </button>
+            <span className="text-lg font-semibold">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages}
+              className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+            >
+              Next
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Start Dungeon Button */}
+      <button
+        onClick={handleStartDungeon}
+        className={`
+          bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-4 px-10 rounded-xl
+          shadow-xl text-2xl transition-all duration-200 mt-8
+          ${
+            !selectedRarity ||
+            !selectedDropPreference ||
+            selectedCharacters.length === 0
+              ? "opacity-60 cursor-not-allowed"
+              : ""
+          }
+        `}
+        disabled={
+          !selectedRarity ||
+          !selectedDropPreference ||
+          selectedCharacters.length === 0
+        }
+      >
+        Start Dungeon
+      </button>
+    </div>
+  );
+};
+
+export default DungeonMode;

@@ -1,255 +1,306 @@
-import React, { useState } from 'react';
-import { BattleEngine } from '../battle';
-import { useGameEngine } from '../context/GameEngineContext';
-import { gachaCharacters } from '../data/characters';
-import { getEnemyByChapterAndStage } from '../data/enemies/enemy-map';
-import { getXpToNextLevel } from '../data/leveling';
-import { PlayerCharacter } from '../types/character';
-import BattleDisplay from './BattleDisplay';
-import CharacterModal from './CharacterModal';
+import React, { useState } from "react";
+import { BattleEngine } from "../battle";
+import { useGameEngine } from "../context/GameEngineContext";
+import { getOwnedCharacters } from "../data/characters/charUtil";
+import { getEnemyByChapterAndStage } from "../data/enemies/enemy-map";
+import { PlayerCharacter } from "../types/character";
+import BattleDisplay from "./BattleDisplay";
+import { CharacterSelection } from "./CharacterCollection";
+import CharacterModal from "./CharacterModal";
 
-const CHAPTERS = 5;
+const CHAPTERS_ARRAY = Array.from({ length: 5 }, (_, i) => `Chapter ${i + 1}`);
 const STAGES_PER_CHAPTER = 10;
 
-function getCrystalReward(chapter: number, stage: number, currentSoloProgress: number, newSoloProgress: number) {
-    // Simple reward logic: 10 crystals per stage, bonus for chapter completion
-    let reward = 50 * chapter;
-    if (newSoloProgress >= currentSoloProgress) {
-        if (chapter === 1) {
-            reward += 250
-        } else if (chapter === 2) {
-            reward += 500
-        } else if (chapter === 3) {
-            reward += 750
-        } else if (chapter === 4) {
-            reward += 1000
-        } else if (chapter === 5) {
-            reward += 1250
-        }
+function getCrystalReward(
+  chapter: number,
+  stage: number,
+  currentSoloProgress: number,
+  newSoloProgress: number,
+) {
+  // Simple reward logic: 10 crystals per stage, bonus for chapter completion
+  let reward = 50 * chapter;
+  if (newSoloProgress >= currentSoloProgress) {
+    if (chapter === 1) {
+      reward += 250;
+    } else if (chapter === 2) {
+      reward += 500;
+    } else if (chapter === 3) {
+      reward += 750;
+    } else if (chapter === 4) {
+      reward += 1000;
+    } else if (chapter === 5) {
+      reward += 1250;
     }
+  }
 
-    return reward;
+  return reward;
 }
 
 function getSoloStageNumber(chapter: number, stage: number) {
-    return (chapter - 1) * STAGES_PER_CHAPTER + stage;
+  return (chapter - 1) * STAGES_PER_CHAPTER + stage;
 }
 
 function isUnlocked(chapter: number, stage: number, soloProgress?: number) {
-    // soloProgress is the highest unlocked stage (1-based)
-    const stageNum = getSoloStageNumber(chapter, stage);
-    return (soloProgress ?? 1) >= stageNum;
+  // soloProgress is the highest unlocked stage (1-based)
+  const stageNum = getSoloStageNumber(chapter, stage);
+  return (soloProgress ?? 1) >= stageNum;
 }
 
-const SoloMode: React.FC<{ onBack: () => void }> = ({ onBack }) => {
-    const { gameEngine, updateGameEngine } = useGameEngine();
-    const [chapter, setChapter] = useState(1);
-    const [stage, setStage] = useState(1);
-    const [selectedChar, setSelectedChar] = useState<PlayerCharacter | null>(null);
-    const [modalCharacter, setModalCharacter] = useState<PlayerCharacter | null>(null);
+interface SoloModeProps {
+  onNavigate: () => void; // Changed from onBack to onNavigate for consistency
+}
 
-    const battleEngine = gameEngine.battleEngine;
+const SoloMode: React.FC<SoloModeProps> = ({ onNavigate }) => {
+  const { gameEngine, updateGameEngine } = useGameEngine();
+  const [chapter, setChapter] = useState(1);
+  const [stage, setStage] = useState(1);
+  const [selectedCharacters, setSelectedCharacters] = useState<
+    PlayerCharacter[]
+  >([]);
+  const [modalCharacter, setModalCharacter] = useState<PlayerCharacter | null>(
+    null,
+  );
 
-    // Get owned characters (should be PlayerCharacter[])
-    const ownedChars: PlayerCharacter[] = gachaCharacters
-        .filter(c => gameEngine.player.unlockedCharacters && gameEngine.player.unlockedCharacters.includes(c.id))
-        .map(base => {
-            const progress = gameEngine.player.characterProgress?.[base.id];
-            return progress ? { ...base, ...progress } : {
-                ...base,
-                level: 1,
-                xp: 0,
-                xpToNextLevel: getXpToNextLevel(1),
-                shards: 0
-            };
-        });
+  // Simulate completed stages for progression logic
+  // Example: initially only Chapter 1, Stage 1 is completed
+  const [completedStages, setCompletedStages] = useState<Set<string>>(
+    new Set(["Chapter 1_Stage 1"]),
+  );
 
-    // Helper to reset battle state
-    function resetBattle() {
-        updateGameEngine(engine => ({
-            ...engine,
-            battleEngine: null,
-        }));
+  const battleEngine = gameEngine.battleEngine;
+
+  // Get owned characters (should be PlayerCharacter[])
+  const ownedChars = getOwnedCharacters(gameEngine);
+
+  // Helper to reset battle state
+  function resetBattle() {
+    updateGameEngine((engine) => ({
+      ...engine,
+      battleEngine: null,
+    }));
+  }
+
+  // Start battle
+  function startBattle() {
+    if (selectedCharacters.length === 0) {
+      console.error(
+        "Please select at least one character to start the battle.",
+      );
+      return;
     }
+    // Prepare player and enemy arrays for the engine
+    const playerArr = selectedCharacters.map((char) => ({ ...char })); // Use selectedCharacters
+    const enemyArr = getEnemyByChapterAndStage(chapter, stage);
+    const newBattleEngine = new BattleEngine({
+      playerCharacters: playerArr,
+      enemies: enemyArr,
+    });
+    updateGameEngine((engine) => ({
+      ...engine,
+      battleEngine: newBattleEngine,
+    }));
+  }
 
-    // Start battle
-    function startBattle() {
-        if (!selectedChar) return;
-        // Prepare player and enemy arrays for the engine
-        const playerArr = [{...selectedChar}];
-        const enemyArr = getEnemyByChapterAndStage(chapter, stage);
-        const newBattleEngine = new BattleEngine({ playerCharacters: playerArr, enemies: enemyArr });
-        updateGameEngine(engine => ({
-            ...engine,
-            battleEngine: newBattleEngine
-        }))
-    }
+  // Handler for CharacterSelection component
+  const handleCharacterSelect = (character: PlayerCharacter) => {
+    setSelectedCharacters((prevSelected) => {
+      if (prevSelected.some((char) => char.id === character.id)) {
+        // Deselect if already selected
+        return prevSelected.filter((char) => char.id !== character.id);
+      } else {
+        return [character];
+      }
+    });
+  };
 
-    // UI rendering
-    return (
-        <div className="solo-mode-container">
-            <button className="solo-back" onClick={() => {
-                resetBattle();
-                onBack();
-            }}>&larr; Back</button>
-            <h2>Solo Mode</h2>
-            <div className="solo-chapter-select">
-                {Array.from({ length: CHAPTERS }, (_, i) => (
-                    <button
-                        key={i}
-                        className={chapter === i + 1 ? 'selected' : ''}
-                        style={{
-                            background: chapter === i + 1 ? '#ffd700' : '#333',
-                            color: chapter === i + 1 ? '#222' : '#fff',
-                            border: chapter === i + 1 ? '2px solid #ffd700' : '1px solid #888',
-                            fontWeight: chapter === i + 1 ? 'bold' : 'normal',
-                            borderRadius: 8,
-                            margin: 2,
-                            padding: '6px 16px',
-                            cursor: isUnlocked(i + 1, 1, gameEngine.player.soloProgress) ? 'pointer' : 'not-allowed',
-                        }}
-                        onClick={() => { setChapter(i + 1); setStage(1); setSelectedChar(null); resetBattle(); }}
-                        disabled={!isUnlocked(i + 1, 1, gameEngine.player.soloProgress)}
-                    >
-                        Chapter {i + 1}
-                    </button>
-                ))}
+  // UI rendering
+  return (
+    <div className="min-h-screen bg-blue-900 text-white font-inter flex flex-col items-center p-4 sm:p-8">
+      {/* Back Button */}
+      <div className="w-full max-w-4xl flex justify-start mb-8">
+        <button
+          className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors duration-200"
+          onClick={() => {
+            resetBattle();
+            onNavigate(); // Navigate back to main menu
+          }}
+        >
+          &larr; Back
+        </button>
+      </div>
+
+      <h1 className="text-4xl font-bold mb-8 text-yellow-400">Solo Mode</h1>
+
+      {battleEngine === null && (
+        <>
+          {/* Chapter Selection */}
+          <div className="w-full max-w-4xl mb-8">
+            <h2 className="text-2xl font-semibold mb-4 text-white text-center">
+              Select Chapter
+            </h2>
+            <div className="flex flex-wrap justify-center gap-3 mb-6">
+              {CHAPTERS_ARRAY.map((chapName, i) => (
+                <button
+                  key={i}
+                  className={`
+                                        py-2 px-4 rounded-lg shadow-md font-semibold transition-all duration-200
+                                        ${
+                                          chapter === i + 1
+                                            ? "bg-yellow-500 text-gray-900 border-2 border-yellow-300 transform scale-105"
+                                            : "bg-blue-700 hover:bg-blue-600 text-white"
+                                        }
+                                        ${
+                                          !isUnlocked(
+                                            i + 1,
+                                            1,
+                                            gameEngine.player.soloProgress,
+                                          )
+                                            ? "opacity-60 cursor-not-allowed"
+                                            : ""
+                                        }
+                                    `}
+                  onClick={() => {
+                    setChapter(i + 1);
+                    setStage(1);
+                    setSelectedCharacters([]);
+                    resetBattle();
+                  }}
+                  disabled={
+                    !isUnlocked(i + 1, 1, gameEngine.player.soloProgress)
+                  }
+                >
+                  {chapName}
+                </button>
+              ))}
             </div>
-            <div className="solo-stage-select">
-                {Array.from({ length: STAGES_PER_CHAPTER }, (_, i) => {
-                    const unlocked = isUnlocked(chapter, i + 1, gameEngine.player.soloProgress);
-                    const selected = stage === i + 1;
-                    let bg = '#888', color = '#fff', border = '1px solid #888', fontWeight = 'normal';
-                    if (selected) {
-                        bg = '#ffd700'; color = '#222'; border = '2px solid #ffd700'; fontWeight = 'bold';
-                    } else if (unlocked) {
-                        bg = '#333'; color = '#fff'; border = '1px solid #888';
-                    } else {
-                        bg = '#222'; color = '#888'; border = '1px solid #444';
-                    }
-                    return (
-                        <button
-                            key={i}
-                            className={selected ? 'selected' : ''}
-                            style={{
-                                background: bg,
-                                color,
-                                border,
-                                fontWeight,
-                                borderRadius: 8,
-                                margin: 2,
-                                padding: '6px 16px',
-                                cursor: unlocked ? 'pointer' : 'not-allowed',
-                            }}
-                            onClick={() => { setStage(i + 1); setSelectedChar(null); resetBattle(); }}
-                            disabled={!unlocked}
-                        >
-                            Stage {i + 1}
-                        </button>
-                    );
-                })}
-            </div>
-            {battleEngine === null && (
-                <div className="solo-char-select">
-                    <h3>Choose Your Fighter</h3>
-                    <button
-                        className="solo-battle-start"
-                        style={{ marginBottom: 18, minWidth: 160, fontSize: 16, fontWeight: 'bold', background: '#ffd700', color: '#222', border: '2px solid #ffd700', borderRadius: 8, padding: '8px 20px' }}
-                        onClick={startBattle}
-                        disabled={!selectedChar}
-                    >
-                        Start Battle
-                    </button>
-                    <div
-                        className="solo-char-list"
-                        style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-                            gap: 16,
-                            justifyItems: 'center',
-                            margin: '0 auto',
-                            maxWidth: 700
-                        }}
-                    >
-                        {ownedChars.length === 0 && <div style={{ gridColumn: '1/-1' }}>You have no characters! Pull from the Gacha first.</div>}
-                        {ownedChars.map(char => (
-                            <div
-                                key={char.id}
-                                className={`solo-char-card${selectedChar?.id === char.id ? ' selected' : ''}`}
-                                onClick={() => setSelectedChar(char)}
-                                style={{
-                                    cursor: 'pointer',
-                                    border: selectedChar?.id === char.id ? '2px solid #ffd700' : '1px solid #ccc',
-                                    borderRadius: 10,
-                                    padding: 10,
-                                    margin: 2,
-                                    background: '#222',
-                                    color: '#fff',
-                                    minWidth: 0,
-                                    width: '100%',
-                                    maxWidth: 160,
-                                    boxSizing: 'border-box',
-                                    boxShadow: selectedChar?.id === char.id ? '0 0 8px #ffd70088' : '0 1px 4px #0002',
-                                    transition: 'border 0.2s, box-shadow 0.2s'
-                                }}
-                            >
-                                <div style={{ fontWeight: 'bold', fontSize: 17, marginBottom: 2 }}>{char.name}</div>
-                                <div style={{ fontSize: 13, marginBottom: 2 }}>{char.strongAffinities.join(', ')}</div>
-                                <div style={{ fontSize: 12, color: '#aaa', marginBottom: 4 }}>Lv. {char.level}</div>
-                                <button
-                                    style={{ marginTop: 4, fontSize: 12, background: '#333', color: '#ffd700', border: '1px solid #ffd700', borderRadius: 6, padding: '3px 10px', cursor: 'pointer' }}
-                                    onClick={e => { e.stopPropagation(); setModalCharacter(char); }}
-                                >
-                                    View Details
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                    {modalCharacter && (
-                        <CharacterModal character={modalCharacter} onClose={() => setModalCharacter(null)} />
+
+            {/* Stage Selection */}
+            <h2 className="text-2xl font-semibold mb-4 text-white text-center">
+              Select Stage
+            </h2>
+            <div className="flex flex-wrap justify-center gap-3">
+              {Array.from(
+                { length: STAGES_PER_CHAPTER },
+                (_, i) => `Stage ${i + 1}`,
+              ).map((stageName, i) => {
+                const unlocked = isUnlocked(
+                  chapter,
+                  i + 1,
+                  gameEngine.player.soloProgress,
+                );
+                const isSelected = stage === i + 1;
+                const stageKey = `${CHAPTERS_ARRAY[chapter - 1]}_${stageName}`; // For completion check
+                const isCompleted = completedStages.has(stageKey);
+
+                return (
+                  <button
+                    key={i}
+                    className={`
+                                            py-2 px-4 rounded-lg shadow-md font-semibold transition-all duration-200
+                                            ${
+                                              unlocked
+                                                ? isSelected
+                                                  ? "bg-yellow-500 text-gray-900 border-2 border-yellow-300 transform scale-105"
+                                                  : "bg-blue-700 hover:bg-blue-600 text-white"
+                                                : "bg-gray-700 text-gray-400 cursor-not-allowed opacity-60"
+                                            }
+                                            ${isCompleted ? "border-2 border-green-500" : ""}
+                                        `}
+                    onClick={() => {
+                      setStage(i + 1);
+                      setSelectedCharacters([]);
+                      resetBattle();
+                    }}
+                    disabled={!unlocked}
+                  >
+                    {stageName}
+                    {isCompleted && (
+                      <span className="ml-2 text-green-300">&#10003;</span>
                     )}
-                </div>
-            )}
-            {battleEngine && (
-                <BattleDisplay
-                    onVictory={() => {
-                        // Calculate current stage number
-                        const currentStageNum = getSoloStageNumber(chapter, stage);
-                        const crystalReward = getCrystalReward(chapter, stage, gameEngine.player.soloProgress, currentStageNum);
-                        // If player completed the highest unlocked stage, unlock the next
-                        updateGameEngine(engine => {
-                            let nextStageNum = currentStageNum + 1;
-                            let newProgress = engine.player.soloProgress;
-                            // If stage 10 of a chapter, unlock stage 1 of next chapter
-                            if (stage === STAGES_PER_CHAPTER) {
-                                nextStageNum = getSoloStageNumber(chapter + 1, 1);
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Character Selection (Reusable Component) */}
+          <CharacterSelection
+            characters={ownedChars} // Pass your actual owned characters here
+            selectedCharacters={selectedCharacters}
+            onCharacterSelect={handleCharacterSelect}
+            maxSelection={1} // Solo mode allows up to 1 characters
+            title="Choose Your Fighters"
+            showPagination={true}
+            charactersPerPage={8}
+            showViewDetailsButton={true}
+          />
+
+          {/* Start Battle Button */}
+          <button
+            onClick={startBattle}
+            className={`
+                            bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-4 px-10 rounded-xl
+                            shadow-xl text-2xl transition-all duration-200 mt-8
+                            ${
+                              selectedCharacters.length === 0
+                                ? "opacity-60 cursor-not-allowed"
+                                : ""
                             }
-                            if (nextStageNum > engine.player.soloProgress) {
-                                newProgress = nextStageNum;
-                            }
-                            return {
-                                ...engine,
-                                player: {
-                                    ...engine.player,
-                                    soloProgress: newProgress,
-                                    crystals: engine.player.crystals + crystalReward
-                                },
-                                battleEngine: null
-                            };
-                        });
-                        setSelectedChar(null);
-                    }}
-                    onDefeat={() => {
-                        updateGameEngine(engine => ({
-                            ...engine,
-                            battleEngine: null
-                        }))
-                        setSelectedChar(null);
-                    }}
-                />
-            )}
-        </div>
-    );
+                        `}
+            disabled={selectedCharacters.length === 0}
+          >
+            Start Battle
+          </button>
+        </>
+      )}
+      {battleEngine && (
+        <BattleDisplay
+          onVictory={() => {
+            const currentStageNum = getSoloStageNumber(chapter, stage);
+            const crystalReward = getCrystalReward(
+              chapter,
+              stage,
+              gameEngine.player.soloProgress,
+              currentStageNum,
+            );
+            updateGameEngine((engine) => {
+              let nextStageNum = currentStageNum + 1;
+              let newProgress = engine.player.soloProgress;
+              if (stage === STAGES_PER_CHAPTER) {
+                nextStageNum = getSoloStageNumber(chapter + 1, 1);
+              }
+              if (nextStageNum > engine.player.soloProgress) {
+                newProgress = nextStageNum;
+              }
+              return {
+                ...engine,
+                player: {
+                  ...engine.player,
+                  soloProgress: newProgress,
+                  crystals: engine.player.crystals + crystalReward,
+                },
+                battleEngine: null,
+              };
+            });
+            setSelectedCharacters([]); // Clear selected characters after battle
+          }}
+          onDefeat={() => {
+            updateGameEngine((engine) => ({
+              ...engine,
+              battleEngine: null,
+            }));
+            setSelectedCharacters([]); // Clear selected characters after battle
+          }}
+        />
+      )}
+      {modalCharacter && (
+        <CharacterModal
+          character={modalCharacter}
+          onClose={() => setModalCharacter(null)}
+        />
+      )}
+    </div>
+  );
 };
 
 export default SoloMode;

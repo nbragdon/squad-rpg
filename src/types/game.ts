@@ -1,3 +1,4 @@
+import { EquipmentType, InventoryItem } from "./inventory";
 import { Rarity } from "./rarity";
 
 export interface GameMode {
@@ -26,19 +27,16 @@ export interface CharacterProgress {
 export interface PlayerProgress {
   crystals: number; // Renamed from currency
   soloProgress: number; // Highest unlocked solo stage (1 = chapter 1 stage 1)
+  dungeonProgress: {
+    [key in Rarity]: {
+      [key in EquipmentType]: boolean;
+    };
+  };
   unlockedCharacters: string[]; // List of owned character IDs
   inventory: InventoryItem[]; // Player's inventory
   characterProgress?: {
     [characterId: string]: CharacterProgress;
   };
-}
-
-export interface InventoryItem {
-  id: string;
-  type: "material" | "gear" | "consumable" | "weapon" | "armor" | "trinket";
-  name: string;
-  quantity: number;
-  rarity: Rarity;
 }
 
 export interface GachaPool {

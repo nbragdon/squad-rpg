@@ -3,6 +3,9 @@ import { EnemyCharacter } from "../../types/enemy";
 import { Rarity } from "../../types/rarity";
 import {
   AdjustStatSkillEffect,
+  ApplyBurnStatusEffectSkillEffect,
+  ApplyPoisonStatusEffectSkillEffect,
+  ApplyStunStatusEffectSkillEffect,
   DamageSkillEffect,
   HealSkillEffect,
   ModifierType,
@@ -11,6 +14,7 @@ import {
   TargetType,
 } from "../../types/skillTypes";
 import { StatType } from "../../types/stats";
+import { StatusEffectType } from "../../types/statusEffects";
 import { BASELINE } from "../statBaselines";
 
 const slimeSplashSkill: Skill = {
@@ -71,10 +75,10 @@ export const ENEMY_RAT_GIANT: EnemyCharacter = {
   strongAffinities: [AffinityType.beast],
   weakAffinities: [AffinityType.beast, AffinityType.textile],
   stats: {
-    [StatType.health]: BASELINE.COMMON[StatType.health] + 80,
+    [StatType.health]: BASELINE.COMMON[StatType.health] + 50,
     [StatType.energy]: 0,
     [StatType.energyGain]: BASELINE.COMMON[StatType.energyGain],
-    [StatType.strength]: BASELINE.COMMON[StatType.strength] + 20,
+    [StatType.strength]: BASELINE.COMMON[StatType.strength] + 10,
     [StatType.defense]: BASELINE.COMMON[StatType.defense] - 10,
     [StatType.magic]: BASELINE.COMMON[StatType.magic] - 20,
     [StatType.magicDefense]: BASELINE.COMMON[StatType.magicDefense] - 20,
@@ -97,7 +101,7 @@ export const ENEMY_RAT_GIANT: EnemyCharacter = {
           damageMultiplier: 1.1,
           damageStat: StatType.strength,
           defenseStat: StatType.defense,
-          targetType: "randomEnemy",
+          targetType: TargetType.randomEnemy,
         } as DamageSkillEffect,
         {
           id: "gnaw_heal_effect",
@@ -132,24 +136,35 @@ export const ENEMY_BAT_CAVE: EnemyCharacter = {
     [StatType.critDamage]: BASELINE.COMMON[StatType.critDamage],
   },
   skills: [
-    /*
     {
       id: "sonic_screech",
       name: "Sonic Screech",
-      description:
-        "Lets out a piercing screech, damaging and lowering the target’s attack for 2 turns.",
-      damageMultiplier: 0.9,
-      damageStat: "speed",
-      energyCost: 22,
-      statusEffect: {
-        id: "attackDown",
-        name: "Attack Down",
-        type: StatusEffectType.Debuff,
-        value: 20,
-        duration: 2,
-      },
+      cost: 35,
+      costStat: StatType.energy,
+      effects: [
+        {
+          id: "sonic_screech_damage_effect",
+          name: "Sonic Screech Damage Effect",
+          type: SkillEffectType.damage,
+          affinities: [AffinityType.gem],
+          damageMultiplier: 1.3,
+          damageStat: StatType.speed,
+          defenseStat: StatType.magicDefense,
+          targetType: TargetType.allEnemies,
+        } as DamageSkillEffect,
+        {
+          id: "sonic_screech_stat_adjustment_effect",
+          name: "Sonic Screech Stat Adjustment Effect",
+          type: SkillEffectType.adjustStat,
+          affinities: [AffinityType.gem],
+          stat: StatType.magicDefense,
+          modifierType: ModifierType.Flat,
+          modifierValue: -20,
+          duration: 2,
+          targetType: TargetType.allEnemies,
+        } as AdjustStatSkillEffect,
+      ],
     },
-  */
   ],
 };
 
@@ -172,23 +187,35 @@ export const ENEMY_GOBLIN_SNEAK: EnemyCharacter = {
     [StatType.critDamage]: BASELINE.COMMON[StatType.critDamage],
   },
   skills: [
-    /*
     {
       id: "stab_n_run",
       name: "Stab & Run",
-      description: "Stabs the target and increases its own speed for 1 turn.",
-      damageMultiplier: 1.2,
-      damageStat: "attack",
-      energyCost: 28,
-      statusEffect: {
-        id: "selfSpeedUp",
-        name: "Speed Up",
-        type: StatusEffectType.Buff,
-        value: 20,
-        duration: 1,
-      },
+      cost: 25,
+      costStat: StatType.energy,
+      effects: [
+        {
+          id: "stab_n_run_damage_effect",
+          name: "Stab & Run Damage Effect",
+          type: SkillEffectType.damage,
+          affinities: [AffinityType.textile],
+          damageMultiplier: 1.2,
+          damageStat: StatType.strength,
+          defenseStat: StatType.defense,
+          targetType: TargetType.lowestHealthEnemy,
+        } as DamageSkillEffect,
+        {
+          id: "stab_n_run_stat_adjustment_effect",
+          name: "Stab & Run Stat Adjustment Effect",
+          type: SkillEffectType.adjustStat,
+          affinities: [AffinityType.textile],
+          stat: StatType.speed,
+          modifierType: ModifierType.Flat,
+          modifierValue: 30,
+          duration: 2,
+          targetType: TargetType.self,
+        } as AdjustStatSkillEffect,
+      ],
     },
-  */
   ],
 };
 
@@ -211,24 +238,36 @@ export const ENEMY_FUNGUS_SPORELING: EnemyCharacter = {
     [StatType.critDamage]: BASELINE.COMMON[StatType.critDamage],
   },
   skills: [
-    /*
     {
       id: "spore_cloud",
       name: "Spore Cloud",
-      description:
-        "Releases spores, damaging and poisoning the target for 2 turns.",
-      damageMultiplier: 1.2,
-      damageStat: "attack",
-      energyCost: 24,
-      statusEffect: {
-        id: "poison",
-        name: "Poison",
-        type: StatusEffectType.Dot,
-        value: 15,
-        duration: 2,
-      },
+      cost: 25,
+      costStat: StatType.energy,
+      effects: [
+        {
+          id: "spore_cloud_damage_effect",
+          name: "Spore Cloud Damage Effect",
+          type: SkillEffectType.damage,
+          affinities: [AffinityType.knowledge],
+          damageMultiplier: 1.1,
+          damageStat: StatType.magic,
+          defenseStat: StatType.magicDefense,
+          targetType: TargetType.allEnemies,
+        } as DamageSkillEffect,
+        {
+          id: "spore_cloud_poison_effect",
+          name: "Spore Cloud Poison Effect",
+          type: SkillEffectType.applyStatusEffect,
+          affinities: [AffinityType.knowledge],
+          statusEffectType: StatusEffectType.poison,
+          modifierType: ModifierType.Percentage,
+          stat: StatType.magic,
+          value: 0.2,
+          duration: 2,
+          targetType: TargetType.allEnemies,
+        } as ApplyPoisonStatusEffectSkillEffect,
+      ],
     },
-  */
   ],
 };
 
@@ -251,24 +290,35 @@ export const ENEMY_SKELETON_MINI: EnemyCharacter = {
     [StatType.critDamage]: BASELINE.COMMON[StatType.critDamage],
   },
   skills: [
-    /*
     {
       id: "bone_throw",
       name: "Bone Throw",
-      description:
-        "Throws a bone, dealing damage and lowering the target’s defense for 1 turn.",
-      damageMultiplier: 1.2,
-      damageStat: "attack",
-      energyCost: 23,
-      statusEffect: {
-        id: "defenseDown",
-        name: "Defense Down",
-        type: StatusEffectType.Debuff,
-        value: 20,
-        duration: 1,
-      },
+      cost: 25,
+      costStat: StatType.energy,
+      effects: [
+        {
+          id: "bone_throw_damage_effect",
+          name: "Bone Throw Damage Effect",
+          type: SkillEffectType.damage,
+          affinities: [AffinityType.void],
+          damageMultiplier: 1.3,
+          damageStat: StatType.strength,
+          defenseStat: StatType.defense,
+          targetType: TargetType.randomEnemy,
+        } as DamageSkillEffect,
+        {
+          id: "bone_throw_stat_adjustment_effect",
+          name: "Bone Throw Stat Adjustment Effect",
+          type: SkillEffectType.adjustStat,
+          affinities: [AffinityType.void],
+          stat: StatType.defense,
+          modifierType: ModifierType.Flat,
+          modifierValue: -25,
+          duration: 4,
+          targetType: TargetType.randomEnemy,
+        } as AdjustStatSkillEffect,
+      ],
     },
-  */
   ],
 };
 
@@ -291,24 +341,35 @@ export const ENEMY_WOLF_CUB: EnemyCharacter = {
     [StatType.critDamage]: BASELINE.COMMON[StatType.critDamage],
   },
   skills: [
-    /*
     {
       id: "pack_howl",
       name: "Pack Howl",
-      description:
-        "Howls to call its pack, increasing its own attack for 2 turns and dealing damage.",
-      damageMultiplier: 1.2,
-      damageStat: "attack",
-      energyCost: 26,
-      statusEffect: {
-        id: "selfAttackUp",
-        name: "Attack Up",
-        type: StatusEffectType.Buff,
-        value: 20,
-        duration: 2,
-      },
+      cost: 30,
+      costStat: StatType.energy,
+      effects: [
+        {
+          id: "pack_howl_damage_effect",
+          name: "Pack Howl Damage Effect",
+          type: SkillEffectType.damage,
+          affinities: [AffinityType.beast],
+          damageMultiplier: 1.4,
+          damageStat: StatType.strength,
+          defenseStat: StatType.defense,
+          targetType: TargetType.randomEnemy,
+        } as DamageSkillEffect,
+        {
+          id: "pack_howl_stat_adjustment_effect",
+          name: "Pack Howl Stat Adjustment Effect",
+          type: SkillEffectType.adjustStat,
+          affinities: [AffinityType.beast],
+          stat: StatType.strength,
+          modifierType: ModifierType.Flat,
+          modifierValue: 50,
+          duration: 3,
+          targetType: TargetType.randomEnemy,
+        } as AdjustStatSkillEffect,
+      ],
     },
-  */
   ],
 };
 
@@ -331,24 +392,33 @@ export const ENEMY_IMP_FIRE: EnemyCharacter = {
     [StatType.critDamage]: BASELINE.COMMON[StatType.critDamage],
   },
   skills: [
-    /*
     {
       id: "ember_burst",
-      name: "Ember Burst",
-      description:
-        "Shoots a burst of embers, dealing damage and burning the target for 2 turns.",
-      damageMultiplier: 1.2,
-      damageStat: "attack",
-      energyCost: 30,
-      statusEffect: {
-        id: "burn",
-        name: "Burn",
-        type: StatusEffectType.Dot,
-        value: 18,
-        duration: 2,
-      },
+      name: "Spore Cloud",
+      cost: 15,
+      costStat: StatType.energy,
+      effects: [
+        {
+          id: "ember_burst_damage_effect",
+          name: "Ember Burst Damage Effect",
+          type: SkillEffectType.damage,
+          affinities: [AffinityType.chaos],
+          damageMultiplier: 1.15,
+          damageStat: StatType.magic,
+          defenseStat: StatType.magicDefense,
+          targetType: TargetType.randomEnemy,
+        } as DamageSkillEffect,
+        {
+          id: "ember_burst_fire_effect",
+          name: "Ember Burst Fire Effect",
+          type: SkillEffectType.applyStatusEffect,
+          affinities: [AffinityType.knowledge],
+          statusEffectType: StatusEffectType.burn,
+          value: 5,
+          targetType: TargetType.allEnemies,
+        } as ApplyBurnStatusEffectSkillEffect,
+      ],
     },
-  */
   ],
 };
 
@@ -371,24 +441,35 @@ export const ENEMY_BEETLE_IRON: EnemyCharacter = {
     [StatType.critDamage]: BASELINE.COMMON[StatType.critDamage],
   },
   skills: [
-    /*
     {
       id: "iron_clash",
       name: "Iron Clash",
-      description:
-        "Charges and slams, dealing damage and increasing its own defense for 2 turns.",
-      damageMultiplier: 1.2,
-      damageStat: "attack",
-      energyCost: 22,
-      statusEffect: {
-        id: "selfDefenseUp",
-        name: "Defense Up",
-        type: StatusEffectType.Buff,
-        value: 25,
-        duration: 2,
-      },
+      cost: 20,
+      costStat: StatType.energy,
+      effects: [
+        {
+          id: "iron_clash_damage_effect",
+          name: "Iron Clash Damage Effect",
+          type: SkillEffectType.damage,
+          affinities: [AffinityType.gem],
+          damageMultiplier: 1.2,
+          damageStat: StatType.defense,
+          defenseStat: StatType.defense,
+          targetType: TargetType.randomEnemy,
+        } as DamageSkillEffect,
+        {
+          id: "iron_clash_stat_adjustment_effect",
+          name: "Iron Clash Stat Adjustment Effect",
+          type: SkillEffectType.adjustStat,
+          affinities: [AffinityType.gem],
+          stat: StatType.defense,
+          modifierType: ModifierType.Flat,
+          modifierValue: 50,
+          duration: 3,
+          targetType: TargetType.self,
+        } as AdjustStatSkillEffect,
+      ],
     },
-  */
   ],
 };
 
@@ -411,24 +492,32 @@ export const ENEMY_MIMIC_CHEST: EnemyCharacter = {
     [StatType.critDamage]: BASELINE.COMMON[StatType.critDamage] + 0.5,
   },
   skills: [
-    /*
     {
       id: "chomp_trap",
       name: "Chomp Trap",
-      description:
-        "Springs open and bites, dealing heavy damage and stunning the target for 1 turn.",
-      damageMultiplier: 1.2,
-      damageStat: "attack",
-      energyCost: 35,
-      statusEffect: {
-        id: "stun",
-        name: "Stun",
-        type: StatusEffectType.Cc,
-        value: 1,
-        duration: 1,
-      },
+      cost: 30,
+      costStat: StatType.energy,
+      effects: [
+        {
+          id: "chomp_trap_damage_effect",
+          name: "Chomp Trap Damage Effect",
+          type: SkillEffectType.damage,
+          affinities: [AffinityType.gem],
+          damageMultiplier: 1.2,
+          damageStat: StatType.strength,
+          defenseStat: StatType.defense,
+          targetType: TargetType.randomEnemy,
+        } as DamageSkillEffect,
+        {
+          id: "chomp_trap_stun_effect",
+          name: "Chomp Trap Stun Effect",
+          type: SkillEffectType.applyStatusEffect,
+          affinities: [AffinityType.gem],
+          value: 1,
+          targetType: TargetType.randomEnemy,
+        } as ApplyStunStatusEffectSkillEffect,
+      ],
     },
-  */
   ],
 };
 

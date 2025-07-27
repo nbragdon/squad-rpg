@@ -1,5 +1,7 @@
 import { BattleEngine } from "../battle/battleEngine";
 import { PlayerProgress } from "../types/game";
+import { EquipmentType } from "../types/inventory";
+import { Rarity } from "../types/rarity";
 
 export interface GameEngine {
   player: PlayerProgress & {
@@ -24,6 +26,33 @@ export function createDefaultGameEngine(): GameEngine {
       inventory: [],
       autoBattle: false,
       soloProgress: 1,
+      dungeonProgress: {
+        [Rarity.COMMON]: {
+          [EquipmentType.weapon]: false,
+          [EquipmentType.armor]: false,
+          [EquipmentType.trinket]: false,
+        },
+        [Rarity.UNCOMMON]: {
+          [EquipmentType.weapon]: false,
+          [EquipmentType.armor]: false,
+          [EquipmentType.trinket]: false,
+        },
+        [Rarity.RARE]: {
+          [EquipmentType.weapon]: false,
+          [EquipmentType.armor]: false,
+          [EquipmentType.trinket]: false,
+        },
+        [Rarity.EPIC]: {
+          [EquipmentType.weapon]: false,
+          [EquipmentType.armor]: false,
+          [EquipmentType.trinket]: false,
+        },
+        [Rarity.LEGENDARY]: {
+          [EquipmentType.weapon]: false,
+          [EquipmentType.armor]: false,
+          [EquipmentType.trinket]: false,
+        },
+      },
       unlockedCharacters: ["ironfoot"],
       characterProgress: {
         ironfoot: {
