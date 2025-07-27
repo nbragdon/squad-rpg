@@ -1,3 +1,4 @@
+import { Rarity } from "types/rarity";
 import {
   COMMON_ENEMIES,
   ENEMY_BAT_CAVE,
@@ -31,4 +32,28 @@ export const STAGE_ENEMY = {
 export function getEnemyByChapterAndStage(chapter: number, stage: number) {
   const enemyId = STAGE_ENEMY[stage as keyof typeof STAGE_ENEMY];
   return [{ id: enemyId, level: stage }];
+}
+
+export function getRandomEnemy(level: number, rarity: Rarity) {
+  const enemies = [];
+  if (rarity === Rarity.COMMON) {
+    enemies.push(...COMMON_ENEMIES);
+  }
+  if (rarity === Rarity.UNCOMMON) {
+    enemies.push(...COMMON_ENEMIES);
+  }
+  if (rarity === Rarity.RARE) {
+    enemies.push(...COMMON_ENEMIES);
+  }
+  if (rarity === Rarity.EPIC) {
+    enemies.push(...COMMON_ENEMIES);
+  }
+  if (rarity === Rarity.LEGENDARY) {
+    enemies.push(...COMMON_ENEMIES);
+  }
+  const randomEnemy = enemies[Math.floor(Math.random() * enemies.length)];
+  return {
+    id: randomEnemy,
+    level: level,
+  };
 }

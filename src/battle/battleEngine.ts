@@ -95,7 +95,7 @@ export function getTargetId(
       if (aliveAllies.length > 0) {
         // Find the ally with the lowest current health
         const lowestHealthAlly = aliveAllies.reduce((prev, current) =>
-          prev.stats.health < current.stats.health ? prev : current,
+          prev.damage > current.damage ? prev : current,
         );
         return [lowestHealthAlly.id];
       }
@@ -105,7 +105,7 @@ export function getTargetId(
       if (aliveEnemies.length > 0) {
         // Find the enemy with the lowest current health
         const lowestHealthEnemy = aliveEnemies.reduce((prev, current) =>
-          prev.stats.health < current.stats.health ? prev : current,
+          prev.damage > current.damage ? prev : current,
         );
         return [lowestHealthEnemy.id];
       }

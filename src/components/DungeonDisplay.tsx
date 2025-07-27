@@ -1,3 +1,6 @@
+import { BattleEngine } from "battle/battleEngine";
+import { getRandomEnemy } from "data/enemies/enemy-map";
+import { generateRandomEquipment } from "data/inventory/equipmentUtil";
 import React, { useEffect, useState } from "react";
 import { useGameEngine } from "../context/GameEngineContext";
 import { gachaCharacters } from "../data/characters";
@@ -5,14 +8,69 @@ import { getXpToNextLevel } from "../data/leveling";
 import { PlayerCharacter } from "../types/character";
 import { EquipmentType } from "../types/inventory";
 import { Rarity } from "../types/rarity";
+import BattleDisplay from "./BattleDisplay";
+import { RARITY_COLORS } from "./utils";
 
-// Reusable rarity to color mapping
-const RARITY_COLORS: Record<Rarity, string> = {
-  [Rarity.COMMON]: "border-gray-500", // Grey
-  [Rarity.UNCOMMON]: "border-green-500", // Green
-  [Rarity.RARE]: "border-blue-500", // Blue
-  [Rarity.EPIC]: "border-purple-500", // Purple
-  [Rarity.LEGENDARY]: "border-yellow-500", // Gold/Yellow
+function getRandomItemType(favoredType: EquipmentType): EquipmentType {
+  // Hardcoded drop rates
+  const dropRates: { type: EquipmentType; rate: number }[] = [];
+
+  if (favoredType === EquipmentType.trinket) {
+    dropRates.push({ type: EquipmentType.trinket, rate: 0.4 });
+    dropRates.push({ type: EquipmentType.weapon, rate: 0.35 });
+    dropRates.push({ type: EquipmentType.armor, rate: 0.25 });
+  }
+
+  if (favoredType === EquipmentType.weapon) {
+    dropRates.push({ type: EquipmentType.trinket, rate: 0.25 });
+    dropRates.push({ type: EquipmentType.weapon, rate: 0.4 });
+    dropRates.push({ type: EquipmentType.armor, rate: 0.35 });
+  }
+
+  if (favoredType === EquipmentType.armor) {
+    dropRates.push({ type: EquipmentType.trinket, rate: 0.25 });
+    dropRates.push({ type: EquipmentType.weapon, rate: 0.35 });
+    dropRates.push({ type: EquipmentType.armor, rate: 0.4 });
+  }
+
+  const totalRate = dropRates.reduce((sum, item) => sum + item.rate, 0);
+  const roll = Math.random() * totalRate; // Scale the roll by totalRate
+
+  let cumulativeRate = 0;
+
+  for (const item of dropRates) {
+    cumulativeRate += item.rate;
+    if (roll < cumulativeRate) {
+      return item.type;
+    }
+  }
+
+  // Fallback in case of floating point inaccuracies, though highly unlikely
+  return dropRates[dropRates.length - 1].type;
+}
+
+const FLOORS_PER_RARITY = {
+  [Rarity.COMMON]: 5,
+  [Rarity.UNCOMMON]: 6,
+  [Rarity.RARE]: 8,
+  [Rarity.EPIC]: 12,
+  [Rarity.LEGENDARY]: 15,
+};
+
+const LEVEL_INCREASE_PER_FLOOR_BY_RARITY = {
+  [Rarity.COMMON]: 2,
+  [Rarity.UNCOMMON]: 3,
+  [Rarity.RARE]: 4,
+  [Rarity.EPIC]: 5,
+  [Rarity.LEGENDARY]: 6,
+};
+
+const BASE_LEVEL_BY_RARITY = {
+  [Rarity.COMMON]: 1,
+  [Rarity.UNCOMMON]: 3,
+  [Rarity.RARE]: 6,
+  [Rarity.EPIC]: 8,
+  [Rarity.LEGENDARY]: 10,
 };
 
 // Define the order of rarities for progression logic
@@ -30,6 +88,7 @@ interface DungeonProps {
 
 const DungeonMode: React.FC<DungeonProps> = ({ onBack }) => {
   const { gameEngine, updateGameEngine } = useGameEngine();
+  const [floor, setFloor] = useState(1);
   const [selectedRarity, setSelectedRarity] = useState<Rarity | null>(null);
   const [selectedDropPreference, setSelectedDropPreference] =
     useState<EquipmentType | null>(null);
@@ -72,6 +131,8 @@ const DungeonMode: React.FC<DungeonProps> = ({ onBack }) => {
             shards: 0,
           };
     });
+
+  const battleEngine = gameEngine.battleEngine;
 
   // Pagination state for characters
   const [currentPage, setCurrentPage] = useState(1);
@@ -157,9 +218,20 @@ const DungeonMode: React.FC<DungeonProps> = ({ onBack }) => {
       dropPreference: selectedDropPreference,
       characters: selectedCharacters.map((c) => c.name),
     });
-    // In a real app, you would navigate to the dungeon battle scene here
-    // For demonstration, let's simulate completion of the selected rarity
-    simulateDungeonCompletion(selectedRarity);
+    const enemyLevel =
+      BASE_LEVEL_BY_RARITY[selectedRarity] +
+      LEVEL_INCREASE_PER_FLOOR_BY_RARITY[selectedRarity] * (floor - 1);
+    updateGameEngine((engine) => ({
+      ...engine,
+      battleEngine: new BattleEngine({
+        playerCharacters: selectedCharacters,
+        enemies: [
+          getRandomEnemy(enemyLevel, selectedRarity),
+          getRandomEnemy(enemyLevel, selectedRarity),
+          getRandomEnemy(enemyLevel, selectedRarity),
+        ],
+      }),
+    }));
   };
 
   // Pagination handlers
@@ -184,24 +256,25 @@ const DungeonMode: React.FC<DungeonProps> = ({ onBack }) => {
       </div>
 
       <h1 className="text-4xl font-bold mb-8 text-yellow-400">Dungeon Mode</h1>
+      {battleEngine === null && (
+        <>
+          {/* Rarity Selection */}
+          <div className="w-full max-w-4xl mb-8">
+            <h2 className="text-2xl font-semibold mb-4 text-white text-center">
+              Select Dungeon Rarity
+            </h2>
+            <div className="flex flex-wrap justify-center gap-4">
+              {RARITY_ORDER.map((rarity) => {
+                const isDisabled = isRarityDisabled(rarity);
+                const isSelected = selectedRarity === rarity;
+                const isCompleted = completedRarities.includes(rarity);
 
-      {/* Rarity Selection */}
-      <div className="w-full max-w-4xl mb-8">
-        <h2 className="text-2xl font-semibold mb-4 text-white text-center">
-          Select Dungeon Rarity
-        </h2>
-        <div className="flex flex-wrap justify-center gap-4">
-          {RARITY_ORDER.map((rarity) => {
-            const isDisabled = isRarityDisabled(rarity);
-            const isSelected = selectedRarity === rarity;
-            const isCompleted = completedRarities.includes(rarity);
-
-            return (
-              <button
-                key={rarity}
-                onClick={() => handleRaritySelect(rarity)}
-                disabled={isDisabled}
-                className={`
+                return (
+                  <button
+                    key={rarity}
+                    onClick={() => handleRaritySelect(rarity)}
+                    disabled={isDisabled}
+                    className={`
                   py-3 px-6 rounded-lg shadow-lg font-bold text-lg transition-all duration-200
                   ${
                     isDisabled
@@ -212,76 +285,79 @@ const DungeonMode: React.FC<DungeonProps> = ({ onBack }) => {
                   }
                   ${isCompleted ? "border-2 border-green-500" : ""}
                 `}
-              >
-                {rarity.toUpperCase()}
-                {isCompleted && (
-                  <span className="ml-2 text-green-300">&#10003;</span>
-                )}{" "}
-                {/* Checkmark for completed */}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+                  >
+                    {rarity.toUpperCase()}
+                    {isCompleted && (
+                      <span className="ml-2 text-green-300">&#10003;</span>
+                    )}{" "}
+                    {/* Checkmark for completed */}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
-      {/* Equipment Drop Preference */}
-      <div className="w-full max-w-4xl mb-8">
-        <h2 className="text-2xl font-semibold mb-4 text-white text-center">
-          Likely Equipment Drop
-        </h2>
-        <div className="flex flex-wrap justify-center gap-6">
-          {Object.values(EquipmentType).map((type) => {
-            const isSelected = selectedDropPreference === type;
-            return (
-              <div
-                key={type}
-                onClick={() => handleDropPreferenceSelect(type)}
-                className={`
+          {/* Equipment Drop Preference */}
+          <div className="w-full max-w-4xl mb-8">
+            <h2 className="text-2xl font-semibold mb-4 text-white text-center">
+              Likely Equipment Drop
+            </h2>
+            <div className="flex flex-wrap justify-center gap-6">
+              {Object.values(EquipmentType).map((type) => {
+                const isSelected = selectedDropPreference === type;
+                return (
+                  <div
+                    key={type}
+                    onClick={() => handleDropPreferenceSelect(type)}
+                    className={`
                   relative bg-gray-800 rounded-xl p-6 flex flex-col items-center justify-center
                   shadow-xl cursor-pointer transition-all duration-200
                   ${isSelected ? "border-2 border-blue-400 transform scale-105" : "border-2 border-transparent hover:border-blue-600"}
                 `}
-              >
-                {/* Placeholder for icon - you can replace with actual SVG/Lucide icons */}
-                <div className="text-5xl mb-3">
-                  {type === EquipmentType.weapon && "⚔️"}
-                  {type === EquipmentType.armor && "🛡️"}
-                  {type === EquipmentType.trinket && "💎"}
-                </div>
-                <span className="text-xl font-semibold capitalize">
-                  {type} Focus
-                </span>
-                {isSelected && (
-                  <div className="absolute top-2 right-2 text-green-400 text-3xl">
-                    &#10003;
+                  >
+                    {/* Placeholder for icon - you can replace with actual SVG/Lucide icons */}
+                    <div className="text-5xl mb-3">
+                      {type === EquipmentType.weapon && "⚔️"}
+                      {type === EquipmentType.armor && "🛡️"}
+                      {type === EquipmentType.trinket && "💎"}
+                    </div>
+                    <span className="text-xl font-semibold capitalize">
+                      {type} Focus
+                    </span>
+                    {isSelected && (
+                      <div className="absolute top-2 right-2 text-green-400 text-3xl">
+                        &#10003;
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
+                );
+              })}
+            </div>
+          </div>
 
-      {/* Character Selection */}
-      <div className="w-full max-w-6xl mb-8">
-        <h2 className="text-2xl font-semibold mb-4 text-white text-center">
-          Choose Your Fighters ({selectedCharacters.length}/3)
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {currentCharacters.map((character) => {
-            const isSelected = selectedCharacters.some(
-              (char) => char.id === character.id,
-            );
-            const isDisabled = selectedCharacters.length >= 3 && !isSelected;
-            // Get the rarity color class
-            const rarityBorderClass =
-              RARITY_COLORS[character.rarity] || "border-gray-500"; // Fallback to gray
+          {/* Character Selection */}
+          <div className="w-full max-w-6xl mb-8">
+            <h2 className="text-2xl font-semibold mb-4 text-white text-center">
+              Choose Your Fighters ({selectedCharacters.length}/3)
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {currentCharacters.map((character) => {
+                const isSelected = selectedCharacters.some(
+                  (char) => char.id === character.id,
+                );
+                const isDisabled =
+                  selectedCharacters.length >= 3 && !isSelected;
+                // Get the rarity color class
+                const rarityBorderClass =
+                  RARITY_COLORS[character.rarity] || "border-gray-500"; // Fallback to gray
 
-            return (
-              <div
-                key={character.id}
-                onClick={() => !isDisabled && handleCharacterSelect(character)}
-                className={`
+                return (
+                  <div
+                    key={character.id}
+                    onClick={() =>
+                      !isDisabled && handleCharacterSelect(character)
+                    }
+                    className={`
                   bg-gray-800 rounded-xl p-4 flex flex-col items-center text-center
                   shadow-xl transition-all duration-200 border-2
                   ${rarityBorderClass} {/* Apply rarity border here */}
@@ -293,59 +369,61 @@ const DungeonMode: React.FC<DungeonProps> = ({ onBack }) => {
                         : "hover:ring-2 hover:ring-offset-2 hover:ring-offset-gray-800 hover:ring-green-600 cursor-pointer" // Hover ring
                   }
                 `}
-              >
-                <img
-                  src={""}
-                  alt={character.name}
-                  className="w-24 h-24 rounded-full mb-3 border-2 border-gray-600 object-cover"
-                  onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src = `https://placehold.co/100x100/6B7280/FFFFFF?text=${character.name.charAt(0)}`;
-                  }}
-                />
-                <h3 className="text-xl font-bold text-yellow-300">
-                  {character.name}
-                </h3>
-                <p className="text-gray-300 text-sm">Lv. {character.level}</p>
-                <p className="text-gray-400 text-xs capitalize">
-                  {character.strongAffinities.join(", ")}
-                </p>
-                <button className="mt-4 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold py-2 px-4 rounded-md shadow transition-colors duration-200">
-                  View Details
+                  >
+                    <img
+                      src={""}
+                      alt={character.name}
+                      className="w-24 h-24 rounded-full mb-3 border-2 border-gray-600 object-cover"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = `https://placehold.co/100x100/6B7280/FFFFFF?text=${character.name.charAt(0)}`;
+                      }}
+                    />
+                    <h3 className="text-xl font-bold text-yellow-300">
+                      {character.name}
+                    </h3>
+                    <p className="text-gray-300 text-sm">
+                      Lv. {character.level}
+                    </p>
+                    <p className="text-gray-400 text-xs capitalize">
+                      {character.strongAffinities.join(", ")}
+                    </p>
+                    <button className="mt-4 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold py-2 px-4 rounded-md shadow transition-colors duration-200">
+                      View Details
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Pagination Controls */}
+            {ownedChars.length > charactersPerPage && (
+              <div className="flex justify-center items-center gap-4 mt-8">
+                <button
+                  onClick={goToPrevPage}
+                  disabled={currentPage === 1}
+                  className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                >
+                  Previous
+                </button>
+                <span className="text-lg font-semibold">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  onClick={goToNextPage}
+                  disabled={currentPage === totalPages}
+                  className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                >
+                  Next
                 </button>
               </div>
-            );
-          })}
-        </div>
-
-        {/* Pagination Controls */}
-        {ownedChars.length > charactersPerPage && (
-          <div className="flex justify-center items-center gap-4 mt-8">
-            <button
-              onClick={goToPrevPage}
-              disabled={currentPage === 1}
-              className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-            >
-              Previous
-            </button>
-            <span className="text-lg font-semibold">
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              onClick={goToNextPage}
-              disabled={currentPage === totalPages}
-              className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-            >
-              Next
-            </button>
+            )}
           </div>
-        )}
-      </div>
 
-      {/* Start Dungeon Button */}
-      <button
-        onClick={handleStartDungeon}
-        className={`
+          {/* Start Dungeon Button */}
+          <button
+            onClick={handleStartDungeon}
+            className={`
           bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-4 px-10 rounded-xl
           shadow-xl text-2xl transition-all duration-200 mt-8
           ${
@@ -356,14 +434,47 @@ const DungeonMode: React.FC<DungeonProps> = ({ onBack }) => {
               : ""
           }
         `}
-        disabled={
-          !selectedRarity ||
-          !selectedDropPreference ||
-          selectedCharacters.length === 0
-        }
-      >
-        Start Dungeon
-      </button>
+            disabled={
+              !selectedRarity ||
+              !selectedDropPreference ||
+              selectedCharacters.length === 0
+            }
+          >
+            Start Dungeon
+          </button>
+        </>
+      )}
+      {battleEngine && (
+        <BattleDisplay
+          onVictory={() => {
+            // randomly pick an equipment type based on selection
+            const equipmentType = getRandomItemType(
+              selectedDropPreference || EquipmentType.weapon,
+            );
+            const randomEquipment = generateRandomEquipment(
+              equipmentType,
+              selectedRarity || Rarity.COMMON,
+            );
+            updateGameEngine((engine) => {
+              return {
+                ...engine,
+                player: {
+                  ...engine.player,
+                  inventory: [...engine.player.inventory, randomEquipment],
+                },
+                battleEngine: null,
+              };
+            });
+          }}
+          onDefeat={() => {
+            updateGameEngine((engine) => ({
+              ...engine,
+              battleEngine: null,
+            }));
+            setSelectedCharacters([]); // Clear selected characters after battle
+          }}
+        />
+      )}
     </div>
   );
 };

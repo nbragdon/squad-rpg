@@ -78,15 +78,15 @@ function getRandomCommonBoostValue(
   }
   if (statType === StatType.speed) {
     if (modifierType === ModifierType.Percentage) value = BASE_PERCENT_STANDARD;
-    if (modifierType === ModifierType.Flat) BASE_FLAT_STANDARD;
+    if (modifierType === ModifierType.Flat) value = BASE_FLAT_STANDARD;
   }
   if (statType === StatType.magic) {
     if (modifierType === ModifierType.Percentage) value = BASE_PERCENT_STANDARD;
-    if (modifierType === ModifierType.Flat) BASE_FLAT_STANDARD;
+    if (modifierType === ModifierType.Flat) value = BASE_FLAT_STANDARD;
   }
   if (statType === StatType.magicDefense) {
     if (modifierType === ModifierType.Percentage) value = BASE_PERCENT_STANDARD;
-    if (modifierType === ModifierType.Flat) BASE_FLAT_STANDARD;
+    if (modifierType === ModifierType.Flat) value = BASE_FLAT_STANDARD;
   }
   if (statType === StatType.energyGain) {
     if (modifierType === ModifierType.Percentage) value = BASE_PERCENT_STANDARD;
@@ -141,15 +141,15 @@ function getRandomUncommonBoostValue(
   }
   if (statType === StatType.speed) {
     if (modifierType === ModifierType.Percentage) value = BASE_PERCENT_STANDARD;
-    if (modifierType === ModifierType.Flat) BASE_FLAT_STANDARD;
+    if (modifierType === ModifierType.Flat) value = BASE_FLAT_STANDARD;
   }
   if (statType === StatType.magic) {
     if (modifierType === ModifierType.Percentage) value = BASE_PERCENT_STANDARD;
-    if (modifierType === ModifierType.Flat) BASE_FLAT_STANDARD;
+    if (modifierType === ModifierType.Flat) value = BASE_FLAT_STANDARD;
   }
   if (statType === StatType.magicDefense) {
     if (modifierType === ModifierType.Percentage) value = BASE_PERCENT_STANDARD;
-    if (modifierType === ModifierType.Flat) BASE_FLAT_STANDARD;
+    if (modifierType === ModifierType.Flat) value = BASE_FLAT_STANDARD;
   }
   if (statType === StatType.energyGain) {
     if (modifierType === ModifierType.Percentage) value = BASE_PERCENT_STANDARD;
@@ -204,15 +204,15 @@ function getRandomRareBoostValue(
   }
   if (statType === StatType.speed) {
     if (modifierType === ModifierType.Percentage) value = BASE_PERCENT_STANDARD;
-    if (modifierType === ModifierType.Flat) BASE_FLAT_STANDARD;
+    if (modifierType === ModifierType.Flat) value = BASE_FLAT_STANDARD;
   }
   if (statType === StatType.magic) {
     if (modifierType === ModifierType.Percentage) value = BASE_PERCENT_STANDARD;
-    if (modifierType === ModifierType.Flat) BASE_FLAT_STANDARD;
+    if (modifierType === ModifierType.Flat) value = BASE_FLAT_STANDARD;
   }
   if (statType === StatType.magicDefense) {
     if (modifierType === ModifierType.Percentage) value = BASE_PERCENT_STANDARD;
-    if (modifierType === ModifierType.Flat) BASE_FLAT_STANDARD;
+    if (modifierType === ModifierType.Flat) value = BASE_FLAT_STANDARD;
   }
   if (statType === StatType.energyGain) {
     if (modifierType === ModifierType.Percentage) value = BASE_PERCENT_STANDARD;
@@ -267,15 +267,15 @@ function getRandomEpicBoostValue(
   }
   if (statType === StatType.speed) {
     if (modifierType === ModifierType.Percentage) value = BASE_PERCENT_STANDARD;
-    if (modifierType === ModifierType.Flat) BASE_FLAT_STANDARD;
+    if (modifierType === ModifierType.Flat) value = BASE_FLAT_STANDARD;
   }
   if (statType === StatType.magic) {
     if (modifierType === ModifierType.Percentage) value = BASE_PERCENT_STANDARD;
-    if (modifierType === ModifierType.Flat) BASE_FLAT_STANDARD;
+    if (modifierType === ModifierType.Flat) value = BASE_FLAT_STANDARD;
   }
   if (statType === StatType.magicDefense) {
     if (modifierType === ModifierType.Percentage) value = BASE_PERCENT_STANDARD;
-    if (modifierType === ModifierType.Flat) BASE_FLAT_STANDARD;
+    if (modifierType === ModifierType.Flat) value = BASE_FLAT_STANDARD;
   }
   if (statType === StatType.energyGain) {
     if (modifierType === ModifierType.Percentage) value = BASE_PERCENT_STANDARD;
@@ -330,15 +330,15 @@ function getRandomLegendaryBoostValue(
   }
   if (statType === StatType.speed) {
     if (modifierType === ModifierType.Percentage) value = BASE_PERCENT_STANDARD;
-    if (modifierType === ModifierType.Flat) BASE_FLAT_STANDARD;
+    if (modifierType === ModifierType.Flat) value = BASE_FLAT_STANDARD;
   }
   if (statType === StatType.magic) {
     if (modifierType === ModifierType.Percentage) value = BASE_PERCENT_STANDARD;
-    if (modifierType === ModifierType.Flat) BASE_FLAT_STANDARD;
+    if (modifierType === ModifierType.Flat) value = BASE_FLAT_STANDARD;
   }
   if (statType === StatType.magicDefense) {
     if (modifierType === ModifierType.Percentage) value = BASE_PERCENT_STANDARD;
-    if (modifierType === ModifierType.Flat) BASE_FLAT_STANDARD;
+    if (modifierType === ModifierType.Flat) value = BASE_FLAT_STANDARD;
   }
   if (statType === StatType.energyGain) {
     if (modifierType === ModifierType.Percentage) value = BASE_PERCENT_STANDARD;

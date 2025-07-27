@@ -58,12 +58,6 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
       } else {
         console.log("Auto-basic attacking for", player.name);
         battleEngine?.attack(player.id);
-        // Even if basic attacking, update for next turn's skill selection
-        setCharactersAutoSelection((prev) => ({
-          ...prev,
-          [player.id]:
-            player.skills[Math.floor(Math.random() * player.skills.length)].id,
-        }));
       }
 
       // After the action, update the game engine to reflect the battle state change
@@ -171,7 +165,7 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
 
     return (
       <div
-        key={char.id}
+        key={Math.random()}
         className={`
           mb-2 p-2 rounded-lg transition-all duration-300
           ${char.isAlive ? "text-white" : "text-gray-400 opacity-70"}
@@ -190,7 +184,7 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
               style={{ width: `${healthPercentage}%` }}
             ></div>
             <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">
-              {char.stats[StatType.health] - char.damage}/
+              {Math.floor(char.stats[StatType.health] - char.damage)}/
               {char.stats[StatType.health]}
             </span>
           </div>
