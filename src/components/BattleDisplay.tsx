@@ -2,7 +2,7 @@ import { levelUp } from "data/leveling";
 import React, { useCallback, useEffect, useState } from "react";
 import { BattleCharacter, calculateBattleXp } from "../battle";
 import { useGameEngine } from "../context/GameEngineContext";
-import { calculateStat } from "../data/statUtils";
+import { adjustedStat, calculateStat } from "../data/statUtils";
 import { StatType } from "../types/stats";
 
 const AUTO_WAIT_TIME = 1500; // Time in ms for auto actions
@@ -145,11 +145,10 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
 
   // Helper for info panel
   const renderCharInfo = (char: BattleCharacter) => {
+    const charHealth = adjustedStat(StatType.health, char);
     const healthPercentage = Math.max(
       0,
-      ((char.stats[StatType.health] - char.damage) /
-        char.stats[StatType.health]) *
-        100,
+      ((charHealth - char.damage) / charHealth) * 100,
     );
     const energyPercentage = Math.max(
       0,
@@ -177,8 +176,7 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
               style={{ width: `${healthPercentage}%` }}
             ></div>
             <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">
-              {Math.floor(char.stats[StatType.health] - char.damage)}/
-              {char.stats[StatType.health]}
+              {Math.floor(charHealth - char.damage)}/{charHealth}
             </span>
           </div>
         </div>
@@ -204,6 +202,7 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
 
   // Ability grid
   const renderAbilityGrid = (player: BattleCharacter) => {
+    const adjustedStrength = adjustedStat(StatType.strength, player);
     const abilities = [
       {
         key: "basic",
@@ -216,7 +215,7 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
           }));
         },
         disabled: false,
-        desc: `Basic Attack: ${player.stats[StatType.strength]} damage`,
+        desc: `Basic Attack: ${adjustedStrength} damage`,
         bgColor: "bg-green-600",
         cost: 0,
         costStat: StatType.energy,
@@ -231,8 +230,7 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
             battleEngine: battleEngine?.getNewInstance(),
           }));
         },
-        disabled:
-          player.stats[skill.costStat || StatType.energy] < (skill.cost || 0),
+        disabled: !battleEngine.canUseSkill(skill.id, player.id),
         desc: `(Cost: ${skill.cost || 0} ${skill.costStat || "energy"})`,
         bgColor: "bg-gray-600",
         cost: skill.cost || 0,

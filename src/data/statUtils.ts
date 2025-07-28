@@ -45,6 +45,15 @@ export function calculateStat(
   stat *=
     1 + (calculableStats.shards || 0) * SHARD_BONUS[calculableStats.rarity];
 
+  // Equipment bonus (player only)
+  return Math.round(stat);
+}
+
+export function adjustedStat(
+  statType: StatType,
+  calculableStats: CalculableStats,
+) {
+  let stat = calculableStats.stats[statType];
   if (calculableStats.statAdjustments) {
     // Apply stat adjustments
     for (const adjustment of calculableStats.statAdjustments) {
@@ -58,7 +67,6 @@ export function calculateStat(
     }
   }
 
-  // Equipment bonus (player only)
   return Math.round(stat);
 }
 

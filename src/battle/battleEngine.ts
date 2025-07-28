@@ -1,4 +1,4 @@
-import { calculateDamage, calculateStat } from "../data/statUtils";
+import { adjustedStat, calculateDamage } from "data/statUtils";
 import { PlayerCharacter } from "../types/character";
 import { EnemyCharacter } from "../types/enemy";
 import {
@@ -13,6 +13,7 @@ import { StatType } from "../types/stats";
 import { StatusEffectType } from "../types/statusEffects";
 import { BattleCharacter, BattleInitOptions, BattleState } from "./battleTypes";
 import {
+  getCalculatedStats,
   getStackableStatusEffectReductionAmount,
   getStatusEffectValue,
 } from "./battleUtils";
@@ -22,7 +23,7 @@ function toBattleCharacter(
   isPlayer: boolean,
 ): BattleCharacter {
   if (isPlayer) {
-    return {
+    const playerBattleChar = {
       ...(char as PlayerCharacter),
       stats: {
         ...char.stats,
@@ -33,9 +34,16 @@ function toBattleCharacter(
       damage: 0,
       isPlayer: true,
     };
+
+    return {
+      ...playerBattleChar,
+      stats: {
+        ...getCalculatedStats(playerBattleChar),
+      },
+    };
   } else {
     const enemy = char as EnemyCharacter & { level: number };
-    return {
+    const enemyBattleChar = {
       ...enemy,
       id: enemy.id + "_" + Math.random().toString(), // generate random unique id
       stats: {
@@ -48,6 +56,13 @@ function toBattleCharacter(
       statAdjustments: [],
       damage: 0,
       isPlayer: false,
+    };
+
+    return {
+      ...enemyBattleChar,
+      stats: {
+        ...getCalculatedStats(enemyBattleChar),
+      },
     };
   }
 }
@@ -198,13 +213,13 @@ export class BattleEngine {
     }
 
     const sortedEligibleCharacters = eligibleCharacters.sort((a, b) => {
-      const speedA = calculateStat(StatType.speed, {
+      const speedA = adjustedStat(StatType.speed, {
         stats: a.stats,
         level: a.level,
         shards: a.shards,
         rarity: a.rarity,
       });
-      const speedB = calculateStat(StatType.speed, {
+      const speedB = adjustedStat(StatType.speed, {
         stats: b.stats,
         level: b.level,
         shards: b.shards,
@@ -282,8 +297,8 @@ export class BattleEngine {
       );
       // Apply damage
       target.damage += dmg;
-      if (target.damage >= target.stats[StatType.health])
-        target.isAlive = false;
+      const targetHealth = adjustedStat(StatType.health, target);
+      if (target.damage >= targetHealth) target.isAlive = false;
       this.state.battleLog.push(
         `${attacker.name} attacks ${target.name} for ${dmg} damage!`,
       );
@@ -377,8 +392,8 @@ export class BattleEngine {
             dmg *= damageEffect.damageMultiplier || 1;
             dmg = Math.floor(dmg);
             target.damage += dmg;
-            if (target.damage >= target.stats[StatType.health])
-              target.isAlive = false;
+            const targetHealth = adjustedStat(StatType.health, target);
+            if (target.damage >= targetHealth) target.isAlive = false;
             this.state.battleLog.push(
               `${attacker.name} uses ${skill.name} on ${target.name} for ${dmg} damage!`,
             );
@@ -502,7 +517,7 @@ export class BattleEngine {
           break;
         case StatusEffectType.burn:
           const dmg = Math.floor(
-            char.stats[StatType.health] * (0.01 * effect.value),
+            adjustedStat(StatType.health, char) * (0.01 * effect.value),
           );
           char.damage += dmg;
           this.state.battleLog.push(
@@ -591,9 +606,10 @@ export class BattleEngine {
       return;
     }
 
+    let gainAmount = adjustedStat(StatType.energyGain, battleCharacter);
+
     battleCharacter.stats[StatType.energy] =
-      (battleCharacter.stats[StatType.energy] || 0) +
-      battleCharacter.stats[StatType.energyGain];
+      (battleCharacter.stats[StatType.energy] || 0) + gainAmount;
   }
 
   endTurn(battleCharacter: BattleCharacter) {

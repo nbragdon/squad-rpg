@@ -1,9 +1,10 @@
 import { ApplyStatusEffectSkillEffect } from "types/skillTypes";
-import { StatType } from "types/stats";
+import { AllStats, StatType } from "types/stats";
 import { StatusEffectType } from "types/statusEffects";
 import { PlayerCharacter } from "../types/character";
 import { EnemyCharacter } from "../types/enemy";
 import { BattleCharacter } from "./battleTypes";
+import { calculateStat } from "data/statUtils";
 
 export function isPlayerCharacter(
   char: PlayerCharacter | BattleCharacter | EnemyCharacter,
@@ -49,4 +50,19 @@ export function getStatusEffectValue(
     return dmg;
   }
   return statusEffect.value || 0;
+}
+
+export function getCalculatedStats(battleCharacter: BattleCharacter): AllStats {
+  return {
+    [StatType.magic]: calculateStat(StatType.magic, battleCharacter),
+    [StatType.energy]: calculateStat(StatType.energy, battleCharacter),
+    [StatType.strength]: calculateStat(StatType.strength, battleCharacter),
+    [StatType.defense]: calculateStat(StatType.defense, battleCharacter),
+    [StatType.speed]: calculateStat(StatType.speed, battleCharacter),
+    [StatType.health]: calculateStat(StatType.health, battleCharacter),
+    [StatType.magicDefense]: calculateStat(StatType.magicDefense, battleCharacter),
+    [StatType.energyGain]: calculateStat(StatType.energyGain, battleCharacter),
+    [StatType.critChance]: calculateStat(StatType.critChance, battleCharacter),
+    [StatType.critDamage]: calculateStat(StatType.critDamage, battleCharacter),
+  };
 }
