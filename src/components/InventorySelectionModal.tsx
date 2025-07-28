@@ -11,6 +11,8 @@ import {
   EQUIPMENT_TYPE_ICONS,
 } from "./utils";
 import { ModifierType } from "types/skillTypes";
+import { useGameEngine } from "context/GameEngineContext";
+import { getAllEquipment } from "data/inventory/equipmentUtil";
 
 export const formatStatValue = (boost: EquipmentItemBoost): string => {
   const value = parseFloat(boost.value.toFixed(0));
@@ -36,16 +38,34 @@ const ITEMS_PER_PAGE = 10; // Number of items to display per page
 export const InventorySelectionModal: React.FC<
   InventorySelectionModalProps
 > = ({ equipmentType, inventory, onClose, onEquip, currentEquippedItem }) => {
+  const { gameEngine } = useGameEngine();
   const [currentPage, setCurrentPage] = useState(1);
   const [filteredAndSortedInventory, setFilteredAndSortedInventory] = useState<
     EquipmentItem[]
   >([]);
 
+  const equipedItemIds: string[] = [];
+  Object.values(gameEngine.player.characterProgress || {}).forEach(
+    (progress) => {
+      if (progress.equipedItems[EquipmentType.weapon])
+        equipedItemIds.push(progress.equipedItems[EquipmentType.weapon]);
+      if (progress.equipedItems[EquipmentType.armor])
+        equipedItemIds.push(progress.equipedItems[EquipmentType.armor]);
+      if (progress.equipedItems[EquipmentType.trinket][0])
+        equipedItemIds.push(progress.equipedItems[EquipmentType.trinket][0]);
+      if (progress.equipedItems[EquipmentType.trinket][1])
+        equipedItemIds.push(progress.equipedItems[EquipmentType.trinket][1]);
+    },
+  );
+
   useEffect(() => {
     // Filter by equipment type and sort by level (highest first)
-    const filtered = inventory.filter(
-      (item) => item.equipmentType === equipmentType,
-    );
+    const filtered = inventory.filter((item) => {
+      return (
+        item.equipmentType === equipmentType &&
+        !equipedItemIds.includes(item.id)
+      );
+    });
     const sorted = filtered.sort((a, b) => b.level - a.level);
     setFilteredAndSortedInventory(sorted);
     setCurrentPage(1); // Reset to first page when inventory or type changes

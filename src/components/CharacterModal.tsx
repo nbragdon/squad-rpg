@@ -471,7 +471,7 @@ const CharacterModal: React.FC<CharacterModalProps> = ({
                       className="absolute top-2 right-2 bg-red-600 text-gray-400 hover:text-white text-xl font-bold"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleUnequipItem(EquipmentType.trinket, 1);
+                        handleUnequipItem(EquipmentType.trinket, 0);
                       }}
                     >
                       &times;

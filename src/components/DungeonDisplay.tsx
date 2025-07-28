@@ -9,6 +9,7 @@ import { Rarity } from "../types/rarity";
 import BattleDisplay from "./BattleDisplay";
 import { RARITY_COLORS } from "./utils";
 import { getOwnedCharacters } from "data/characters/charUtil";
+import CharacterModal from "./CharacterModal";
 
 function getRandomItemType(favoredType: EquipmentType): EquipmentType {
   // Hardcoded drop rates
@@ -94,6 +95,9 @@ const DungeonMode: React.FC<DungeonProps> = ({ onBack }) => {
   const [selectedCharacters, setSelectedCharacters] = useState<
     PlayerCharacter[]
   >([]);
+  const [modalCharacter, setModalCharacter] = useState<PlayerCharacter | null>(
+    null,
+  );
   // go through dungeon progress and if all 3 dungeon types for a single rarity are true, then that rarity is completed
   const getCompltedRarities = () => {
     const completedRarities: Rarity[] = [];
@@ -370,7 +374,12 @@ const DungeonMode: React.FC<DungeonProps> = ({ onBack }) => {
                     <p className="text-gray-400 text-xs capitalize">
                       {character.strongAffinities.join(", ")}
                     </p>
-                    <button className="mt-4 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold py-2 px-4 rounded-md shadow transition-colors duration-200">
+                    <button
+                      onClick={() => {
+                        setModalCharacter(character);
+                      }}
+                      className="mt-4 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold py-2 px-4 rounded-md shadow transition-colors duration-200"
+                    >
                       View Details
                     </button>
                   </div>
@@ -458,6 +467,12 @@ const DungeonMode: React.FC<DungeonProps> = ({ onBack }) => {
             }));
             setSelectedCharacters([]); // Clear selected characters after battle
           }}
+        />
+      )}
+      {modalCharacter && (
+        <CharacterModal
+          character={modalCharacter}
+          onClose={() => setModalCharacter(null)}
         />
       )}
     </div>
