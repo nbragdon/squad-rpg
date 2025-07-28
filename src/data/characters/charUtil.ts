@@ -1,5 +1,6 @@
+import { PlayerCharacter } from "types/character";
 import { GameEngine } from "../../engine/GameEngine";
-import { gachaCharacters } from "../characters";
+import { gachaCharacters, generateBaseCharacterProgress } from "../characters";
 import { getXpToNextLevel } from "../leveling";
 
 export function getOwnedCharacters(gameEngine: GameEngine) {
@@ -17,6 +18,9 @@ export function getOwnedCharacters(gameEngine: GameEngine) {
         xp: progress?.xp || 0,
         xpToNextLevel: getXpToNextLevel(progress?.level || 1),
         shards: progress?.shards || 0,
+        equipedItems:
+          progress?.equipedItems ||
+          generateBaseCharacterProgress().equipedItems,
       };
     });
 }

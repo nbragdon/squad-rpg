@@ -1,4 +1,5 @@
 import { AffinityType } from "./affinity";
+import { EquippedItems } from "./game";
 import { InventoryItem } from "./inventory";
 import { Rarity } from "./rarity";
 import { Skill } from "./skillTypes";
@@ -20,7 +21,5 @@ export interface PlayerCharacter extends CharacterBase {
   level: number;
   xp: number; // Current XP
   shards: number;
-  equippedWeapon?: InventoryItem | null;
-  equippedArmor?: InventoryItem | null;
-  equippedTrinkets?: [InventoryItem | null, InventoryItem | null];
+  equipedItems: EquippedItems;
 }

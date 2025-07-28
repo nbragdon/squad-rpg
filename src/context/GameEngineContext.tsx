@@ -1,16 +1,32 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { GameEngine, createDefaultGameEngine } from "../engine/GameEngine";
+import { generateBaseCharacterProgress } from "data/characters";
+import { CharacterProgress } from "types/game";
 
 function loadGameEngine(): GameEngine {
   const raw = localStorage.getItem("squadRpgGameEngine");
   if (!raw) return createDefaultGameEngine();
   try {
     const gameEngine: GameEngine = JSON.parse(raw);
+    let validCharacterProgress: { [key in string]: CharacterProgress } = {};
+    if (gameEngine.player.characterProgress) {
+      Object.entries(gameEngine.player.characterProgress).forEach(
+        ([id, progress]) => {
+          validCharacterProgress[id] = {
+            ...generateBaseCharacterProgress(),
+            ...progress,
+          };
+        },
+      );
+    }
     gameEngine.player = {
       ...gameEngine.player,
       dungeonProgress: {
         ...createDefaultGameEngine().player.dungeonProgress,
         ...gameEngine.player.dungeonProgress,
+      },
+      characterProgress: {
+        ...validCharacterProgress,
       },
     };
     gameEngine.battleEngine = null;

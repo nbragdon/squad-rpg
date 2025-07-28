@@ -1,4 +1,4 @@
-import { EquipmentType, InventoryItem } from "./inventory";
+import { EquipmentItem, EquipmentType, InventoryItem } from "./inventory";
 import { Rarity } from "./rarity";
 
 export interface GameMode {
@@ -17,10 +17,17 @@ export interface Reward {
   rarity?: Rarity;
 }
 
+export interface EquippedItems {
+  [EquipmentType.weapon]: string | undefined;
+  [EquipmentType.armor]: string | undefined;
+  [EquipmentType.trinket]: [string | undefined, string | undefined];
+}
+
 export interface CharacterProgress {
   level: number;
   xp: number;
   shards: number;
+  equipedItems: EquippedItems;
 }
 
 export interface PlayerProgress {
@@ -32,7 +39,7 @@ export interface PlayerProgress {
     };
   };
   unlockedCharacters: string[]; // List of owned character IDs
-  inventory: InventoryItem[]; // Player's inventory
+  equipment: { [key in string]: EquipmentItem }; // Player's inventory
   characterProgress?: {
     [characterId: string]: CharacterProgress;
   };

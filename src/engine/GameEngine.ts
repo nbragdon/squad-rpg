@@ -1,3 +1,4 @@
+import { generateBaseCharacterProgress } from "data/characters";
 import { BattleEngine } from "../battle/battleEngine";
 import { PlayerProgress } from "../types/game";
 import { EquipmentType } from "../types/inventory";
@@ -23,7 +24,7 @@ export function createDefaultGameEngine(): GameEngine {
       id: "player_1",
       name: "Player",
       crystals: 0,
-      inventory: [],
+      equipment: {},
       autoBattle: false,
       soloProgress: 1,
       dungeonProgress: {
@@ -55,11 +56,7 @@ export function createDefaultGameEngine(): GameEngine {
       },
       unlockedCharacters: ["ironfoot"],
       characterProgress: {
-        ironfoot: {
-          level: 1,
-          xp: 0,
-          shards: 0,
-        },
+        ironfoot: generateBaseCharacterProgress(),
       },
     },
     battleEngine: null,

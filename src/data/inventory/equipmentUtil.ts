@@ -1,3 +1,4 @@
+import { GameEngine } from "engine/GameEngine";
 import {
   EquipmentItem,
   EquipmentItemBoost,
@@ -7,6 +8,7 @@ import {
 import { Rarity } from "../../types/rarity";
 import { ModifierType } from "../../types/skillTypes";
 import { StatType } from "../../types/stats";
+import { CharacterProgress, EquippedItems } from "types/game";
 
 export function randomlyGenerateMainStatCount(rarity: Rarity): number {
   if (rarity === Rarity.COMMON) return 1;
@@ -54,7 +56,7 @@ function getRandomCommonBoostValue(
 ): number {
   let value = 0;
   const BASE_LOW_FLAT_VALUE = 1;
-  const BASE_CRIT_DMG_FLAT_VALUE = 0.1;
+  const BASE_CRIT_DMG_FLAT_VALUE = 10;
   const BASE_PERCENT_CRIT = 20;
   const BASE_FLAT_STANDARD = 30;
   const BASE_PERCENT_STANDARD = 25;
@@ -117,7 +119,7 @@ function getRandomUncommonBoostValue(
 ): number {
   let value = 0;
   const BASE_LOW_FLAT_VALUE = 2;
-  const BASE_CRIT_DMG_FLAT_VALUE = 0.15;
+  const BASE_CRIT_DMG_FLAT_VALUE = 15;
   const BASE_PERCENT_CRIT = 25;
   const BASE_FLAT_STANDARD = 35;
   const BASE_PERCENT_STANDARD = 30;
@@ -180,7 +182,7 @@ function getRandomRareBoostValue(
 ): number {
   let value = 0;
   const BASE_LOW_FLAT_VALUE = 3;
-  const BASE_CRIT_DMG_FLAT_VALUE = 0.2;
+  const BASE_CRIT_DMG_FLAT_VALUE = 20;
   const BASE_PERCENT_CRIT = 30;
   const BASE_FLAT_STANDARD = 40;
   const BASE_PERCENT_STANDARD = 35;
@@ -243,7 +245,7 @@ function getRandomEpicBoostValue(
 ): number {
   let value = 0;
   const BASE_LOW_FLAT_VALUE = 4;
-  const BASE_CRIT_DMG_FLAT_VALUE = 0.3;
+  const BASE_CRIT_DMG_FLAT_VALUE = 30;
   const BASE_PERCENT_CRIT = 35;
   const BASE_FLAT_STANDARD = 45;
   const BASE_PERCENT_STANDARD = 40;
@@ -306,7 +308,7 @@ function getRandomLegendaryBoostValue(
 ): number {
   let value = 0;
   const BASE_LOW_FLAT_VALUE = 8;
-  const BASE_CRIT_DMG_FLAT_VALUE = 0.4;
+  const BASE_CRIT_DMG_FLAT_VALUE = 40;
   const BASE_PERCENT_CRIT = 50;
   const BASE_FLAT_STANDARD = 60;
   const BASE_PERCENT_STANDARD = 50;
@@ -639,10 +641,31 @@ export function generateRandomEquipment(
     subBoosts: subStatBoosts,
     level: 1,
     name: uniqueName,
-    id: uniqueName,
+    id: crypto.randomUUID(),
     type: InventoryType.equipment,
     stackable: false,
     quantity: 1,
     rarity: rarity,
   };
+}
+
+export function getAllEquipment(
+  equipedItems: EquippedItems | undefined,
+  inventory: { [key in string]: EquipmentItem },
+): EquipmentItem[] {
+  if (!equipedItems) return [];
+  const itemIds = [
+    equipedItems[EquipmentType.weapon],
+    equipedItems[EquipmentType.armor],
+    equipedItems[EquipmentType.trinket][0],
+    equipedItems[EquipmentType.trinket][1],
+  ].filter((item) => item !== undefined && item !== null);
+
+  const itermediate = Object.values(inventory).filter((equipment) =>
+    itemIds.includes(equipment.id),
+  );
+
+  console.log(itermediate, itemIds, inventory);
+
+  return itermediate;
 }

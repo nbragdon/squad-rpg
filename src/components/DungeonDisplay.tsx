@@ -3,12 +3,12 @@ import { getRandomEnemy } from "data/enemies/enemy-map";
 import { generateRandomEquipment } from "data/inventory/equipmentUtil";
 import React, { useEffect, useState } from "react";
 import { useGameEngine } from "../context/GameEngineContext";
-import { gachaCharacters } from "../data/characters";
 import { PlayerCharacter } from "../types/character";
 import { EquipmentType } from "../types/inventory";
 import { Rarity } from "../types/rarity";
 import BattleDisplay from "./BattleDisplay";
 import { RARITY_COLORS } from "./utils";
+import { getOwnedCharacters } from "data/characters/charUtil";
 
 function getRandomItemType(favoredType: EquipmentType): EquipmentType {
   // Hardcoded drop rates
@@ -112,25 +112,8 @@ const DungeonMode: React.FC<DungeonProps> = ({ onBack }) => {
     getCompltedRarities(),
   );
 
-  const ownedChars: PlayerCharacter[] = gachaCharacters
-    .filter(
-      (c) =>
-        gameEngine.player.unlockedCharacters &&
-        gameEngine.player.unlockedCharacters.includes(c.id),
-    )
-    .map((base) => {
-      const progress = gameEngine.player.characterProgress?.[base.id];
-      return progress
-        ? { ...base, ...progress }
-        : {
-            ...base,
-            level: 1,
-            xp: 0,
-            shards: 0,
-          };
-    });
-
   const battleEngine = gameEngine.battleEngine;
+  const ownedChars = getOwnedCharacters(gameEngine);
 
   // Pagination state for characters
   const [currentPage, setCurrentPage] = useState(1);
@@ -228,6 +211,7 @@ const DungeonMode: React.FC<DungeonProps> = ({ onBack }) => {
           getRandomEnemy(enemyLevel, selectedRarity),
           getRandomEnemy(enemyLevel, selectedRarity),
         ],
+        inventory: engine.player.equipment,
       }),
     }));
   };
@@ -458,7 +442,10 @@ const DungeonMode: React.FC<DungeonProps> = ({ onBack }) => {
                 ...engine,
                 player: {
                   ...engine.player,
-                  inventory: [...engine.player.inventory, randomEquipment],
+                  equipment: {
+                    ...engine.player.equipment,
+                    [randomEquipment.id]: randomEquipment,
+                  },
                 },
                 battleEngine: null,
               };

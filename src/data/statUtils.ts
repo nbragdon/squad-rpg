@@ -1,9 +1,11 @@
+import { EquippedItems } from "types/game";
 import { BattleCharacter } from "../battle/battleTypes";
 import { AffinityType } from "../types/affinity";
 import { Rarity } from "../types/rarity";
 import { AdjustStatSkillEffect, ModifierType } from "../types/skillTypes";
 import { AllStats, StatType } from "../types/stats";
 import { StatusEffectType } from "../types/statusEffects";
+import { EquipmentItem, EquipmentType } from "types/inventory";
 
 const AFFINITY_DAMAGE_MULT = 1.25;
 const STAT_GROWTH_PER_LEVEL = 1.05;
@@ -30,6 +32,7 @@ export interface CalculableStats {
     };
   };
   statAdjustments?: AdjustStatSkillEffect[];
+  equipment?: EquipmentItem[];
 }
 
 // Calculate stat for a character (player or enemy)
@@ -42,10 +45,27 @@ export function calculateStat(
     calculableStats.stats[statType] *
     Math.pow(STAT_GROWTH_PER_LEVEL, calculableStats.level - 1);
   // Shard bonus (player only)
-  stat *=
-    1 + (calculableStats.shards || 0) * SHARD_BONUS[calculableStats.rarity];
+  stat +=
+    stat *
+    ((calculableStats.shards || 0) * SHARD_BONUS[calculableStats.rarity]);
+
+  const baseValue = stat;
 
   // Equipment bonus (player only)
+  if (calculableStats.equipment) {
+    console.log(calculableStats);
+    calculableStats.equipment.forEach((item) => {
+      [...item.mainBoosts, ...item.subBoosts].forEach((boost) => {
+        if (statType === boost.statType) {
+          if (boost.modifierType === ModifierType.Flat) {
+            stat += boost.value;
+          } else if (boost.modifierType === ModifierType.Percentage) {
+            stat += baseValue * (boost.value / 100);
+          }
+        }
+      });
+    });
+  }
   return Math.round(stat);
 }
 
@@ -57,7 +77,7 @@ export function adjustedStat(
   if (calculableStats.statAdjustments) {
     // Apply stat adjustments
     for (const adjustment of calculableStats.statAdjustments) {
-      if (adjustment.stat === statType) {
+      if (adjustment.stat === statType && (adjustment.duration || 0) > 0) {
         if (adjustment.modifierType === ModifierType.Flat) {
           stat += adjustment.modifierValue;
         } else if (adjustment.modifierType === ModifierType.Percentage) {

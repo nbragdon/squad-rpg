@@ -6,7 +6,10 @@ import Gacha from "./components/Gacha";
 import MainMenu from "./components/MainMenu";
 import SoloMode from "./components/SoloMode";
 import { useGameEngine } from "./context/GameEngineContext";
-import { gachaCharacters } from "./data/characters";
+import {
+  gachaCharacters,
+  generateBaseCharacterProgress,
+} from "./data/characters";
 
 export enum GameScreen {
   SOLO = "solo",
@@ -39,10 +42,7 @@ function App() {
               )
               .map((base) => ({
                 ...base,
-                level: 1,
-                xp: 0,
-                xpToNextLevel: 100,
-                shards: 0,
+                ...generateBaseCharacterProgress(),
               }))}
             player={gameEngine.player}
             onBack={() => handleNavigate(GameScreen.MENU)}

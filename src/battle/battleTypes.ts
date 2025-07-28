@@ -1,3 +1,4 @@
+import { EquipmentItem } from "types/inventory";
 import { AffinityType } from "../types/affinity";
 import { PlayerCharacter } from "../types/character";
 import { EnemyCharacter } from "../types/enemy";
@@ -30,7 +31,7 @@ export interface BattleCharacter {
   weakAffinities: AffinityType[];
   strongAffinities: AffinityType[];
   isPlayer: boolean;
-  equipment?: {};
+  equipment: EquipmentItem[];
 }
 
 export interface BattleInitEnemy {
@@ -41,6 +42,7 @@ export interface BattleInitEnemy {
 export interface BattleInitOptions {
   playerCharacters: PlayerCharacter[];
   enemies: BattleInitEnemy[];
+  inventory: { [key in string]: EquipmentItem };
 }
 
 export type BattlePhase = "setup" | "combat" | "victory" | "defeat";

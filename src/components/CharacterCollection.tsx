@@ -5,7 +5,7 @@ import { getXpToNextLevel } from "../data/leveling";
 import { PlayerCharacter } from "../types/character";
 import "./CharacterCollection.css";
 import CharacterModal from "./CharacterModal";
-import { getRarityColor, RARITY_COLORS } from "./utils";
+import { RARITY_COLORS } from "./utils";
 
 // Reusable CharacterSelection Component (full implementation for Canvas)
 interface CharacterSelectionProps {
@@ -220,7 +220,6 @@ const CharacterCollection: React.FC<CharacterCollectionProps> = ({
         <CharacterModal
           character={modalCharacter}
           onClose={() => setModalCharacter(null)}
-          getRarityColor={getRarityColor}
         />
       )}
     </div>

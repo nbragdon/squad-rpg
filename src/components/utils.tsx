@@ -2,42 +2,34 @@ import React from "react";
 import {
   FaArrowUp,
   FaBolt,
-  FaBook,
-  FaBrain,
   FaCrosshairs,
-  FaDiceD20,
   FaFistRaised,
-  FaGem,
-  FaGhost,
   FaHeart,
-  FaMagic,
-  FaMoon,
   FaPaw,
-  FaRunning,
   FaShieldAlt,
   FaSkullCrossbones,
   FaStar,
-  FaSun,
-  FaTshirt,
 } from "react-icons/fa";
+import {
+  GiAnarchy,
+  GiAxeSword,
+  GiBlackHoleBolas,
+  GiChestArmor,
+  GiCrystalize,
+  GiMagicPalm,
+  GiMagicShield,
+  GiPowerRing,
+  GiRolledCloth,
+  GiSecretBook,
+  GiSparkSpirit,
+  GiSunbeams,
+  GiWalkingBoot,
+} from "react-icons/gi";
 import { AffinityType } from "../types/affinity";
 import { Rarity } from "../types/rarity";
 import { StatType } from "../types/stats";
-
-export const getRarityColor = (rarity: Rarity): string => {
-  switch (rarity) {
-    case Rarity.COMMON:
-      return "#808080";
-    case Rarity.RARE:
-      return "#0080ff";
-    case Rarity.EPIC:
-      return "#8000ff";
-    case Rarity.LEGENDARY:
-      return "#ff8000";
-    default:
-      return "#808080";
-  }
-};
+import { SkillEffectType } from "types/skillTypes";
+import { EquipmentType } from "types/inventory";
 
 export const getRarityTextColorClass = (rarity: Rarity): string => {
   switch (rarity) {
@@ -72,30 +64,47 @@ export const StatIcons: Record<StatType, React.ReactNode> = {
   [StatType.energyGain]: <FaArrowUp />, // Represents gaining something
   [StatType.strength]: <FaFistRaised />,
   [StatType.defense]: <FaShieldAlt />,
-  [StatType.magic]: <FaMagic />, // Represents magical power
-  [StatType.magicDefense]: <FaBrain />, // Represents mental defense or wisdom
-  [StatType.speed]: <FaRunning />,
+  [StatType.magic]: <GiMagicPalm />, // Represents magical power
+  [StatType.magicDefense]: <GiMagicShield />, // Represents mental defense or wisdom
+  [StatType.speed]: <GiWalkingBoot />,
   [StatType.critChance]: <FaCrosshairs />, // Represents aiming for a critical hit
   [StatType.critDamage]: <FaSkullCrossbones />, // Represents lethal damage
 };
 
 // --- Affinity Icons ---
 export const AffinityIcons: Record<AffinityType, React.ReactNode> = {
-  [AffinityType.void]: <FaMoon />, // Represents darkness/void
-  [AffinityType.radiance]: <FaSun />, // Represents light/radiance
+  [AffinityType.void]: <GiBlackHoleBolas />, // Represents darkness/void
+  [AffinityType.radiance]: <GiSunbeams />, // Represents light/radiance
   [AffinityType.beast]: <FaPaw />, // Represents animalistic nature
-  [AffinityType.spirit]: <FaGhost />, // Represents spiritual essence
-  [AffinityType.knowledge]: <FaBook />, // Represents intellect/knowledge
-  [AffinityType.chaos]: <FaDiceD20 />, // Represents randomness/chaos (D20 for RPG feel)
-  [AffinityType.gem]: <FaGem />, // Represents precious stones/gems
-  [AffinityType.textile]: <FaTshirt />, // Represents fabric/clothing
+  [AffinityType.spirit]: <GiSparkSpirit />, // Represents spiritual essence
+  [AffinityType.knowledge]: <GiSecretBook />, // Represents intellect/knowledge
+  [AffinityType.chaos]: <GiAnarchy />, // Represents randomness/chaos (D20 for RPG feel)
+  [AffinityType.gem]: <GiCrystalize />, // Represents precious stones/gems
+  [AffinityType.textile]: <GiRolledCloth />, // Represents fabric/clothing
 };
 
 // --- Rarity Icons ---
 export const RarityIcons: Record<Rarity, React.ReactNode> = {
-  [Rarity.COMMON]: <FaStar style={{ color: "#A0A0A0" }} />, // Grey star
-  [Rarity.UNCOMMON]: <FaStar style={{ color: "#4CAF50" }} />, // Green star
-  [Rarity.RARE]: <FaStar style={{ color: "#2196F3" }} />, // Blue star
-  [Rarity.EPIC]: <FaStar style={{ color: "#9C27B0" }} />, // Purple star
-  [Rarity.LEGENDARY]: <FaStar style={{ color: "#FFD700" }} />, // Gold star
+  [Rarity.COMMON]: <FaStar style={{ color: RARITY_COLORS[Rarity.COMMON] }} />, // Grey star
+  [Rarity.UNCOMMON]: (
+    <FaStar style={{ color: RARITY_COLORS[Rarity.UNCOMMON] }} />
+  ), // Green star
+  [Rarity.RARE]: <FaStar style={{ color: RARITY_COLORS[Rarity.RARE] }} />, // Blue star
+  [Rarity.EPIC]: <FaStar style={{ color: RARITY_COLORS[Rarity.EPIC] }} />, // Purple star
+  [Rarity.LEGENDARY]: (
+    <FaStar style={{ color: RARITY_COLORS[Rarity.LEGENDARY] }} />
+  ), // Gold star
+};
+
+export const ABILITY_BG_COLOR = {
+  [SkillEffectType.damage]: "bg-red-600",
+  [SkillEffectType.adjustStat]: "bg-red-600",
+  [SkillEffectType.heal]: "bg-purple-600",
+  [SkillEffectType.applyStatusEffect]: "bg-teal-600",
+};
+
+export const EQUIPMENT_TYPE_ICONS = {
+  [EquipmentType.armor]: <GiChestArmor />,
+  [EquipmentType.weapon]: <GiAxeSword />,
+  [EquipmentType.trinket]: <GiPowerRing />,
 };

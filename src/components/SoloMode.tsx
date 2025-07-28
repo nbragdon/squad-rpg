@@ -94,6 +94,7 @@ const SoloMode: React.FC<SoloModeProps> = ({ onNavigate }) => {
     const newBattleEngine = new BattleEngine({
       playerCharacters: playerArr,
       enemies: enemyArr,
+      inventory: gameEngine.player.equipment,
     });
     updateGameEngine((engine) => ({
       ...engine,

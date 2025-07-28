@@ -17,54 +17,58 @@ import {
   getStackableStatusEffectReductionAmount,
   getStatusEffectValue,
 } from "./battleUtils";
+import { GameEngine } from "engine/GameEngine";
+import { getAllEquipment } from "data/inventory/equipmentUtil";
+import { EquipmentItem } from "types/inventory";
 
-function toBattleCharacter(
-  char: PlayerCharacter | (EnemyCharacter & { level: number }),
-  isPlayer: boolean,
+function playerCharacterToBattle(
+  char: PlayerCharacter,
+  inventory: { [key in string]: EquipmentItem },
 ): BattleCharacter {
-  if (isPlayer) {
-    const playerBattleChar = {
-      ...(char as PlayerCharacter),
-      stats: {
-        ...char.stats,
-      },
-      isAlive: true,
-      statusEffects: {},
-      statAdjustments: [],
-      damage: 0,
-      isPlayer: true,
-    };
+  const playerBattleChar = {
+    ...char,
+    isAlive: true,
+    statusEffects: {},
+    statAdjustments: [],
+    damage: 0,
+    isPlayer: true,
+    equipment: getAllEquipment(char.equipedItems, inventory),
+  };
 
-    return {
-      ...playerBattleChar,
-      stats: {
-        ...getCalculatedStats(playerBattleChar),
-      },
-    };
-  } else {
-    const enemy = char as EnemyCharacter & { level: number };
-    const enemyBattleChar = {
-      ...enemy,
-      id: enemy.id + "_" + Math.random().toString(), // generate random unique id
-      stats: {
-        ...enemy.stats,
-      },
-      isAlive: true,
-      level: enemy.level,
-      shards: 0,
-      statusEffects: {},
-      statAdjustments: [],
-      damage: 0,
-      isPlayer: false,
-    };
+  return {
+    ...playerBattleChar,
+    stats: {
+      ...getCalculatedStats(playerBattleChar),
+    },
+  };
+}
 
-    return {
-      ...enemyBattleChar,
-      stats: {
-        ...getCalculatedStats(enemyBattleChar),
-      },
-    };
-  }
+function enemyCharacterToBattle(
+  enemy: EnemyCharacter,
+  level: number,
+): BattleCharacter {
+  const enemyBattleChar = {
+    ...enemy,
+    id: crypto.randomUUID(), // generate random unique id
+    stats: {
+      ...enemy.stats,
+    },
+    isAlive: true,
+    level: level,
+    shards: 0,
+    statusEffects: {},
+    statAdjustments: [],
+    damage: 0,
+    isPlayer: false,
+    equipment: [],
+  };
+
+  return {
+    ...enemyBattleChar,
+    stats: {
+      ...getCalculatedStats(enemyBattleChar),
+    },
+  };
 }
 
 /**
@@ -148,14 +152,14 @@ export class BattleEngine {
     }
     // Generate player team
     const playerTeam = options.playerCharacters.map((c) =>
-      toBattleCharacter(c, true),
+      playerCharacterToBattle(c, options.inventory),
     );
     // Generate enemy team
     const enemyTeam = options.enemies.map((e) => {
       const base = e.id;
       // Defensive: if not found, skip
       if (!base) throw new Error(`Enemy not found: ${e.id}`);
-      return toBattleCharacter({ ...base, level: e.level }, false);
+      return enemyCharacterToBattle(base, e.level);
     });
 
     this.state = {
@@ -477,6 +481,7 @@ export class BattleEngine {
 
   reduceStatAdjustmentDurations(battleChar: BattleCharacter) {
     battleChar.statAdjustments.forEach((adj) => {
+      console.log("adjustment", adj);
       if (!adj.duration) return;
       adj.duration -= 1;
       if (adj.duration <= 0) {

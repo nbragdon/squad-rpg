@@ -4,6 +4,8 @@ import { BattleCharacter, calculateBattleXp } from "../battle";
 import { useGameEngine } from "../context/GameEngineContext";
 import { adjustedStat, calculateStat } from "../data/statUtils";
 import { StatType } from "../types/stats";
+import { ABILITY_BG_COLOR, AffinityIcons, StatIcons } from "./utils";
+import { generateBaseCharacterProgress } from "data/characters";
 
 const AUTO_WAIT_TIME = 1500; // Time in ms for auto actions
 
@@ -160,12 +162,53 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
         key={Math.random()}
         className={`
           mb-2 p-2 rounded-lg transition-all duration-300
-          ${char.isAlive ? "text-white" : "text-gray-400 opacity-70"}
+          ${char.isAlive ? "text-white" : "text-gray-300 opacity-70"}
           ${currentCharacter?.id === char.id ? "font-bold bg-white bg-opacity-10 ring-2 ring-yellow-300 ring-offset-1 ring-offset-blue-900" : "font-normal"}
         `}
       >
-        <div className="text-center text-lg mb-1">
+        <div className="text-center text-base mb-1">
           {char.name} (Lv.{char.level})
+        </div>
+        {/* Affinities */}
+        <div className="flex justify-between text-xs">
+          <div>
+            <span className="font-semibold text-green-400 flex items-center mb-1">
+              Strong:
+            </span>
+            <div className="flex flex-wrap gap-1">
+              {char.strongAffinities.length > 0 ? (
+                char.strongAffinities.map((affinity) => (
+                  <span
+                    key={affinity}
+                    className="flex items-center bg-green-900 px-2 py-0.5 rounded-full"
+                  >
+                    {AffinityIcons[affinity] || "❓"}
+                  </span>
+                ))
+              ) : (
+                <span className="text-gray-400">None</span>
+              )}
+            </div>
+          </div>
+          <div>
+            <span className="font-semibold text-red-400 flex items-center mb-1">
+              Weak:
+            </span>
+            <div className="flex flex-wrap gap-1 justify-end">
+              {char.weakAffinities.length > 0 ? (
+                char.weakAffinities.map((affinity) => (
+                  <span
+                    key={affinity}
+                    className="flex items-center bg-red-900 px-2 py-0.5 rounded-full"
+                  >
+                    {AffinityIcons[affinity] || "❓"}
+                  </span>
+                ))
+              ) : (
+                <span className="text-gray-400">None</span>
+              )}
+            </div>
+          </div>
         </div>
         {/* Health Bar */}
         <div className="flex items-center mb-1">
@@ -219,6 +262,8 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
         bgColor: "bg-green-600",
         cost: 0,
         costStat: StatType.energy,
+        isUltimate: false,
+        cooldown: 0,
       },
       ...(player.skills || []).map((skill) => ({
         key: skill.id,
@@ -232,9 +277,11 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
         },
         disabled: !battleEngine.canUseSkill(skill.id, player.id),
         desc: `(Cost: ${skill.cost || 0} ${skill.costStat || "energy"})`,
-        bgColor: "bg-gray-600",
+        bgColor: ABILITY_BG_COLOR[skill.effects[0].type] || "bg-gray-600",
         cost: skill.cost || 0,
         costStat: skill.costStat || StatType.energy,
+        isUltimate: false,
+        cooldown: battleEngine.getSkillCooldown(player.id, skill.id),
       })),
       {
         key: "end_turn",
@@ -251,6 +298,8 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
         bgColor: "bg-orange-600",
         cost: 0,
         costStat: StatType.energy,
+        isUltimate: false,
+        cooldown: 0,
       },
     ];
     // Pad to 4 columns
@@ -264,6 +313,8 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
         bgColor: "bg-transparent", // Use transparent background for empty slots
         cost: 0,
         costStat: StatType.energy,
+        isUltimate: false,
+        cooldown: 0,
       });
     return (
       <div
@@ -273,36 +324,40 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
         "
       >
         {abilities.map((ab, i) => (
-          <div key={ab.key} className="relative flex flex-col items-center">
+          <div
+            className={`relative flex flex-col items-center ${ab.isUltimate ? "col-span-full" : ""}`}
+          >
             <button
               onClick={ab.onClick}
               disabled={ab.disabled}
               className={`
-                ${ab.bgColor} text-white font-bold text-base
-                min-w-[8rem] min-h-[2.5rem] rounded-lg mb-1
-                ${ab.disabled ? "opacity-50 border border-gray-400 cursor-not-allowed" : "hover:bg-opacity-80 cursor-pointer"}
-                transition-colors duration-200 relative overflow-hidden
-              `}
+              ${ab.bgColor} text-white font-bold text-base
+              min-w-[8rem] min-h-[3rem] rounded-lg mb-1 px-4 py-2
+              ${ab.disabled ? "opacity-50 border border-gray-400 cursor-not-allowed" : "hover:bg-opacity-80 cursor-pointer"}
+              transition-colors duration-200 relative overflow-hidden
+              ${ab.isUltimate ? "bg-gradient-to-r from-yellow-500 to-orange-500 text-gray-900 animate-pulse-glow" : ""}
+              shadow-md hover:shadow-lg active:scale-95
+              flex flex-col items-center justify-center
+            `}
             >
-              {ab.name}
+              {/* Ability Name */}
+              <span className="relative z-10 text-center">
+                {ab.cooldown > 0 ? `CD: ${ab.cooldown}` : ab.name}
+              </span>
+
+              {/* Cost on a new line below the name */}
               {ab.cost > 0 && (
                 <span
-                  className={`absolute bottom-1 right-1 text-xs font-normal px-1 py-0.5 rounded-md
-                  ${player.stats[ab.costStat] < ab.cost ? "bg-red-700" : "bg-gray-900"}
-                `}
+                  className={`relative z-10 text-xs font-semibold mt-1 flex items-center justify-center text-blue-300`}
                 >
-                  {ab.cost} {ab.costStat === StatType.energy ? "E" : ""}
+                  {StatIcons[ab.costStat]}{" "}
+                  <span className="ml-1">{ab.cost}</span>
                 </span>
               )}
             </button>
-            <div className="text-sm text-white text-center min-h-[2.25rem]">
+            <div className="text-sm text-gray-300 text-center min-h-[2.25rem]">
               {ab.desc}
             </div>
-            {ab.disabled && (
-              <div className="absolute inset-0 bg-black bg-opacity-60 rounded-lg flex items-center justify-center text-gray-300 font-bold text-lg pointer-events-none">
-                Disabled
-              </div>
-            )}
           </div>
         ))}
       </div>
@@ -329,11 +384,7 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
         battleState.playerTeam.forEach((char: { id: string | number }) => {
           let characterToUpdate = updatedCharacterProgress[char.id];
           if (!characterToUpdate) {
-            characterToUpdate = {
-              level: 1,
-              xp: 0,
-              shards: 0,
-            };
+            characterToUpdate = generateBaseCharacterProgress();
           }
           updatedCharacterProgress[char.id] = levelUp({
             ...characterToUpdate,
