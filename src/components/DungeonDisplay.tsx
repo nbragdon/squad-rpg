@@ -4,7 +4,6 @@ import { generateRandomEquipment } from "data/inventory/equipmentUtil";
 import React, { useEffect, useState } from "react";
 import { useGameEngine } from "../context/GameEngineContext";
 import { gachaCharacters } from "../data/characters";
-import { getXpToNextLevel } from "../data/leveling";
 import { PlayerCharacter } from "../types/character";
 import { EquipmentType } from "../types/inventory";
 import { Rarity } from "../types/rarity";
@@ -127,7 +126,6 @@ const DungeonMode: React.FC<DungeonProps> = ({ onBack }) => {
             ...base,
             level: 1,
             xp: 0,
-            xpToNextLevel: getXpToNextLevel(1),
             shards: 0,
           };
     });

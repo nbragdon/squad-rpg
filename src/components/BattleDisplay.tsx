@@ -1,7 +1,7 @@
+import { levelUp } from "data/leveling";
 import React, { useCallback, useEffect, useState } from "react";
 import { BattleCharacter, calculateBattleXp } from "../battle";
 import { useGameEngine } from "../context/GameEngineContext";
-import { levelUp } from "../data/leveling";
 import { calculateStat } from "../data/statUtils";
 import { StatType } from "../types/stats";
 
@@ -42,22 +42,21 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
         }));
       }
 
-      const skill = player.skills.find((s) => s.id === skillId);
-      const skillStat = skill?.costStat || StatType.energy;
-      const skillCost = skill?.cost || 0;
-
-      if (player.stats[skillStat] >= skillCost) {
-        console.log("Auto-using skill:", skill?.name, "for", player.name);
-        battleEngine?.useSkill(skillId, player.id);
+      if (battleEngine?.canUseSkill(skillId, player.id)) {
+        console.log("Auto-using skill:", skillId, "for", player.name);
+        battleEngine.takeTurn("skill", skillId);
         // After using a skill, randomly pick a *new* skill for the *next* turn of this character
         setCharactersAutoSelection((prev) => ({
           ...prev,
           [player.id]:
             player.skills[Math.floor(Math.random() * player.skills.length)].id,
         }));
-      } else {
+      } else if (battleEngine?.canAttack(player.id)) {
         console.log("Auto-basic attacking for", player.name);
-        battleEngine?.attack(player.id);
+        battleEngine?.takeTurn("attack");
+      } else {
+        console.log("Auto end turn for", player.name);
+        battleEngine?.takeTurn("endTurn");
       }
 
       // After the action, update the game engine to reflect the battle state change
@@ -73,17 +72,14 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
 
   // Auto mode effect
   useEffect(() => {
-    const isPlayerTurn = battleEngine?.getCurrentTeamTurn() === "player";
-    const currentPlayer = isPlayerTurn
-      ? battleEngine?.getCurrentTurnCharacter()
-      : null;
+    const currentPlayer = battleEngine?.getCurrentTurnCharacter() || null;
     const enemyExists = battleState?.enemyTeam.some((c) => c.isAlive);
 
     if (
       auto &&
       battleState?.battlePhase === "combat" &&
-      isPlayerTurn &&
       currentPlayer &&
+      currentPlayer.isPlayer &&
       enemyExists &&
       !waitingOnAutoAction
     ) {
@@ -96,8 +92,6 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
     }
   }, [
     auto,
-    battleState?.battlePhase,
-    battleEngine?.getCurrentTeamTurn(),
     battleEngine, // This dependency ensures the effect re-runs after an enemy turn
     onAutoTurn, // Depend on the memoized onAutoTurn
     waitingOnAutoAction, // To re-evaluate when `waitingOnAutoAction` becomes false
@@ -107,8 +101,7 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
   if (!battleState) return null;
 
   const currentCharacter = battleEngine.getCurrentTurnCharacter();
-  const isPlayerTurn =
-    battleEngine.getCurrentTeamTurn() === "player" && currentCharacter && !auto;
+  const isPlayerTurn = (currentCharacter?.isPlayer || false) && !auto;
 
   // Timeline: show turn order and who has acted this round
   const aliveCharacters = [
@@ -216,7 +209,7 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
         key: "basic",
         name: "Basic Attack",
         onClick: () => {
-          battleEngine.attack(player.id);
+          battleEngine.takeTurn("attack");
           updateGameEngine((engine) => ({
             ...engine,
             battleEngine: battleEngine?.getNewInstance(),
@@ -232,7 +225,7 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
         key: skill.id,
         name: skill.name,
         onClick: () => {
-          battleEngine.useSkill(skill.id, player.id);
+          battleEngine.takeTurn("skill", skill.id);
           updateGameEngine((engine) => ({
             ...engine,
             battleEngine: battleEngine?.getNewInstance(),
@@ -245,6 +238,22 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
         cost: skill.cost || 0,
         costStat: skill.costStat || StatType.energy,
       })),
+      {
+        key: "end_turn",
+        name: "End Turn",
+        onClick: () => {
+          battleEngine.takeTurn("endTurn");
+          updateGameEngine((engine) => ({
+            ...engine,
+            battleEngine: battleEngine?.getNewInstance(),
+          }));
+        },
+        disabled: false,
+        desc: `End turn without taking an action`,
+        bgColor: "bg-orange-600",
+        cost: 0,
+        costStat: StatType.energy,
+      },
     ];
     // Pad to 4 columns
     while (abilities.length < 4)
@@ -318,12 +327,20 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
     const handleVictory = () => {
       const xpGained = getVictoryXp();
       updateGameEngine((engine) => {
-        const updatedCharacterProgress = { ...engine.player.characterProgress };
+        let updatedCharacterProgress = { ...engine.player.characterProgress };
         battleState.playerTeam.forEach((char: { id: string | number }) => {
           let characterToUpdate = updatedCharacterProgress[char.id];
-          characterToUpdate.xp = (characterToUpdate.xp || 0) + xpGained;
-          characterToUpdate = levelUp(characterToUpdate);
-          updatedCharacterProgress[char.id] = characterToUpdate;
+          if (!characterToUpdate) {
+            characterToUpdate = {
+              level: 1,
+              xp: 0,
+              shards: 0,
+            };
+          }
+          updatedCharacterProgress[char.id] = levelUp({
+            ...characterToUpdate,
+            xp: (characterToUpdate.xp || 0) + xpGained,
+          });
         });
 
         return {

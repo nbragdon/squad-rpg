@@ -23,11 +23,13 @@ export interface BattleCharacter {
       type: StatusEffectType;
       duration: number;
       value: number;
+      stackable: boolean;
     };
   };
   statAdjustments: AdjustStatSkillEffect[];
   weakAffinities: AffinityType[];
   strongAffinities: AffinityType[];
+  isPlayer: boolean;
   equipment?: {};
 }
 
@@ -50,5 +52,6 @@ export interface BattleState {
   battlePhase: BattlePhase;
   turnCount: number;
   battleLog: string[];
+  skillCooldowns: { [characterId: string]: { [skillId: string]: number } };
   xpLogs?: string[];
 }

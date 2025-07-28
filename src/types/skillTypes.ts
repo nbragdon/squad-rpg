@@ -61,7 +61,6 @@ export interface ApplyStatusEffectSkillEffect extends SkillEffect {
 export interface ApplyPoisonStatusEffectSkillEffect
   extends ApplyStatusEffectSkillEffect {
   statusEffectType: StatusEffectType.poison;
-  modifierType: ModifierType;
   stat: StatType;
   value: number; // Optional value for the status effect
   duration: number; // Optional duration for damage over time effects
@@ -92,9 +91,9 @@ export interface ApplyBleedStatusEffectSkillEffect
   stackable: true;
 }
 
-export interface ApplyFreezeStatusEffectSkillEffect
+export interface ApplyBrittleStatusEffectSkillEffect
   extends ApplyStatusEffectSkillEffect {
-  statusEffectType: StatusEffectType.freeze;
+  statusEffectType: StatusEffectType.brittle;
   value: number; // Optional value for the status effect
   duration: undefined; // Optional duration for damage over time effects
   stackable: true;

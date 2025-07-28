@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useGameEngine } from "../context/GameEngineContext";
 import { gachaCharacters } from "../data/characters";
-import { getXpToNextLevel } from "../data/leveling";
 import { CharacterBase, PlayerCharacter } from "../types/character";
 import { Rarity } from "../types/rarity";
 import "./Gacha.css";
@@ -37,7 +36,6 @@ function createPlayerCharacter(base: CharacterBase): PlayerCharacter {
     ...base,
     level: 1,
     xp: 0,
-    xpToNextLevel: getXpToNextLevel(1),
     shards: 0,
   };
 }
@@ -176,7 +174,6 @@ const Gacha: React.FC<GachaProps> = ({ onBack }) => {
           newProgress.characterProgress[char.id] = {
             level: char.level,
             xp: char.xp,
-            xpToNextLevel: getXpToNextLevel(char.level),
             shards: char.shards,
           };
         } else {

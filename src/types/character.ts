@@ -19,7 +19,6 @@ export interface CharacterBase {
 export interface PlayerCharacter extends CharacterBase {
   level: number;
   xp: number; // Current XP
-  xpToNextLevel: number; // XP required for next level
   shards: number;
   equippedWeapon?: InventoryItem | null;
   equippedArmor?: InventoryItem | null;

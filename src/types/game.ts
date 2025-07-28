@@ -20,7 +20,6 @@ export interface Reward {
 export interface CharacterProgress {
   level: number;
   xp: number;
-  xpToNextLevel: number;
   shards: number;
 }
 
