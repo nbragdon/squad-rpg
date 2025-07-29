@@ -10,6 +10,7 @@ import {
   gachaCharacters,
   generateBaseCharacterProgress,
 } from "./data/characters";
+import EquipmentManagementPage from "components/EquipmentManagement";
 
 export enum GameScreen {
   SOLO = "solo",
@@ -19,6 +20,7 @@ export enum GameScreen {
   COLLECTION = "collection",
   TEAM = "team",
   GACHA = "gacha",
+  EQUIPMENT = "equipment",
 }
 
 function App() {
@@ -54,6 +56,12 @@ function App() {
         return <Gacha onBack={() => handleNavigate(GameScreen.MENU)} />;
       case "dungeon":
         return <DungeonMode onBack={() => handleNavigate(GameScreen.MENU)} />;
+      case "equipment":
+        return (
+          <EquipmentManagementPage
+            onBack={() => handleNavigate(GameScreen.MENU)}
+          />
+        );
       default:
         return <MainMenu onNavigate={handleNavigate} />;
     }

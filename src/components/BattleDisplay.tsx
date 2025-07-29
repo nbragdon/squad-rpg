@@ -4,8 +4,17 @@ import { BattleCharacter, calculateBattleXp } from "../battle";
 import { useGameEngine } from "../context/GameEngineContext";
 import { adjustedStat, calculateStat } from "../data/statUtils";
 import { StatType } from "../types/stats";
-import { ABILITY_BG_COLOR, AffinityIcons, StatIcons } from "./utils";
+import {
+  ABILITY_BG_COLOR,
+  AffinityIcons,
+  getRarityTextColorClass,
+  RarityIcons,
+  StatIcons,
+  StatusEffectIcons,
+} from "./utils";
 import { generateBaseCharacterProgress } from "data/characters";
+import { AffinityType } from "types/affinity";
+import { StatusEffectType } from "types/statusEffects";
 
 const AUTO_WAIT_TIME = 1500; // Time in ms for auto actions
 
@@ -157,24 +166,113 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
       (char.stats[StatType.energy] / (char.stats[StatType.energy] || 1)) * 100,
     ); // Prevent division by zero
 
+    const healthColor =
+      healthPercentage > 50
+        ? "bg-green-500"
+        : healthPercentage > 20
+          ? "bg-yellow-500"
+          : "bg-red-500";
+    const energyColor = "bg-blue-500";
+
+    const isActiveTurn = currentCharacter?.id === char.id;
+
     return (
       <div
-        key={Math.random()}
+        key={char.id}
         className={`
-          mb-2 p-2 rounded-lg transition-all duration-300
-          ${char.isAlive ? "text-white" : "text-gray-300 opacity-70"}
-          ${currentCharacter?.id === char.id ? "font-bold bg-white bg-opacity-10 ring-2 ring-yellow-300 ring-offset-1 ring-offset-blue-900" : "font-normal"}
+          relative bg-gray-800 rounded-xl p-4 text-white shadow-lg border-2
+          ${char.isAlive ? (isActiveTurn ? "border-yellow-400 ring-2 ring-yellow-400" : "border-blue-700") : "border-gray-600 opacity-50"}
+          w-full sm:w-auto flex-grow transition-all duration-300 transform
+          ${isActiveTurn ? "scale-105" : "scale-100"}
         `}
       >
-        <div className="text-center text-base mb-1">
-          {char.name} (Lv.{char.level})
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center">
+            <img
+              src={`https://placehold.co/40x40/6B7280/FFFFFF?text=${char.name.charAt(0)}`}
+              alt={char.name}
+              className="w-10 h-10 rounded-full border-2 border-gray-600 object-cover mr-3"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = `https://placehold.co/40x40/6B7280/FFFFFF?text=${char.name.charAt(0)}`;
+              }}
+            />
+            <div>
+              <div className="text-lg font-bold leading-tight">
+                {char.name} (Lv.{char.level})
+              </div>
+              <div
+                className={`text-sm font-semibold ${getRarityTextColorClass(char.rarity)} flex items-center`}
+              >
+                {RarityIcons[char.rarity]}
+                <span className="ml-1">{char.rarity.toUpperCase()}</span>
+              </div>
+            </div>
+          </div>
+          {/* Status Effects Icons */}
+          {Object.keys(char.statusEffects).length > 0 && (
+            <div className="flex flex-wrap justify-end space-x-1 ml-2">
+              {Object.values(char.statusEffects).map((effect, idx) => (
+                <span
+                  key={idx}
+                  className="flex items-center text-xl"
+                  title={`${effect.type} (${effect.duration} turns)`}
+                >
+                  {StatusEffectIcons[effect.type]}
+                  {effect.value !== 0 && (
+                    <span className="text-xs ml-0.5 font-semibold">
+                      {effect.type === StatusEffectType.poison ||
+                      effect.type === StatusEffectType.burn
+                        ? `${effect.value} dmg`
+                        : effect.value}
+                    </span>
+                  )}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
+
+        {/* Health Bar */}
+        <div className="mb-2">
+          <div className="flex items-center text-sm mb-0.5">
+            <span className="mr-2 text-red-600">
+              {StatIcons[StatType.health]}
+            </span>{" "}
+            HP:
+          </div>
+          <div className="w-full bg-gray-700 rounded-full h-4 relative">
+            <div
+              className={`${healthColor} h-4 rounded-full transition-all duration-300`}
+              style={{ width: `${healthPercentage}%` }}
+            ></div>
+            <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">
+              {Math.max(0, Math.floor(charHealth - char.damage))}/{charHealth}
+            </span>
+          </div>
+        </div>
+        {/* Energy Bar */}
+        <div className="mb-3">
+          <div className="flex items-center text-sm mb-0.5">
+            <span className="mr-2 text-yellow-400">
+              {StatIcons[StatType.energy]}
+            </span>{" "}
+            Energy:
+          </div>
+          <div className="w-full bg-gray-700 rounded-full h-4 relative">
+            <div
+              className={`${energyColor} h-4 rounded-full transition-all duration-300`}
+              style={{ width: `${energyPercentage}%` }}
+            ></div>
+            <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">
+              {Math.floor(char.stats[StatType.energy])}
+            </span>
+          </div>
+        </div>
+
         {/* Affinities */}
         <div className="flex justify-between text-xs">
           <div>
-            <span className="font-semibold text-green-400 flex items-center mb-1">
-              Strong:
-            </span>
             <div className="flex flex-wrap gap-1">
               {char.strongAffinities.length > 0 ? (
                 char.strongAffinities.map((affinity) => (
@@ -182,7 +280,8 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
                     key={affinity}
                     className="flex items-center bg-green-900 px-2 py-0.5 rounded-full"
                   >
-                    {AffinityIcons[affinity] || "❓"}
+                    {AffinityIcons[affinity as AffinityType] || "❓"}
+                    <span className="ml-1 capitalize">{affinity}</span>
                   </span>
                 ))
               ) : (
@@ -191,9 +290,6 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
             </div>
           </div>
           <div>
-            <span className="font-semibold text-red-400 flex items-center mb-1">
-              Weak:
-            </span>
             <div className="flex flex-wrap gap-1 justify-end">
               {char.weakAffinities.length > 0 ? (
                 char.weakAffinities.map((affinity) => (
@@ -201,7 +297,8 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
                     key={affinity}
                     className="flex items-center bg-red-900 px-2 py-0.5 rounded-full"
                   >
-                    {AffinityIcons[affinity] || "❓"}
+                    {AffinityIcons[affinity as AffinityType] || "❓"}
+                    <span className="ml-1 capitalize">{affinity}</span>
                   </span>
                 ))
               ) : (
@@ -210,34 +307,11 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
             </div>
           </div>
         </div>
-        {/* Health Bar */}
-        <div className="flex items-center mb-1">
-          <span className="text-sm mr-2 w-12 text-right">HP:</span>
-          <div className="flex-grow bg-gray-700 rounded-full h-3 relative">
-            <div
-              className="bg-red-500 h-3 rounded-full"
-              style={{ width: `${healthPercentage}%` }}
-            ></div>
-            <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">
-              {Math.floor(charHealth - char.damage)}/{charHealth}
-            </span>
-          </div>
-        </div>
-        {/* Energy Bar */}
-        <div className="flex items-center">
-          <span className="text-sm mr-2 w-12 text-right">Energy:</span>
-          <div className="flex-grow bg-gray-700 rounded-full h-3 relative">
-            <div
-              className="bg-blue-500 h-3 rounded-full"
-              style={{ width: `${energyPercentage}%` }}
-            ></div>
-            <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">
-              {char.stats[StatType.energy]}
-            </span>
-          </div>
-        </div>
+
         {!char.isAlive && (
-          <div className="text-center text-red-400 text-sm mt-1">(KO)</div>
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70 rounded-xl text-red-500 text-2xl font-bold">
+            DEFEATED
+          </div>
         )}
       </div>
     );
@@ -463,20 +537,32 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
           {timeline}
         </div>
       </div>
-      <div className="flex flex-col sm:flex-row justify-center gap-8 sm:gap-16 mb-4">
-        <div className="w-full sm:w-1/2">
-          <h4 className="text-center text-xl font-semibold mb-2 text-yellow-300">
+
+      {/* Teams Display */}
+      <div className="flex flex-col sm:flex-row justify-center gap-6 sm:gap-10 mb-8 w-full">
+        <div className="w-full sm:w-1/2 flex flex-col items-center">
+          <h4 className="text-center text-3xl font-extrabold mb-4 text-yellow-300">
             Your Team
           </h4>
-          {battleState.playerTeam.map(renderCharInfo)}
+          <div className="flex flex-col gap-4 w-full max-w-sm">
+            {battleState.playerTeam.map((char) => renderCharInfo(char))}
+          </div>
         </div>
-        <div className="w-full sm:w-1/2">
-          <h4 className="text-center text-xl font-semibold mb-2 text-yellow-300">
+
+        <div className="hidden sm:flex items-center justify-center text-6xl font-extrabold text-red-500 mx-4">
+          VS
+        </div>
+
+        <div className="w-full sm:w-1/2 flex flex-col items-center">
+          <h4 className="text-center text-3xl font-extrabold mb-4 text-red-400">
             Enemies
           </h4>
-          {battleState.enemyTeam.map(renderCharInfo)}
+          <div className="flex flex-col gap-4 w-full max-w-sm">
+            {battleState.enemyTeam.map((char) => renderCharInfo(char))}
+          </div>
         </div>
       </div>
+
       <div className="flex justify-center gap-6 my-4">
         <button
           onClick={() =>

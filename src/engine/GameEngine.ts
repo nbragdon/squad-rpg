@@ -23,6 +23,7 @@ export function createDefaultGameEngine(): GameEngine {
     player: {
       id: "player_1",
       name: "Player",
+      coins: 0,
       crystals: 0,
       equipment: {},
       autoBattle: false,

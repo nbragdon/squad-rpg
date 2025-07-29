@@ -669,3 +669,25 @@ export function getAllEquipment(
 
   return itermediate;
 }
+
+export function getEquipmentValue(equipment: EquipmentItem): number {
+  let value = 10;
+  switch (equipment.rarity) {
+    case Rarity.UNCOMMON:
+      value += 10;
+      break;
+    case Rarity.RARE:
+      value += 20;
+      break;
+    case Rarity.EPIC:
+      value += 30;
+      break;
+    case Rarity.LEGENDARY:
+      value += 50;
+      break;
+  }
+  value *= equipment.level;
+  value *= equipment.mainBoosts.length;
+  value *= 1 + 0.5 * (equipment.subBoosts.length - 1);
+  return Math.floor(value);
+}

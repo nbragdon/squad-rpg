@@ -4,8 +4,18 @@ import { Rarity } from "../../types/rarity";
 import { StatType } from "../../types/stats";
 import {
   ArcaneBoltSkill,
+  CripplingShotSkill,
+  DeepGashSkill,
+  EtherealBarrierSkill,
   HeelSmashSkill,
+  HolyLightSkill,
+  PiercingArrowSkill,
+  PinDownSkill,
+  QuickHealSkill,
   QuickStabSkill,
+  ShadowSlashSkill,
+  ShadowStepSkill,
+  SpiritWardSkill,
   StoneSkinSkill,
   ThunderClapSkill,
   VenomDaggerSkill,
@@ -92,7 +102,7 @@ export const commonCharacters: CharacterBase[] = [
       [StatType.critChance]: BASELINE.COMMON[StatType.critChance],
       [StatType.critDamage]: BASELINE.COMMON[StatType.critDamage],
     },
-    skills: [ThunderClapSkill, ArcaneBoltSkill], // quickHeal, holyLight
+    skills: [QuickHealSkill, HolyLightSkill],
     ultimateSkill: ThunderClapSkill, // clericSanctuary
     strongAffinities: [AffinityType.radiance],
     weakAffinities: [AffinityType.chaos, AffinityType.void],
@@ -111,9 +121,9 @@ export const commonCharacters: CharacterBase[] = [
       [StatType.magicDefense]: BASELINE.COMMON[StatType.magicDefense] - 10,
       [StatType.speed]: BASELINE.COMMON[StatType.speed] + 10,
       [StatType.critChance]: BASELINE.COMMON[StatType.critChance] + 3,
-      [StatType.critDamage]: BASELINE.COMMON[StatType.critDamage] + 0.1,
+      [StatType.critDamage]: BASELINE.COMMON[StatType.critDamage] + 10,
     },
-    skills: [ThunderClapSkill, ArcaneBoltSkill], // burningLash, cripplingShot
+    skills: [CripplingShotSkill, DeepGashSkill],
     ultimateSkill: ThunderClapSkill, // hunterVolley
     strongAffinities: [AffinityType.beast],
     weakAffinities: [AffinityType.gem, AffinityType.knowledge],
@@ -134,30 +144,30 @@ export const commonCharacters: CharacterBase[] = [
       [StatType.critChance]: BASELINE.COMMON[StatType.critChance],
       [StatType.critDamage]: BASELINE.COMMON[StatType.critDamage],
     },
-    skills: [ThunderClapSkill, ArcaneBoltSkill], // holyLight, radiantPulse
+    skills: [SpiritWardSkill, EtherealBarrierSkill],
     ultimateSkill: ThunderClapSkill, // divineLight
     strongAffinities: [AffinityType.spirit],
     weakAffinities: [AffinityType.beast, AffinityType.radiance],
   },
   {
-    id: "doomcaster",
-    name: "Doomcaster",
+    id: "shadow_slayer",
+    name: "Shadow Slayer",
     rarity: Rarity.COMMON,
     stats: {
       [StatType.health]: BASELINE.COMMON[StatType.health] - 30,
       [StatType.energy]: 0,
       [StatType.energyGain]: BASELINE.COMMON[StatType.energyGain] + 3,
-      [StatType.strength]: BASELINE.COMMON[StatType.strength] - 20,
+      [StatType.strength]: BASELINE.COMMON[StatType.strength] + 30,
       [StatType.defense]: BASELINE.COMMON[StatType.defense] - 20,
-      [StatType.magic]: BASELINE.COMMON[StatType.magic] + 20,
-      [StatType.magicDefense]: BASELINE.COMMON[StatType.magicDefense] + 20,
-      [StatType.speed]: BASELINE.COMMON[StatType.speed] - 10,
-      [StatType.critChance]: BASELINE.COMMON[StatType.critChance],
-      [StatType.critDamage]: BASELINE.COMMON[StatType.critDamage] + 0.2,
+      [StatType.magic]: BASELINE.COMMON[StatType.magic],
+      [StatType.magicDefense]: BASELINE.COMMON[StatType.magicDefense],
+      [StatType.speed]: BASELINE.COMMON[StatType.speed] + 30,
+      [StatType.critChance]: BASELINE.COMMON[StatType.critChance] + 3,
+      [StatType.critDamage]: BASELINE.COMMON[StatType.critDamage] + 20,
     },
-    skills: [ThunderClapSkill, ArcaneBoltSkill], // arcaneBolt, shadowSlash
+    skills: [ShadowStepSkill, ShadowSlashSkill],
     ultimateSkill: ThunderClapSkill, // arcaneCataclysm
-    strongAffinities: [AffinityType.knowledge],
+    strongAffinities: [AffinityType.void],
     weakAffinities: [AffinityType.chaos, AffinityType.textile],
   },
   {
@@ -176,7 +186,7 @@ export const commonCharacters: CharacterBase[] = [
       [StatType.critChance]: BASELINE.COMMON[StatType.critChance] + 5,
       [StatType.critDamage]: BASELINE.COMMON[StatType.critDamage] + 0.3,
     },
-    skills: [ThunderClapSkill, ArcaneBoltSkill], // burningLash, piercingArrow
+    skills: [PinDownSkill, PiercingArrowSkill],
     ultimateSkill: ThunderClapSkill, // hunterVolley
     strongAffinities: [AffinityType.textile],
     weakAffinities: [AffinityType.gem, AffinityType.spirit],

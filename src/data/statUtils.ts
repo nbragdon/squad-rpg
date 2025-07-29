@@ -7,6 +7,7 @@ import { AllStats, StatType } from "../types/stats";
 import { StatusEffectType } from "../types/statusEffects";
 import { EquipmentItem, EquipmentType } from "types/inventory";
 
+const BRITTLE_MULTIPLIER = 0.02;
 const AFFINITY_DAMAGE_MULT = 1.25;
 const STAT_GROWTH_PER_LEVEL = 1.05;
 
@@ -125,10 +126,16 @@ export function calculateDamage(
   // crit
   const isShocked = target.statusEffects?.[StatusEffectType.shock];
   if (!isShocked && didCrit(attacker.stats[StatType.critChance])) {
-    dmg *= 1 + attacker.stats[StatType.critDamage];
+    dmg *= 1 + attacker.stats[StatType.critDamage] / 100;
     if (battleLog) {
       battleLog.push(`${attacker.name} crits ${target.name}!`);
     }
+  }
+
+  // brittle
+  const brittle = target.statusEffects?.[StatusEffectType.brittle]?.value;
+  if (brittle) {
+    dmg *= 1 + brittle * BRITTLE_MULTIPLIER;
   }
   return Math.max(1, Math.round(dmg));
 }

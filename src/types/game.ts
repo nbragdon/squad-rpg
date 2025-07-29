@@ -31,6 +31,7 @@ export interface CharacterProgress {
 }
 
 export interface PlayerProgress {
+  coins: number;
   crystals: number; // Renamed from currency
   soloProgress: number; // Highest unlocked solo stage (1 = chapter 1 stage 1)
   dungeonProgress: {

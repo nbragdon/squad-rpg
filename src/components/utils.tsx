@@ -2,13 +2,20 @@ import React from "react";
 import {
   FaArrowUp,
   FaBolt,
+  FaCoins,
   FaCrosshairs,
+  FaDizzy,
+  FaFire,
   FaFistRaised,
   FaHeart,
   FaPaw,
+  FaQuestionCircle,
+  FaRunning,
   FaShieldAlt,
   FaSkullCrossbones,
   FaStar,
+  FaTint,
+  FaVolumeMute,
 } from "react-icons/fa";
 import {
   GiAnarchy,
@@ -16,11 +23,16 @@ import {
   GiBlackHoleBolas,
   GiChestArmor,
   GiCrystalize,
+  GiDropWeapon,
+  GiLightningTrio,
   GiMagicPalm,
   GiMagicShield,
+  GiPoisonBottle,
   GiPowerRing,
   GiRolledCloth,
   GiSecretBook,
+  GiShouting,
+  GiSnail,
   GiSparkSpirit,
   GiSunbeams,
   GiWalkingBoot,
@@ -30,6 +42,7 @@ import { Rarity } from "../types/rarity";
 import { StatType } from "../types/stats";
 import { SkillEffectType } from "types/skillTypes";
 import { EquipmentType } from "types/inventory";
+import { StatusEffectType } from "types/statusEffects";
 
 export const getRarityTextColorClass = (rarity: Rarity): string => {
   switch (rarity) {
@@ -96,11 +109,31 @@ export const RarityIcons: Record<Rarity, React.ReactNode> = {
   ), // Gold star
 };
 
+// --- Status Icons ---
+export const StatusEffectIcons: Record<StatusEffectType, React.ReactNode> = {
+  [StatusEffectType.burn]: <FaFire className="text-orange-400" />,
+  [StatusEffectType.brittle]: <GiCrystalize className="text-blue-300" />,
+  [StatusEffectType.poison]: <GiPoisonBottle className="text-green-400" />,
+  [StatusEffectType.shock]: <GiLightningTrio className="text-yellow-400" />,
+  [StatusEffectType.bleed]: <FaTint className="text-red-400" />,
+  [StatusEffectType.stun]: <FaDizzy className="text-yellow-400" />,
+  [StatusEffectType.silence]: <FaVolumeMute className="text-gray-400" />,
+  [StatusEffectType.taunt]: <GiShouting className="text-red-400" />,
+  [StatusEffectType.shield]: <FaShieldAlt className="text-blue-300" />,
+  [StatusEffectType.haste]: <FaRunning className="text-lime-400" />,
+  [StatusEffectType.slow]: <GiSnail className="text-gray-400" />,
+  [StatusEffectType.confusion]: (
+    <FaQuestionCircle className="text-purple-400" />
+  ),
+  [StatusEffectType.disarm]: <GiDropWeapon className="text-gray-400" />,
+};
+
 export const ABILITY_BG_COLOR = {
   [SkillEffectType.damage]: "bg-red-600",
   [SkillEffectType.adjustStat]: "bg-red-600",
   [SkillEffectType.heal]: "bg-purple-600",
   [SkillEffectType.applyStatusEffect]: "bg-teal-600",
+  [SkillEffectType.cleanse]: "bg-emerald-600",
 };
 
 export const EQUIPMENT_TYPE_ICONS = {
@@ -108,3 +141,5 @@ export const EQUIPMENT_TYPE_ICONS = {
   [EquipmentType.weapon]: <GiAxeSword />,
   [EquipmentType.trinket]: <GiPowerRing />,
 };
+
+export const COIN_ICON = <FaCoins className="text-amber-300" />;

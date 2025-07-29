@@ -8,6 +8,7 @@ export enum SkillEffectType {
   heal = "heal",
   applyStatusEffect = "applyStatusEffect",
   adjustStat = "adjustStat",
+  cleanse = "cleanse",
 }
 
 export enum TargetType {
@@ -18,6 +19,12 @@ export enum TargetType {
   allEnemies = "allEnemies",
   lowestHealthAlly = "lowestHealthAlly",
   lowestHealthEnemy = "lowestHealthEnemy",
+}
+
+export enum CleansableEffect {
+  statusEffect = "statusEffect",
+  adjustedStat = "adjustedStat",
+  all = "all",
 }
 
 export enum ModifierType {
@@ -46,6 +53,12 @@ export interface HealSkillEffect extends SkillEffect {
   healMultiplier: number;
   healStat: StatType;
   duration?: number; // Optional duration for damage over time effects
+}
+
+export interface CleanseSkillEffect extends SkillEffect {
+  type: SkillEffectType.cleanse;
+  count: number | "all";
+  cleansableEffect: CleansableEffect;
 }
 
 export interface ApplyStatusEffectSkillEffect extends SkillEffect {

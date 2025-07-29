@@ -21,6 +21,7 @@ function loadGameEngine(): GameEngine {
     }
     gameEngine.player = {
       ...gameEngine.player,
+      coins: gameEngine.player.coins || 0,
       dungeonProgress: {
         ...createDefaultGameEngine().player.dungeonProgress,
         ...gameEngine.player.dungeonProgress,

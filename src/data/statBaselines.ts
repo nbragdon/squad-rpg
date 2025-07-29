@@ -12,7 +12,7 @@ export const BASELINE = {
     [StatType.magic]: 100,
     [StatType.magicDefense]: 100,
     [StatType.critChance]: 5,
-    [StatType.critDamage]: 0.2,
+    [StatType.critDamage]: 20,
   },
   UNCOMMON: {
     [StatType.health]: 500,
@@ -23,7 +23,7 @@ export const BASELINE = {
     [StatType.magic]: 100,
     [StatType.magicDefense]: 100,
     [StatType.critChance]: 5,
-    [StatType.critDamage]: 0.2,
+    [StatType.critDamage]: 20,
   },
   RARE: {
     [StatType.health]: 500,
@@ -34,7 +34,7 @@ export const BASELINE = {
     [StatType.magic]: 100,
     [StatType.magicDefense]: 100,
     [StatType.critChance]: 5,
-    [StatType.critDamage]: 0.2,
+    [StatType.critDamage]: 20,
   },
   EPIC: {
     [StatType.health]: 500,
@@ -45,7 +45,7 @@ export const BASELINE = {
     [StatType.magic]: 100,
     [StatType.magicDefense]: 100,
     [StatType.critChance]: 5,
-    [StatType.critDamage]: 0.2,
+    [StatType.critDamage]: 20,
   },
   LEGENDARY: {
     [StatType.health]: 500,
@@ -56,6 +56,6 @@ export const BASELINE = {
     [StatType.magic]: 100,
     [StatType.magicDefense]: 100,
     [StatType.critChance]: 5,
-    [StatType.critDamage]: 0.2,
+    [StatType.critDamage]: 20,
   },
 };
