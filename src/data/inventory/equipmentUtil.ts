@@ -3,12 +3,13 @@ import {
   EquipmentItem,
   EquipmentItemBoost,
   EquipmentType,
+  EquippedItems,
   InventoryType,
 } from "../../types/inventory";
 import { Rarity } from "../../types/rarity";
 import { ModifierType } from "../../types/skillTypes";
 import { StatType } from "../../types/stats";
-import { CharacterProgress, EquippedItems } from "types/game";
+import { CharacterProgress } from "types/game";
 
 export function randomlyGenerateMainStatCount(rarity: Rarity): number {
   if (rarity === Rarity.COMMON) return 1;

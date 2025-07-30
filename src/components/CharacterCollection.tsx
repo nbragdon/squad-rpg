@@ -11,7 +11,7 @@ import { RARITY_COLORS } from "./utils";
 interface CharacterSelectionProps {
   characters: PlayerCharacter[]; // Array of all available characters
   selectedCharacters?: PlayerCharacter[]; // Optional: Array of currently selected characters (for selection mode)
-  onCharacterSelect?: (character: PlayerCharacter) => void; // Optional: Callback for selection change
+  onCharacterSelect?: (characters: PlayerCharacter[]) => void; // Optional: Callback for selection change
   maxSelection?: number; // Optional: Maximum number of characters that can be selected
   title?: string; // Optional title for the section
   showPagination?: boolean; // Whether to show pagination controls (default: true)
@@ -53,6 +53,22 @@ export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
     setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
   };
 
+  const getUpdatedSelectedCharacters = (character: PlayerCharacter) => {
+    if (selectedCharacters.some((char) => char.id === character.id)) {
+      // Deselect if already selected
+      return selectedCharacters.filter((char) => char.id !== character.id);
+    } else {
+      // Select if not selected, up to maxSelection characters
+      if (selectedCharacters.length < maxSelection) {
+        return [...selectedCharacters, character];
+      } else {
+        // Optionally, show a message that max characters are selected
+        console.log(`Maximum ${maxSelection} characters can be selected.`);
+        return selectedCharacters;
+      }
+    }
+  };
+
   return (
     <div className="w-full max-w-6xl mx-auto mb-8">
       <h2 className="text-2xl font-semibold mb-4 text-white text-center">
@@ -77,7 +93,9 @@ export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
               key={character.id}
               // Only allow click for selection if onCharacterSelect is provided
               onClick={() =>
-                onCharacterSelect && !isDisabled && onCharacterSelect(character)
+                onCharacterSelect &&
+                !isDisabled &&
+                onCharacterSelect(getUpdatedSelectedCharacters(character))
               }
               className={`
                 bg-gray-800 rounded-xl p-4 flex flex-col items-center text-center

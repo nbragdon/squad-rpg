@@ -1,27 +1,5 @@
-import { EquipmentItem, EquipmentType, InventoryItem } from "./inventory";
+import { EquipmentItem, EquipmentType, EquippedItems } from "./inventory";
 import { Rarity } from "./rarity";
-
-export interface GameMode {
-  id: string;
-  name: string;
-  description: string;
-  type: "story" | "daily" | "dungeon" | "pvp" | "event";
-  energyCost: number;
-  rewards: Reward[];
-}
-
-export interface Reward {
-  type: "currency" | "material" | "character" | "gear";
-  id: string;
-  amount: number;
-  rarity?: Rarity;
-}
-
-export interface EquippedItems {
-  [EquipmentType.weapon]: string | undefined;
-  [EquipmentType.armor]: string | undefined;
-  [EquipmentType.trinket]: [string | undefined, string | undefined];
-}
 
 export interface CharacterProgress {
   level: number;

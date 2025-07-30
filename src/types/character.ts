@@ -1,6 +1,5 @@
 import { AffinityType } from "./affinity";
-import { EquippedItems } from "./game";
-import { InventoryItem } from "./inventory";
+import { EquippedItems } from "./inventory";
 import { Rarity } from "./rarity";
 import { Skill } from "./skillTypes";
 import { AllStats } from "./stats";

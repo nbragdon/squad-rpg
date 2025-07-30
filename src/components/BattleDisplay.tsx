@@ -7,7 +7,10 @@ import { StatType } from "../types/stats";
 import {
   ABILITY_BG_COLOR,
   AffinityIcons,
+  COIN_ICON,
+  EQUIPMENT_TYPE_ICONS,
   getRarityTextColorClass,
+  RARITY_COLORS,
   RarityIcons,
   StatIcons,
   StatusEffectIcons,
@@ -15,16 +18,31 @@ import {
 import { generateBaseCharacterProgress } from "data/characters";
 import { AffinityType } from "types/affinity";
 import { StatusEffectType } from "types/statusEffects";
+import {
+  CoinsReward,
+  CrystalReward,
+  EquipmentReward,
+  ExpReward,
+  Reward,
+  RewardType,
+} from "types/reward";
+import { generateRandomEquipment } from "data/inventory/equipmentUtil";
+import { formatStatValue } from "./InventorySelectionModal";
+import { HiSparkles } from "react-icons/hi";
+import { FaGem } from "react-icons/fa";
+import { EquipmentItem, EquipmentType } from "types/inventory";
 
 const AUTO_WAIT_TIME = 1500; // Time in ms for auto actions
 
 interface BattleDisplayProps {
+  rewards: Reward[];
   onVictory?: () => void;
   onDefeat?: () => void;
   onFlee?: () => void;
 }
 
 const BattleDisplay: React.FC<BattleDisplayProps> = ({
+  rewards,
   onVictory,
   onDefeat,
   onFlee,
@@ -221,8 +239,7 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
                   {StatusEffectIcons[effect.type]}
                   {effect.value !== 0 && (
                     <span className="text-xs ml-0.5 font-semibold">
-                      {effect.type === StatusEffectType.poison ||
-                      effect.type === StatusEffectType.burn
+                      {effect.type === StatusEffectType.poison
                         ? `${effect.value} dmg`
                         : effect.value}
                     </span>
@@ -450,11 +467,160 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
     return calculateBattleXp(playerChars, enemyChars);
   }
 
+  // Render a single reward card
+  const renderRewardCard = (reward: Reward, index: number) => {
+    const commonCardClasses = `
+      bg-gray-800 rounded-xl p-4 shadow-xl text-center
+      flex flex-col items-center justify-center
+      animate-fade-in animate-scale-in
+    `;
+    const animationDelay = { animationDelay: `${index * 0.1}s` }; // Staggered animation
+
+    switch (reward.type) {
+      case RewardType.exp:
+        const expReward = reward as ExpReward;
+        return (
+          <div
+            key={index}
+            className={`${commonCardClasses} border-2 border-green-500`}
+            style={animationDelay}
+          >
+            <div className="text-5xl text-green-400 mb-2">{<HiSparkles />}</div>
+            <h3 className="text-xl font-bold text-white mb-1">Experience</h3>
+            <p className="text-lg text-green-300">+{expReward.amount} XP</p>
+          </div>
+        );
+      case RewardType.coins:
+        const coinsReward = reward as CoinsReward;
+        return (
+          <div
+            key={index}
+            className={`${commonCardClasses} border-2 border-yellow-500`}
+            style={animationDelay}
+          >
+            <div className="text-5xl text-yellow-400 mb-2">{COIN_ICON}</div>
+            <h3 className="text-xl font-bold text-white mb-1">Coins</h3>
+            <p className="text-lg text-yellow-300">+{coinsReward.amount}</p>
+          </div>
+        );
+      case RewardType.crystal:
+        const crystalReward = reward as CrystalReward;
+        return (
+          <div
+            key={index}
+            className={`${commonCardClasses} border-2 border-purple-500`}
+            style={animationDelay}
+          >
+            <div className="text-5xl text-purple-400 mb-2">
+              {<FaGem className="text-orange-700" />}
+            </div>
+            <h3 className="text-xl font-bold text-white mb-1">Crystals</h3>
+            <p className="text-lg text-purple-300">+{crystalReward.amount}</p>
+          </div>
+        );
+      case RewardType.equipment:
+        const equipmentReward = reward as EquipmentReward;
+        const item = equipmentReward.equipment;
+        if (!item) return null;
+        const rarityBorderClass =
+          RARITY_COLORS[item.rarity] || "border-gray-500";
+        const rarityTextColorClass = getRarityTextColorClass(item.rarity);
+
+        return (
+          <div
+            key={index}
+            className={`
+              ${commonCardClasses} ${rarityBorderClass}
+              transform hover:scale-102 transition-transform duration-200
+            `}
+            style={animationDelay}
+          >
+            <div className="flex justify-between items-start w-full mb-2">
+              <h3 className="text-lg font-bold text-white leading-tight">
+                {item.name}
+              </h3>
+              <div className="flex items-center text-sm text-gray-300 ml-1">
+                Lv.{" "}
+                <span className="font-bold text-yellow-300 ml-1">
+                  {item.level}
+                </span>
+              </div>
+            </div>
+
+            <div
+              className={`text-sm font-semibold mb-2 ${rarityTextColorClass} flex items-center`}
+            >
+              {RarityIcons[item.rarity]}
+              <span className="ml-1">{item.rarity.toUpperCase()}</span>
+            </div>
+
+            <div className="mb-2 flex items-center text-base">
+              {EQUIPMENT_TYPE_ICONS[item.equipmentType]}
+              <span className="ml-1 capitalize">{item.equipmentType}</span>
+            </div>
+
+            {/* Main Stats */}
+            {item.mainBoosts.length > 0 && (
+              <div className="w-full text-left mb-1">
+                <h4 className="text-xs font-semibold text-green-300 mb-0.5">
+                  Main Stats:
+                </h4>
+                {item.mainBoosts.map((boost, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center text-green-200 text-xs"
+                  >
+                    {StatIcons[boost.statType]}
+                    <span className="ml-1">
+                      {formatStatValue(boost)} {StatType[boost.statType]}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Sub Stats */}
+            {item.subBoosts.length > 0 && (
+              <div className="w-full text-left">
+                <h4 className="text-xs font-semibold text-gray-400 mb-0.5">
+                  Sub Stats:
+                </h4>
+                {item.subBoosts.map((boost, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center text-gray-300 text-xs"
+                  >
+                    {StatIcons[boost.statType]}
+                    <span className="ml-1">
+                      {formatStatValue(boost)} {StatType[boost.statType]}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
   if (isBattleOver) {
-    const handleVictory = () => {
-      const xpGained = getVictoryXp();
-      updateGameEngine((engine) => {
-        let updatedCharacterProgress = { ...engine.player.characterProgress };
+    let updatedGameEngine = gameEngine;
+    const updatedBattleRewards: Reward[] = [];
+    let updatedCharacterProgress = {
+      ...updatedGameEngine.player.characterProgress,
+    };
+    let updatedEquipment = { ...updatedGameEngine.player.equipment };
+    let crystals = updatedGameEngine.player.crystals;
+    let coins = updatedGameEngine.player.coins;
+    rewards.forEach((reward) => {
+      if (reward.type === RewardType.exp) {
+        const xpGained = getVictoryXp() * (reward.multiplier || 1);
+        updatedBattleRewards.push({
+          ...reward,
+          amount: xpGained,
+        });
         battleState.playerTeam.forEach((char: { id: string | number }) => {
           let characterToUpdate = updatedCharacterProgress[char.id];
           if (!characterToUpdate) {
@@ -465,19 +631,70 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
             xp: (characterToUpdate.xp || 0) + xpGained,
           });
         });
+      } else if (
+        reward.type === RewardType.equipment &&
+        reward.equipmentType &&
+        reward.rarity
+      ) {
+        const newEquipment = generateRandomEquipment(
+          reward.equipmentType,
+          reward.rarity,
+        );
+        updatedBattleRewards.push({
+          ...reward,
+          equipment: newEquipment,
+        });
+        updatedEquipment[newEquipment.id] = newEquipment;
+        reward.equipment = newEquipment;
+      } else if (reward.type === RewardType.crystal && reward.amount) {
+        updatedBattleRewards.push(reward);
+        crystals += reward.amount;
+      } else if (reward.type === RewardType.coins && reward.amount) {
+        updatedBattleRewards.push(reward);
+        coins += reward.amount;
+      }
+    });
 
+    updatedGameEngine = {
+      ...updatedGameEngine,
+      player: {
+        ...updatedGameEngine.player,
+        characterProgress: { ...updatedCharacterProgress },
+        equipment: { ...updatedEquipment },
+        crystals,
+        coins,
+      },
+    };
+
+    console.log("updatedBattleRewards", updatedBattleRewards);
+
+    const handleVictory = () => {
+      updateGameEngine((engine) => {
         return {
           ...engine,
-          player: {
-            ...engine.player,
-            characterProgress: updatedCharacterProgress,
-          },
+          ...updatedGameEngine,
         };
       });
       if (onVictory) onVictory();
     };
+
     return (
-      <div className="max-w-3xl mx-auto p-6 bg-blue-900 text-white rounded-lg shadow-lg animate-fade-in">
+      <div className="max-w-4xl mx-auto p-6 bg-blue-900 text-white rounded-lg shadow-lg animate-fade-in">
+        <style>{`
+          @keyframes bounce-once {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-15px); }
+            60% { transform: translateY(-7px); }
+          }
+          @keyframes scale-in {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+          }
+          @keyframes fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+        `}</style>
         {battleState.battlePhase === "victory" && (
           <div className="text-center mt-8">
             <h2 className="text-yellow-400 text-3xl font-bold mb-3 animate-bounce-once">
@@ -485,18 +702,26 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
             </h2>
             <div className="text-5xl mb-4 animate-scale-in">🏆</div>{" "}
             {/* Victory Icon */}
-            <div className="mb-2">
-              {`Each character gained ${getVictoryXp()} XP!`}
+            {/* Rewards Section */}
+            <h3 className="text-2xl font-semibold text-yellow-300 mb-4">
+              Rewards
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+              {updatedBattleRewards.map(renderRewardCard)}
             </div>
             {battleState.xpLogs &&
-              battleState.xpLogs.map((msg, i) => <div key={i}>{msg}</div>)}
+              battleState.xpLogs.map((msg, i) => (
+                <div key={i} className="text-sm text-gray-300">
+                  {msg}
+                </div>
+              ))}
             <button
               onClick={handleVictory}
               className="
-                mt-4 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold
-                rounded-lg min-w-[7.5rem] min-h-[2.5rem] border-none cursor-pointer
-                shadow-md transition-colors duration-200
-              "
+              mt-4 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold
+              rounded-lg min-w-[7.5rem] min-h-[2.5rem] border-none cursor-pointer
+              shadow-md transition-colors duration-200
+            "
             >
               Continue
             </button>

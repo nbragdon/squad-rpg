@@ -1,11 +1,10 @@
-import { EquippedItems } from "types/game";
 import { BattleCharacter } from "../battle/battleTypes";
 import { AffinityType } from "../types/affinity";
 import { Rarity } from "../types/rarity";
 import { AdjustStatSkillEffect, ModifierType } from "../types/skillTypes";
 import { AllStats, StatType } from "../types/stats";
 import { StatusEffectType } from "../types/statusEffects";
-import { EquipmentItem, EquipmentType } from "types/inventory";
+import { EquipmentItem } from "types/inventory";
 
 const BRITTLE_MULTIPLIER = 0.02;
 const AFFINITY_DAMAGE_MULT = 1.25;
@@ -88,7 +87,7 @@ export function adjustedStat(
     }
   }
 
-  return Math.round(stat);
+  return Math.round(Math.max(stat, 1));
 }
 
 /**

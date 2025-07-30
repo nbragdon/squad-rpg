@@ -7,6 +7,7 @@ import { PlayerCharacter } from "../types/character";
 import BattleDisplay from "./BattleDisplay";
 import { CharacterSelection } from "./CharacterCollection";
 import CharacterModal from "./CharacterModal";
+import { RewardType } from "types/reward";
 
 const CHAPTERS_ARRAY = Array.from({ length: 5 }, (_, i) => `Chapter ${i + 1}`);
 const STAGES_PER_CHAPTER = 10;
@@ -113,6 +114,14 @@ const SoloMode: React.FC<SoloModeProps> = ({ onNavigate }) => {
       }
     });
   };
+
+  const currentStageNum = getSoloStageNumber(chapter, stage);
+  const crystalReward = getCrystalReward(
+    chapter,
+    stage,
+    gameEngine.player.soloProgress,
+    currentStageNum,
+  );
 
   // UI rendering
   return (
@@ -228,12 +237,14 @@ const SoloMode: React.FC<SoloModeProps> = ({ onNavigate }) => {
           <CharacterSelection
             characters={ownedChars} // Pass your actual owned characters here
             selectedCharacters={selectedCharacters}
-            onCharacterSelect={handleCharacterSelect}
+            onCharacterSelect={(playerChars) => {
+              setSelectedCharacters([...playerChars]);
+            }}
             maxSelection={1} // Solo mode allows up to 1 characters
             title="Choose Your Fighters"
-            showPagination={true}
-            charactersPerPage={8}
-            showViewDetailsButton={true}
+            onViewDetails={(character) => {
+              setModalCharacter(character);
+            }}
           />
 
           {/* Start Battle Button */}
@@ -256,34 +267,20 @@ const SoloMode: React.FC<SoloModeProps> = ({ onNavigate }) => {
       )}
       {battleEngine && (
         <BattleDisplay
+          rewards={[
+            {
+              type: RewardType.crystal,
+              amount: crystalReward,
+            },
+            {
+              type: RewardType.exp,
+            },
+          ]}
           onVictory={() => {
-            const currentStageNum = getSoloStageNumber(chapter, stage);
-            const crystalReward = getCrystalReward(
-              chapter,
-              stage,
-              gameEngine.player.soloProgress,
-              currentStageNum,
-            );
-            updateGameEngine((engine) => {
-              let nextStageNum = currentStageNum + 1;
-              let newProgress = engine.player.soloProgress;
-              if (stage === STAGES_PER_CHAPTER) {
-                nextStageNum = getSoloStageNumber(chapter + 1, 1);
-              }
-              if (nextStageNum > engine.player.soloProgress) {
-                newProgress = nextStageNum;
-              }
-              return {
-                ...engine,
-                player: {
-                  ...engine.player,
-                  soloProgress: newProgress,
-                  crystals: engine.player.crystals + crystalReward,
-                },
-                battleEngine: null,
-              };
-            });
-            setSelectedCharacters([]); // Clear selected characters after battle
+            updateGameEngine((engine) => ({
+              ...engine,
+              battleEngine: null,
+            }));
           }}
           onDefeat={() => {
             updateGameEngine((engine) => ({

@@ -39,8 +39,8 @@ export const HeelSmashSkill: Skill = {
 
 // Stone Skin ---------------------------------------------------------------
 const StoneSkinEffect: AdjustStatSkillEffect = {
-  id: "heel_smash_damage_effect",
-  name: "Heel Smash Damage",
+  id: "stone_skin_defense_boost",
+  name: "Stone Skin Defense Boost",
   affinities: [AffinityType.gem],
   targetType: TargetType.self,
   duration: 4,
@@ -83,6 +83,7 @@ const VenomDaggerApplyStatusEffect: ApplyStatusEffectSkillEffect = {
   duration: 3,
   stackable: false,
   value: 30,
+  modifierType: ModifierType.Flat,
 };
 
 export const VenomDaggerSkill: Skill = {

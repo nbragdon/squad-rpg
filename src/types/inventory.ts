@@ -34,6 +34,12 @@ export interface EquipmentItem extends InventoryItem {
   level: number;
 }
 
+export interface EquippedItems {
+  [EquipmentType.weapon]: string | undefined;
+  [EquipmentType.armor]: string | undefined;
+  [EquipmentType.trinket]: [string | undefined, string | undefined];
+}
+
 export interface Inventory {
   [InventoryType.equipment]: { [key: string]: InventoryItem };
 }

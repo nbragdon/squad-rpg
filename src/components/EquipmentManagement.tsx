@@ -343,11 +343,9 @@ const EquipmentManagementPage: React.FC<EquipmentManagementPageProps> = ({
                     onClick={() => handleTrashClick(item)}
                     className="mt-4 bg-red-700 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors duration-200 flex items-center justify-center"
                   >
-                    {<GiTrashCan className="text-gray-400" />}{" "}
                     {/* Invoking the function */}
-                    <span className="ml-2">
-                      Trash ({getEquipmentValue(item)} {COIN_ICON}
-                    </span>
+                    <span className="mr-1">{getEquipmentValue(item)}</span>
+                    {COIN_ICON}
                   </button>
                 </div>
               );

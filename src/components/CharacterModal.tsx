@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { getXpToNextLevel } from "../data/leveling";
-import { SkillDescriptionCard } from "../data/skills/skillDescriptionUtil";
 import { calculateStat } from "../data/statUtils";
 import { AffinityType } from "../types/affinity";
 import { PlayerCharacter } from "../types/character";
@@ -19,6 +18,7 @@ import {
   formatStatValue,
   InventorySelectionModal,
 } from "./InventorySelectionModal";
+import { SkillDescriptionCard } from "./skillDescriptionCard";
 
 interface CharacterModalProps {
   character: PlayerCharacter;
@@ -41,13 +41,9 @@ const CharacterModal: React.FC<CharacterModalProps> = ({
   const displayCharacter = character;
 
   // Combine all skills and ultimate skill into a single array for navigation
-  const allAbilities =
-    displayCharacter.skills && displayCharacter.ultimateSkill
-      ? [
-          ...displayCharacter.skills,
-          { ...displayCharacter.ultimateSkill, isUltimate: true },
-        ]
-      : [];
+  const allAbilities = displayCharacter.skills
+    ? [...displayCharacter.skills]
+    : [];
 
   const [currentAbilityIndex, setCurrentAbilityIndex] = useState(0);
 
@@ -564,7 +560,7 @@ const CharacterModal: React.FC<CharacterModalProps> = ({
             <div className="grid grid-cols-2 gap-4 text-base">
               <div>
                 <p className="font-semibold text-green-400 mb-2 flex items-center">
-                  <span className="mr-2">💪</span> Strong:
+                  Strong:
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {displayCharacter.strongAffinities &&
@@ -587,7 +583,7 @@ const CharacterModal: React.FC<CharacterModalProps> = ({
               </div>
               <div>
                 <p className="font-semibold text-red-400 mb-2 flex items-center">
-                  <span className="mr-2"> দুর্বল </span> Weak:
+                  Weak:
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {displayCharacter.weakAffinities &&
@@ -657,7 +653,10 @@ const CharacterModal: React.FC<CharacterModalProps> = ({
             {/* Current Ability Card */}
             <div className="flex justify-center">
               {currentAbility ? (
-                <SkillDescriptionCard skill={currentAbility} />
+                <SkillDescriptionCard
+                  skill={currentAbility}
+                  character={character}
+                />
               ) : (
                 <p className="text-gray-400 text-center w-full">
                   No abilities defined.

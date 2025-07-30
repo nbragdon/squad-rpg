@@ -1,4 +1,4 @@
-import { ApplyStatusEffectSkillEffect } from "types/skillTypes";
+import { ApplyStatusEffectSkillEffect, ModifierType } from "types/skillTypes";
 import { AllStats, StatType } from "types/stats";
 import { StatusEffectType } from "types/statusEffects";
 import { PlayerCharacter } from "../types/character";
@@ -43,10 +43,16 @@ export function getStatusEffectValue(
   statusEffect: ApplyStatusEffectSkillEffect,
 ): number {
   if (statusEffect.statusEffectType === StatusEffectType.poison) {
-    const dmg = Math.floor(
-      attacker.stats[statusEffect.stat || StatType.magic] *
-        (statusEffect.value || 0),
-    );
+    let dmg = 0;
+    if (statusEffect.modifierType === ModifierType.Percentage) {
+      dmg = Math.floor(
+        attacker.stats[statusEffect.stat || StatType.magic] *
+          (statusEffect.value || 0),
+      );
+    } else {
+      dmg = statusEffect.value || 0;
+    }
+    console.log(attacker, statusEffect, dmg);
     return dmg;
   }
   return statusEffect.value || 0;
@@ -60,7 +66,10 @@ export function getCalculatedStats(battleCharacter: BattleCharacter): AllStats {
     [StatType.defense]: calculateStat(StatType.defense, battleCharacter),
     [StatType.speed]: calculateStat(StatType.speed, battleCharacter),
     [StatType.health]: calculateStat(StatType.health, battleCharacter),
-    [StatType.magicDefense]: calculateStat(StatType.magicDefense, battleCharacter),
+    [StatType.magicDefense]: calculateStat(
+      StatType.magicDefense,
+      battleCharacter,
+    ),
     [StatType.energyGain]: calculateStat(StatType.energyGain, battleCharacter),
     [StatType.critChance]: calculateStat(StatType.critChance, battleCharacter),
     [StatType.critDamage]: calculateStat(StatType.critDamage, battleCharacter),
