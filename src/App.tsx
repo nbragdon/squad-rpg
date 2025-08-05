@@ -11,6 +11,7 @@ import {
   generateBaseCharacterProgress,
 } from "./data/characters";
 import EquipmentManagementPage from "components/EquipmentManagement";
+import TitanMode from "components/TitanDisplay";
 
 export enum GameScreen {
   SOLO = "solo",
@@ -21,6 +22,7 @@ export enum GameScreen {
   TEAM = "team",
   GACHA = "gacha",
   EQUIPMENT = "equipment",
+  TITAN = "titan",
 }
 
 function App() {
@@ -33,9 +35,9 @@ function App() {
 
   const renderScreen = () => {
     switch (currentScreen) {
-      case "menu":
+      case GameScreen.MENU:
         return <MainMenu onNavigate={handleNavigate} />;
-      case "collection":
+      case GameScreen.COLLECTION:
         return (
           <CharacterCollection
             characters={gachaCharacters
@@ -50,18 +52,20 @@ function App() {
             onBack={() => handleNavigate(GameScreen.MENU)}
           />
         );
-      case "solo":
+      case GameScreen.SOLO:
         return <SoloMode onNavigate={() => handleNavigate(GameScreen.MENU)} />;
-      case "gacha":
+      case GameScreen.GACHA:
         return <Gacha onBack={() => handleNavigate(GameScreen.MENU)} />;
-      case "dungeon":
+      case GameScreen.DUNGEON:
         return <DungeonMode onBack={() => handleNavigate(GameScreen.MENU)} />;
-      case "equipment":
+      case GameScreen.EQUIPMENT:
         return (
           <EquipmentManagementPage
             onBack={() => handleNavigate(GameScreen.MENU)}
           />
         );
+      case GameScreen.TITAN:
+        return <TitanMode onBack={() => handleNavigate(GameScreen.MENU)} />;
       default:
         return <MainMenu onNavigate={handleNavigate} />;
     }

@@ -628,8 +628,9 @@ const BurningCorruptionApplyPoison: ApplyStatusEffectSkillEffect = {
   affinities: [AffinityType.chaos],
   targetType: TargetType.randomEnemy,
   statusEffectType: StatusEffectType.poison,
+  modifierType: ModifierType.Percentage,
   stat: StatType.magic,
-  value: 0.7,
+  value: 0.6,
   duration: 3,
   stackable: false,
 };

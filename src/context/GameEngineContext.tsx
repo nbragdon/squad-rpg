@@ -7,7 +7,13 @@ function loadGameEngine(): GameEngine {
   const raw = localStorage.getItem("squadRpgGameEngine");
   if (!raw) return createDefaultGameEngine();
   try {
-    const gameEngine: GameEngine = JSON.parse(raw);
+    const defaultGameEngine = createDefaultGameEngine();
+    console.log(defaultGameEngine);
+    const gameEngine: GameEngine = {
+      ...defaultGameEngine,
+      ...JSON.parse(raw),
+    };
+    console.log(gameEngine);
     let validCharacterProgress: { [key in string]: CharacterProgress } = {};
     if (gameEngine.player.characterProgress) {
       Object.entries(gameEngine.player.characterProgress).forEach(
@@ -20,10 +26,15 @@ function loadGameEngine(): GameEngine {
       );
     }
     gameEngine.player = {
+      ...defaultGameEngine.player,
       ...gameEngine.player,
       coins: gameEngine.player.coins || 0,
+      crystals: gameEngine.player.crystals || 0,
+      inventory: gameEngine.player.inventory
+        ? { ...gameEngine.player.inventory }
+        : {},
       dungeonProgress: {
-        ...createDefaultGameEngine().player.dungeonProgress,
+        ...defaultGameEngine.player.dungeonProgress,
         ...gameEngine.player.dungeonProgress,
       },
       characterProgress: {

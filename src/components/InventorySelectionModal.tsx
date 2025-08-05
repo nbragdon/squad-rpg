@@ -12,17 +12,11 @@ import {
 } from "./utils";
 import { ModifierType } from "types/skillTypes";
 import { useGameEngine } from "context/GameEngineContext";
-import { getAllEquipment } from "data/inventory/equipmentUtil";
-
-export const formatStatValue = (boost: EquipmentItemBoost): string => {
-  const value = parseFloat(boost.value.toFixed(0));
-  let formattedValue = `${value}`;
-
-  if (boost.modifierType === ModifierType.Percentage) {
-    formattedValue = `${value}%`;
-  }
-  return `${boost.value > 0 ? "+" : ""}${formattedValue}`;
-};
+import {
+  calculateLeveledEquipmentValue,
+  formatStatValue,
+  getAllEquipment,
+} from "data/inventory/equipmentUtil";
 
 // --- InventorySelectionModal Component (now embedded) ---
 interface InventorySelectionModalProps {
@@ -130,14 +124,20 @@ export const InventorySelectionModal: React.FC<
                 </span>
                 {currentEquippedItem.mainBoosts.map((boost, idx) => (
                   <span key={idx} className="text-xs text-green-300">
-                    {StatIcons[boost.statType]} {formatStatValue(boost)}
+                    {StatIcons[boost.statType]}{" "}
+                    {formatStatValue(boost, currentEquippedItem.level, true)}
                   </span>
                 ))}
                 {currentEquippedItem.subBoosts.length > 0 && (
                   <span className="text-xs text-gray-400 mt-1">
                     {currentEquippedItem.subBoosts.map((boost) => (
                       <span key={boost.statType} className="mr-2">
-                        {StatIcons[boost.statType]} {formatStatValue(boost)}
+                        {StatIcons[boost.statType]}{" "}
+                        {formatStatValue(
+                          boost,
+                          currentEquippedItem.level,
+                          false,
+                        )}
                       </span>
                     ))}
                   </span>
@@ -189,7 +189,9 @@ export const InventorySelectionModal: React.FC<
                           className="flex items-center text-green-300 text-sm"
                         >
                           {StatIcons[boost.statType]}
-                          <span className="ml-1">{formatStatValue(boost)}</span>
+                          <span className="ml-1">
+                            {formatStatValue(boost, item.level, true)}
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -204,7 +206,7 @@ export const InventorySelectionModal: React.FC<
                           >
                             {StatIcons[boost.statType]}
                             <span className="ml-1">
-                              {formatStatValue(boost)}
+                              {formatStatValue(boost, item.level, false)}
                             </span>
                           </div>
                         ))}

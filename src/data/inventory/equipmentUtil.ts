@@ -51,18 +51,26 @@ export function randomlyGenerateSubStatCount(rarity: Rarity): number {
   return 1;
 }
 
+const COMMON_LOW_FLAT_VALUE = 2;
+const COMMON_CRIT_DMG_FLAT_VALUE = 20;
+const COMMON_PERCENT_CRIT = 20;
+const COMMON_FLAT_STANDARD = 30;
+const COMMON_PERCENT_STANDARD = 15;
+const COMMON_FLAT_HEALTH = 100;
+const COMMON_ENERGY_FLAT_VALUE = 8;
+
 function getRandomCommonBoostValue(
   statType: StatType,
   modifierType: ModifierType,
 ): number {
   let value = 0;
-  const BASE_LOW_FLAT_VALUE = 1;
-  const BASE_CRIT_DMG_FLAT_VALUE = 10;
-  const BASE_PERCENT_CRIT = 20;
-  const BASE_FLAT_STANDARD = 30;
-  const BASE_PERCENT_STANDARD = 25;
-  const BASE_FLAT_HEALTH = 60;
-  const BASE_ENERGY_FLAT_VALUE = 3;
+  const BASE_LOW_FLAT_VALUE = COMMON_LOW_FLAT_VALUE;
+  const BASE_CRIT_DMG_FLAT_VALUE = COMMON_CRIT_DMG_FLAT_VALUE;
+  const BASE_PERCENT_CRIT = COMMON_PERCENT_CRIT;
+  const BASE_FLAT_STANDARD = COMMON_FLAT_STANDARD;
+  const BASE_PERCENT_STANDARD = COMMON_PERCENT_STANDARD;
+  const BASE_FLAT_HEALTH = COMMON_FLAT_HEALTH;
+  const BASE_ENERGY_FLAT_VALUE = COMMON_ENERGY_FLAT_VALUE;
   if (statType === StatType.critChance) {
     if (modifierType === ModifierType.Percentage) value = BASE_PERCENT_CRIT;
     if (modifierType === ModifierType.Flat) value = BASE_LOW_FLAT_VALUE;
@@ -119,13 +127,13 @@ function getRandomUncommonBoostValue(
   modifierType: ModifierType,
 ): number {
   let value = 0;
-  const BASE_LOW_FLAT_VALUE = 2;
-  const BASE_CRIT_DMG_FLAT_VALUE = 15;
-  const BASE_PERCENT_CRIT = 25;
-  const BASE_FLAT_STANDARD = 35;
-  const BASE_PERCENT_STANDARD = 30;
-  const BASE_FLAT_HEALTH = 70;
-  const BASE_ENERGY_FLAT_VALUE = 3;
+  const BASE_LOW_FLAT_VALUE = COMMON_LOW_FLAT_VALUE + 2;
+  const BASE_CRIT_DMG_FLAT_VALUE = COMMON_CRIT_DMG_FLAT_VALUE + 10;
+  const BASE_PERCENT_CRIT = COMMON_PERCENT_CRIT + 5;
+  const BASE_FLAT_STANDARD = COMMON_FLAT_STANDARD + 15;
+  const BASE_PERCENT_STANDARD = COMMON_PERCENT_STANDARD + 5;
+  const BASE_FLAT_HEALTH = COMMON_FLAT_HEALTH + 50;
+  const BASE_ENERGY_FLAT_VALUE = COMMON_ENERGY_FLAT_VALUE + 4;
   if (statType === StatType.critChance) {
     if (modifierType === ModifierType.Percentage) value = BASE_PERCENT_CRIT;
     if (modifierType === ModifierType.Flat) value = BASE_LOW_FLAT_VALUE;
@@ -182,13 +190,13 @@ function getRandomRareBoostValue(
   modifierType: ModifierType,
 ): number {
   let value = 0;
-  const BASE_LOW_FLAT_VALUE = 3;
-  const BASE_CRIT_DMG_FLAT_VALUE = 20;
-  const BASE_PERCENT_CRIT = 30;
-  const BASE_FLAT_STANDARD = 40;
-  const BASE_PERCENT_STANDARD = 35;
-  const BASE_FLAT_HEALTH = 80;
-  const BASE_ENERGY_FLAT_VALUE = 4;
+  const BASE_LOW_FLAT_VALUE = COMMON_LOW_FLAT_VALUE + 4;
+  const BASE_CRIT_DMG_FLAT_VALUE = COMMON_CRIT_DMG_FLAT_VALUE + 15;
+  const BASE_PERCENT_CRIT = COMMON_PERCENT_CRIT + 8;
+  const BASE_FLAT_STANDARD = COMMON_FLAT_STANDARD + 25;
+  const BASE_PERCENT_STANDARD = COMMON_PERCENT_STANDARD + 10;
+  const BASE_FLAT_HEALTH = COMMON_FLAT_HEALTH + 100;
+  const BASE_ENERGY_FLAT_VALUE = COMMON_ENERGY_FLAT_VALUE + 8;
   if (statType === StatType.critChance) {
     if (modifierType === ModifierType.Percentage) value = BASE_PERCENT_CRIT;
     if (modifierType === ModifierType.Flat) value = BASE_LOW_FLAT_VALUE;
@@ -245,13 +253,13 @@ function getRandomEpicBoostValue(
   modifierType: ModifierType,
 ): number {
   let value = 0;
-  const BASE_LOW_FLAT_VALUE = 4;
-  const BASE_CRIT_DMG_FLAT_VALUE = 30;
-  const BASE_PERCENT_CRIT = 35;
-  const BASE_FLAT_STANDARD = 45;
-  const BASE_PERCENT_STANDARD = 40;
-  const BASE_FLAT_HEALTH = 90;
-  const BASE_ENERGY_FLAT_VALUE = 5;
+  const BASE_LOW_FLAT_VALUE = COMMON_LOW_FLAT_VALUE + 8;
+  const BASE_CRIT_DMG_FLAT_VALUE = COMMON_CRIT_DMG_FLAT_VALUE + 25;
+  const BASE_PERCENT_CRIT = COMMON_PERCENT_CRIT + 15;
+  const BASE_FLAT_STANDARD = COMMON_FLAT_STANDARD + 50;
+  const BASE_PERCENT_STANDARD = COMMON_PERCENT_STANDARD + 20;
+  const BASE_FLAT_HEALTH = COMMON_FLAT_HEALTH + 200;
+  const BASE_ENERGY_FLAT_VALUE = COMMON_ENERGY_FLAT_VALUE + 15;
   if (statType === StatType.critChance) {
     if (modifierType === ModifierType.Percentage) value = BASE_PERCENT_CRIT;
     if (modifierType === ModifierType.Flat) value = BASE_LOW_FLAT_VALUE;
@@ -308,13 +316,13 @@ function getRandomLegendaryBoostValue(
   modifierType: ModifierType,
 ): number {
   let value = 0;
-  const BASE_LOW_FLAT_VALUE = 8;
-  const BASE_CRIT_DMG_FLAT_VALUE = 40;
-  const BASE_PERCENT_CRIT = 50;
-  const BASE_FLAT_STANDARD = 60;
-  const BASE_PERCENT_STANDARD = 50;
-  const BASE_FLAT_HEALTH = 120;
-  const BASE_ENERGY_FLAT_VALUE = 8;
+  const BASE_LOW_FLAT_VALUE = COMMON_LOW_FLAT_VALUE + 15;
+  const BASE_CRIT_DMG_FLAT_VALUE = COMMON_CRIT_DMG_FLAT_VALUE + 40;
+  const BASE_PERCENT_CRIT = COMMON_PERCENT_CRIT + 25;
+  const BASE_FLAT_STANDARD = COMMON_FLAT_STANDARD + 80;
+  const BASE_PERCENT_STANDARD = COMMON_PERCENT_STANDARD + 30;
+  const BASE_FLAT_HEALTH = COMMON_FLAT_HEALTH + 300;
+  const BASE_ENERGY_FLAT_VALUE = COMMON_ENERGY_FLAT_VALUE + 20;
   if (statType === StatType.critChance) {
     if (modifierType === ModifierType.Percentage) value = BASE_PERCENT_CRIT;
     if (modifierType === ModifierType.Flat) value = BASE_LOW_FLAT_VALUE;
@@ -410,10 +418,7 @@ export function generateMainStatEquipmentBoosts(
     if (!uniquePairs[key]) {
       uniquePairs[key] = {
         statType,
-        level: 1,
-        value: parseFloat(
-          getRandomBoostValue(rarity, statType, modifierType).toFixed(2),
-        ),
+        value: Math.ceil(getRandomBoostValue(rarity, statType, modifierType)),
         modifierType,
       };
     }
@@ -442,9 +447,8 @@ export function generateSubStatEquipmentBoosts(
     if (!uniquePairs[key]) {
       uniquePairs[key] = {
         statType,
-        level: 1,
-        value: parseFloat(
-          (getRandomBoostValue(rarity, statType, modifierType) / 2).toFixed(2),
+        value: Math.ceil(
+          getRandomBoostValue(rarity, statType, modifierType) / 2,
         ),
         modifierType,
       };
@@ -692,3 +696,104 @@ export function getEquipmentValue(equipment: EquipmentItem): number {
   value *= 1 + 0.5 * (equipment.subBoosts.length - 1);
   return Math.floor(value);
 }
+
+// Helper to calculate a stat's value at a specific level, based on its level 1 base value
+export const calculateLeveledEquipmentValue = (
+  initialBaseValue: number, // Value at level 1
+  level: number,
+): number => {
+  if (level <= 1) return Math.ceil(initialBaseValue);
+  const levelDifference = level - 1; // Difference from level 1
+  return Math.ceil(initialBaseValue * (1 + 0.15 * levelDifference));
+};
+
+export const calculateSubstatEquipmentValue = (
+  baseValue: number,
+  upgrades: number[] | undefined,
+) => {
+  const sum = upgrades
+    ? upgrades.reduce(
+        (accumulator, currentValue) => accumulator + currentValue,
+        0,
+      )
+    : 0;
+  return Math.ceil(baseValue + sum);
+};
+
+export const MAX_EQUIPMENT_LEVELS: Record<Rarity, number> = {
+  [Rarity.COMMON]: 10,
+  [Rarity.UNCOMMON]: 15,
+  [Rarity.RARE]: 20,
+  [Rarity.EPIC]: 25,
+  [Rarity.LEGENDARY]: 30,
+};
+
+export const calculateLevelUpCost = (currentLevel: number): number => {
+  if (currentLevel === 1) return 20; // Cost to get to level 1 (from level 0)
+  // Base cost for currentLevel (to get to currentLevel + 1)
+  let cost = 20 * Math.pow(currentLevel - 1, 2.115);
+
+  // Apply jumps
+  if (currentLevel >= 10) {
+    cost *= 1.1; // 10% jump at level 10
+  }
+  if (currentLevel >= 20) {
+    cost *= 1.1; // Another 10% jump at level 20
+  }
+
+  return Math.round(cost); // Round to nearest integer coin
+};
+
+// Function to apply a random substat increase
+export const applyRandomSubstatIncrease = (
+  item: EquipmentItem,
+): EquipmentItem => {
+  const newSubBoosts = [...item.subBoosts];
+
+  if (newSubBoosts.length > 0) {
+    // Otherwise, pick a random existing sub-boost to upgrade
+    const randomIndex = Math.floor(Math.random() * newSubBoosts.length);
+    const boostToUpgrade = { ...newSubBoosts[randomIndex] }; // Create a copy
+
+    const randomIncreasePercent =
+      Math.floor(Math.random() * (50 - 30 + 1)) + 30; // 30-50%
+    const increaseAmount = Math.ceil(
+      boostToUpgrade.value * (randomIncreasePercent / 100),
+    );
+
+    // If baseValue is not set, set it to the current value before the first random upgrade
+    if (boostToUpgrade.upgrades === undefined) {
+      boostToUpgrade.upgrades = [increaseAmount];
+    }
+
+    boostToUpgrade.upgrades.push(increaseAmount);
+    newSubBoosts[randomIndex] = boostToUpgrade;
+  }
+
+  return { ...item, subBoosts: newSubBoosts };
+};
+
+export const getLeveledEquipmentValue = (
+  boost: EquipmentItemBoost,
+  level: number,
+  isMainBoost: boolean,
+) => {
+  return isMainBoost
+    ? calculateLeveledEquipmentValue(boost.value, level)
+    : calculateSubstatEquipmentValue(boost.value, boost.upgrades);
+};
+
+export const formatStatValue = (
+  boost: EquipmentItemBoost,
+  level: number,
+  isMainBoost: boolean,
+): string => {
+  const leveledValue = getLeveledEquipmentValue(boost, level, isMainBoost);
+
+  const formattedLeveledValue =
+    boost.modifierType === ModifierType.Percentage
+      ? `${leveledValue}%`
+      : `${leveledValue}`;
+
+  return `+${formattedLeveledValue}`;
+};

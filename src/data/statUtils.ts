@@ -5,6 +5,7 @@ import { AdjustStatSkillEffect, ModifierType } from "../types/skillTypes";
 import { AllStats, StatType } from "../types/stats";
 import { StatusEffectType } from "../types/statusEffects";
 import { EquipmentItem } from "types/inventory";
+import { getLeveledEquipmentValue } from "./inventory/equipmentUtil";
 
 const BRITTLE_MULTIPLIER = 0.02;
 const AFFINITY_DAMAGE_MULT = 1.25;
@@ -56,11 +57,17 @@ export function calculateStat(
     console.log(calculableStats);
     calculableStats.equipment.forEach((item) => {
       [...item.mainBoosts, ...item.subBoosts].forEach((boost) => {
+        const isMainBoost = item.mainBoosts.includes(boost);
+        const leveledValue = getLeveledEquipmentValue(
+          boost,
+          item.level,
+          isMainBoost,
+        );
         if (statType === boost.statType) {
           if (boost.modifierType === ModifierType.Flat) {
-            stat += boost.value;
+            stat += leveledValue;
           } else if (boost.modifierType === ModifierType.Percentage) {
-            stat += baseValue * (boost.value / 100);
+            stat += baseValue * (leveledValue / 100);
           }
         }
       });

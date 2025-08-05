@@ -12,8 +12,42 @@ import {
   ENEMY_SLIME_GREEN,
   ENEMY_WOLF_CUB,
 } from "./common-enemies";
+import {
+  ENEMY_BEAST_TITAN,
+  ENEMY_VOID_TITAN,
+  ENEMY_CHAOS_TITAN,
+} from "./common-titans";
+import { BattleInitEnemy } from "battle/battleTypes";
 
 export const ALL_ENEMIES = [...COMMON_ENEMIES];
+
+export const TITAN_ENEMY = {
+  [Rarity.COMMON]: [
+    { id: ENEMY_BEAST_TITAN, level: 5 },
+    { id: ENEMY_VOID_TITAN, level: 10 },
+    { id: ENEMY_CHAOS_TITAN, level: 15 },
+  ],
+  [Rarity.UNCOMMON]: [
+    { id: ENEMY_BEAST_TITAN, level: 5 },
+    { id: ENEMY_VOID_TITAN, level: 10 },
+    { id: ENEMY_CHAOS_TITAN, level: 15 },
+  ],
+  [Rarity.RARE]: [
+    { id: ENEMY_BEAST_TITAN, level: 5 },
+    { id: ENEMY_VOID_TITAN, level: 10 },
+    { id: ENEMY_CHAOS_TITAN, level: 15 },
+  ],
+  [Rarity.EPIC]: [
+    { id: ENEMY_BEAST_TITAN, level: 5 },
+    { id: ENEMY_VOID_TITAN, level: 10 },
+    { id: ENEMY_CHAOS_TITAN, level: 15 },
+  ],
+  [Rarity.LEGENDARY]: [
+    { id: ENEMY_BEAST_TITAN, level: 5 },
+    { id: ENEMY_VOID_TITAN, level: 10 },
+    { id: ENEMY_CHAOS_TITAN, level: 15 },
+  ],
+};
 
 // Map of chapter 1 stage number (1-10) to a unique enemy
 export const STAGE_ENEMY = {
@@ -33,6 +67,13 @@ export function getEnemyByChapterAndStage(chapter: number, stage: number) {
   const enemyId = STAGE_ENEMY[stage as keyof typeof STAGE_ENEMY];
   return [{ id: enemyId, level: stage }];
 }
+
+export const generateTitan = (
+  rarity: Rarity,
+  level: number,
+): BattleInitEnemy[] => {
+  return [TITAN_ENEMY[rarity][level - 1]];
+};
 
 export function getRandomEnemy(level: number, rarity: Rarity) {
   const enemies = [];

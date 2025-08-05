@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { useGameEngine } from "../context/GameEngineContext";
 import { PlayerCharacter } from "../types/character";
 import { EquipmentType } from "../types/inventory";
-import { Rarity } from "../types/rarity";
+import { Rarity, RARITY_ORDER } from "../types/rarity";
 import BattleDisplay from "./BattleDisplay";
 import { RARITY_COLORS } from "./utils";
 import { getOwnedCharacters } from "data/characters/charUtil";
@@ -74,15 +74,6 @@ const BASE_LEVEL_BY_RARITY = {
   [Rarity.EPIC]: 8,
   [Rarity.LEGENDARY]: 10,
 };
-
-// Define the order of rarities for progression logic
-const RARITY_ORDER = [
-  Rarity.COMMON,
-  Rarity.UNCOMMON,
-  Rarity.RARE,
-  Rarity.EPIC,
-  Rarity.LEGENDARY,
-];
 
 interface DungeonProps {
   onBack: () => void;

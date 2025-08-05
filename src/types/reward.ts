@@ -1,4 +1,4 @@
-import { EquipmentItem, EquipmentType } from "./inventory";
+import { EquipmentItem, EquipmentType, InventoryItem } from "./inventory";
 import { Rarity } from "./rarity";
 
 export enum RewardType {
@@ -6,6 +6,7 @@ export enum RewardType {
   equipment = "equipment",
   crystal = "crystal",
   coins = "coins",
+  item = "item",
 }
 
 export interface Reward {
@@ -15,6 +16,7 @@ export interface Reward {
   rarity?: Rarity;
   amount?: number;
   equipment?: EquipmentItem;
+  item?: InventoryItem;
 }
 
 export interface ExpReward extends Reward {
@@ -36,5 +38,10 @@ export interface CrystalReward extends Reward {
 
 export interface CoinsReward extends Reward {
   type: RewardType.coins;
+  amount: number;
+}
+
+export interface ItemReward extends Reward {
+  type: RewardType.item;
   amount: number;
 }

@@ -11,7 +11,12 @@ import {
 } from "../types/skillTypes";
 import { StatType } from "../types/stats";
 import { StatusEffectType } from "../types/statusEffects";
-import { BattleCharacter, BattleInitOptions, BattleState } from "./battleTypes";
+import {
+  BattleCharacter,
+  BattleInitOptions,
+  BattleState,
+  DamageRecordType,
+} from "./battleTypes";
 import {
   getCalculatedStats,
   getStackableStatusEffectReductionAmount,
@@ -20,6 +25,7 @@ import {
 import { GameEngine } from "engine/GameEngine";
 import { getAllEquipment } from "data/inventory/equipmentUtil";
 import { EquipmentItem } from "types/inventory";
+import { getCompletedThresholdRewards } from "./victoryTreshholds";
 
 function playerCharacterToBattle(
   char: PlayerCharacter,
@@ -168,6 +174,17 @@ export class BattleEngine {
       activatedCharactersThisRound: [],
       battlePhase: "combat",
       turnCount: 1,
+      round: 1,
+      maxRounds: options.maxRounds || 100,
+      victoryThresholds: options.victoryThresholds || [],
+      battleRecords: {
+        damage: {
+          [DamageRecordType.BASIC_ATTACK]: 0,
+          [DamageRecordType.STATUS_EFFECT_DAMAGE]: 0,
+          [DamageRecordType.ALL_DAMAGE]: 0,
+          [DamageRecordType.ABILITY_DAMAGE]: 0,
+        },
+      },
       battleLog: ["Battle begins!"],
       skillCooldowns: {},
       xpLogs: [],
@@ -251,6 +268,13 @@ export class BattleEngine {
     return attacker;
   }
 
+  recordDamage(amount: number, type: DamageRecordType) {
+    this.state.battleRecords.damage[type] += amount;
+    if (type !== DamageRecordType.ALL_DAMAGE) {
+      this.state.battleRecords.damage[DamageRecordType.ALL_DAMAGE] += amount;
+    }
+  }
+
   private checkBattleEnd() {
     const playerAlive = this.state.playerTeam.some((c) => c.isAlive);
     const enemyAlive = this.state.enemyTeam.some((c) => c.isAlive);
@@ -263,6 +287,21 @@ export class BattleEngine {
     if (!enemyAlive && this.state.battlePhase !== "victory") {
       this.state.battlePhase = "victory";
       this.state.battleLog.push("Victory! You have defeated the enemy team!");
+      return true;
+    }
+    if (this.state.round >= this.state.maxRounds) {
+      console.log(this.state.victoryThresholds, this.state.battleRecords);
+      if (getCompletedThresholdRewards(this.getState()).length > 0) {
+        this.state.battlePhase = "victory";
+        this.state.battleLog.push(
+          `Victory! You delt a total of ${this.state.battleRecords.damage[DamageRecordType.ALL_DAMAGE]} damage.`,
+        );
+      } else {
+        this.state.battlePhase = "defeat";
+        this.state.battleLog.push(
+          "Defeat! You did not do enough damage to pass the thresholds.",
+        );
+      }
       return true;
     }
 
@@ -306,6 +345,8 @@ export class BattleEngine {
       this.state.battleLog.push(
         `${attacker.name} attacks ${target.name} for ${dmg} damage!`,
       );
+      if (!target.isPlayer)
+        this.recordDamage(dmg, DamageRecordType.BASIC_ATTACK);
       if (!target.isAlive) {
         this.state.battleLog.push(`${target.name} is defeated!`);
       }
@@ -401,6 +442,8 @@ export class BattleEngine {
             this.state.battleLog.push(
               `${attacker.name} uses ${skill.name} on ${target.name} for ${dmg} damage!`,
             );
+            if (!target.isPlayer)
+              this.recordDamage(dmg, DamageRecordType.ABILITY_DAMAGE);
             if (!target.isAlive) {
               this.state.battleLog.push(`${target.name} is defeated!`);
             }
@@ -515,10 +558,15 @@ export class BattleEngine {
     Object.values(char.statusEffects).forEach((effect, idx) => {
       switch (effect.type) {
         case StatusEffectType.poison:
-          char.damage += effect.value;
+          const poisonDmg =
+            effect.value *
+            (100 / (100 + adjustedStat(StatType.magicDefense, char) * 2));
+          char.damage += poisonDmg;
           this.state.battleLog.push(
-            `${char.name} takes ${effect.value} poison damage!`,
+            `${char.name} takes ${poisonDmg} poison damage!`,
           );
+          if (!char.isPlayer)
+            this.recordDamage(poisonDmg, DamageRecordType.STATUS_EFFECT_DAMAGE);
           break;
         case StatusEffectType.burn:
           const dmg = Math.floor(
@@ -528,6 +576,8 @@ export class BattleEngine {
           this.state.battleLog.push(
             `${char.name} takes ${effect.value} burn damage!`,
           );
+          if (!char.isPlayer)
+            this.recordDamage(dmg, DamageRecordType.STATUS_EFFECT_DAMAGE);
           break;
       }
       if (!effect.stackable) {
@@ -552,6 +602,7 @@ export class BattleEngine {
     let character = this.getCurrentTurnCharacter();
 
     if (!character) {
+      this.state.round += 1;
       this.state.activatedCharactersThisRound = [];
       this.state.battleLog.push("--- New Round! ---");
       character = this.getCurrentTurnCharacter();
@@ -637,6 +688,7 @@ export class BattleEngine {
       ) {
         // Reset for the next round
         this.state.activatedCharactersThisRound = [];
+        this.state.round += 1;
         this.state.battleLog.push("--- New Round! ---");
       }
     }

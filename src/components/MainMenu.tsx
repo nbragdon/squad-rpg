@@ -63,6 +63,12 @@ const MainMenu: React.FC<MainMenuProps> = ({ onNavigate }) => {
         </button>
         <button
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-blue-900"
+          onClick={() => onNavigate(GameScreen.TITAN)}
+        >
+          Titan
+        </button>
+        <button
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-blue-900"
           onClick={() => onNavigate(GameScreen.COLLECTION)}
         >
           Character Collection

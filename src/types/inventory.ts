@@ -4,6 +4,7 @@ import { StatType } from "./stats";
 
 export enum InventoryType {
   equipment = "equipment",
+  item = "item",
 }
 
 export enum EquipmentType {
@@ -22,9 +23,9 @@ export interface InventoryItem {
 
 export interface EquipmentItemBoost {
   statType: StatType;
-  level: number;
   value: number;
   modifierType: ModifierType;
+  upgrades?: number[];
 }
 
 export interface EquipmentItem extends InventoryItem {
@@ -42,4 +43,5 @@ export interface EquippedItems {
 
 export interface Inventory {
   [InventoryType.equipment]: { [key: string]: InventoryItem };
+  [InventoryType.item]: { [key: string]: InventoryItem };
 }

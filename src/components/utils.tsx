@@ -34,14 +34,16 @@ import {
   GiShouting,
   GiSnail,
   GiSparkSpirit,
+  GiStandingPotion,
   GiSunbeams,
+  GiTicket,
   GiWalkingBoot,
 } from "react-icons/gi";
 import { AffinityType } from "../types/affinity";
 import { Rarity } from "../types/rarity";
 import { StatType } from "../types/stats";
 import { SkillEffectType } from "types/skillTypes";
-import { EquipmentType } from "types/inventory";
+import { EquipmentType, InventoryItem } from "types/inventory";
 import { StatusEffectType } from "types/statusEffects";
 
 export const getRarityTextColorClass = (rarity: Rarity): string => {
@@ -143,3 +145,11 @@ export const EQUIPMENT_TYPE_ICONS = {
 };
 
 export const COIN_ICON = <FaCoins className="text-amber-300" />;
+
+export const getItemIcon = (item: InventoryItem) => {
+  if (item.id.includes("ticket")) {
+    return <GiTicket />;
+  }
+
+  return <GiStandingPotion />;
+};

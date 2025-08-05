@@ -6,6 +6,7 @@ import { Rarity } from "../types/rarity";
 import { AdjustStatSkillEffect, Skill } from "../types/skillTypes";
 import { AllStats } from "../types/stats";
 import { StatusEffectType } from "../types/statusEffects";
+import { VictoryThreshold } from "./victoryTreshholds";
 
 export type BattleParticipant = PlayerCharacter | EnemyCharacter;
 
@@ -43,6 +44,21 @@ export interface BattleInitOptions {
   playerCharacters: PlayerCharacter[];
   enemies: BattleInitEnemy[];
   inventory: { [key in string]: EquipmentItem };
+  maxRounds?: number;
+  victoryThresholds?: VictoryThreshold[];
+}
+
+export enum DamageRecordType {
+  BASIC_ATTACK = "BASIC_ATTACK",
+  STATUS_EFFECT_DAMAGE = "STATUS_EFFECT_DAMAGE",
+  ALL_DAMAGE = "ALL_DAMAGE",
+  ABILITY_DAMAGE = "ABILITY_DAMAGE",
+}
+
+export interface BattleRecords {
+  damage: {
+    [key in DamageRecordType]: number;
+  };
 }
 
 export type BattlePhase = "setup" | "combat" | "victory" | "defeat";
@@ -53,6 +69,10 @@ export interface BattleState {
   activatedCharactersThisRound: string[];
   battlePhase: BattlePhase;
   turnCount: number;
+  round: number;
+  maxRounds: number;
+  battleRecords: BattleRecords;
+  victoryThresholds?: VictoryThreshold[];
   battleLog: string[];
   skillCooldowns: { [characterId: string]: { [skillId: string]: number } };
   xpLogs?: string[];

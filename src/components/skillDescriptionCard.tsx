@@ -10,7 +10,7 @@ import {
   AdjustStatSkillEffect,
   CleanseSkillEffect,
 } from "types/skillTypes";
-import { AllStats } from "types/stats";
+import { AllStats, StatType } from "types/stats";
 import { StatIcons, AffinityIcons } from "./utils";
 import { PlayerCharacter } from "types/character";
 
@@ -134,7 +134,7 @@ export const SkillDescriptionCard: React.FC<SkillDescriptionCardProps> = ({
                   {(effect as ApplyStatusEffectSkillEffect).statusEffectType}
                 </span>{" "}
                 {(effect as ApplyStatusEffectSkillEffect).value &&
-                  `(${(effect as ApplyStatusEffectSkillEffect).value}) `}
+                  `(${(effect as ApplyStatusEffectSkillEffect).stat ? Math.floor(character.stats[(effect as ApplyStatusEffectSkillEffect).stat || StatType.magic] * ((effect as ApplyStatusEffectSkillEffect).value || 0)) : (effect as ApplyStatusEffectSkillEffect).value}) `}
                 status effect
                 {(effect as ApplyStatusEffectSkillEffect).duration &&
                   ` for ${(effect as ApplyStatusEffectSkillEffect).duration} turns`}

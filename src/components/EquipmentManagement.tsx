@@ -4,7 +4,6 @@ import { PlayerCharacter } from "types/character";
 import { EquipmentType, EquipmentItem } from "types/inventory";
 import { Rarity } from "types/rarity";
 import { StatType } from "types/stats";
-import { formatStatValue } from "./InventorySelectionModal";
 import {
   RARITY_COLORS,
   getRarityTextColorClass,
@@ -14,7 +13,15 @@ import {
   COIN_ICON,
 } from "./utils";
 import { getOwnedCharacters } from "data/characters/charUtil";
-import { getEquipmentValue } from "data/inventory/equipmentUtil";
+import {
+  applyRandomSubstatIncrease,
+  calculateLevelUpCost,
+  formatStatValue,
+  generateSubStatEquipmentBoosts,
+  getEquipmentValue,
+  getLeveledEquipmentValue,
+  MAX_EQUIPMENT_LEVELS,
+} from "data/inventory/equipmentUtil";
 import { GiTrashCan } from "react-icons/gi";
 
 interface EquipmentManagementPageProps {
@@ -37,6 +44,10 @@ const EquipmentManagementPage: React.FC<EquipmentManagementPageProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [itemToTrash, setItemToTrash] = useState<EquipmentItem | null>(null);
+  const [message, setMessage] = useState<{
+    text: string;
+    type: "success" | "error";
+  } | null>(null);
 
   // Memoize equipped items map for quick lookup
   const equippedItemsMap = useMemo(() => {
@@ -46,6 +57,7 @@ const EquipmentManagementPage: React.FC<EquipmentManagementPageProps> = ({
       const selectedChar = ownedChars.find(
         (character) => character.id === characterId,
       );
+      console.log(selectedChar);
       if (selectedChar) {
         if (char.equipedItems[EquipmentType.weapon])
           map.set(char.equipedItems[EquipmentType.weapon], selectedChar);
@@ -133,6 +145,122 @@ const EquipmentManagementPage: React.FC<EquipmentManagementPageProps> = ({
     setItemToTrash(null);
   };
 
+  const handleLevelUp = (itemToLevelUp: EquipmentItem) => {
+    const currentLevel = itemToLevelUp.level;
+    const maxLevel = MAX_EQUIPMENT_LEVELS[itemToLevelUp.rarity];
+    const cost = calculateLevelUpCost(currentLevel);
+
+    if (currentLevel >= maxLevel) {
+      setMessage({
+        text: `${itemToLevelUp.name} is already at max level!`,
+        type: "error",
+      });
+      return;
+    }
+
+    if (gameEngine.player.coins < cost) {
+      setMessage({
+        text: `Not enough coins! Need ${cost} coins.`,
+        type: "error",
+      });
+      return;
+    }
+
+    updateGameEngine((prevEngine) => {
+      const newEquipment = { ...prevEngine.player.equipment };
+      let item = { ...newEquipment[itemToLevelUp.id] }; // Create a mutable copy
+
+      if (item) {
+        item.level = item.level + 1;
+
+        // Apply random substat increase every 5 levels
+        if (item.level % 5 === 0) {
+          item = applyRandomSubstatIncrease(item);
+        }
+
+        newEquipment[itemToLevelUp.id] = item; // Update the item in the equipment object
+      }
+
+      return {
+        ...prevEngine,
+        player: {
+          ...prevEngine.player,
+          coins: prevEngine.player.coins - cost,
+          equipment: newEquipment,
+        },
+      };
+    });
+    setMessage({
+      text: `${itemToLevelUp.name} leveled up to Lv. ${currentLevel + 1}!`,
+      type: "success",
+    });
+  };
+
+  const handleMaxLevelUp = (itemToLevelUp: EquipmentItem) => {
+    let currentItem = { ...itemToLevelUp }; // Create a mutable copy for calculations
+    let levelsGained = 0;
+    let newCoins = gameEngine.player.coins;
+
+    while (currentItem.level < MAX_EQUIPMENT_LEVELS[currentItem.rarity]) {
+      const costForNextLevel = calculateLevelUpCost(currentItem.level);
+
+      if (newCoins >= costForNextLevel) {
+        newCoins -= costForNextLevel;
+        levelsGained++;
+        currentItem.level = currentItem.level + 1;
+
+        // Apply random substat increase every 5 levels
+        if (currentItem.level % 5 === 0) {
+          currentItem = applyRandomSubstatIncrease(currentItem);
+        }
+      } else {
+        break; // Not enough coins for the next level
+      }
+    }
+
+    if (levelsGained > 0) {
+      updateGameEngine((prevEngine) => {
+        const newEquipment = { ...prevEngine.player.equipment };
+        newEquipment[currentItem.id] = currentItem; // Update with the fully leveled item
+
+        return {
+          ...prevEngine,
+          player: {
+            ...prevEngine.player,
+            coins: newCoins,
+            equipment: newEquipment,
+          },
+        };
+      });
+      setMessage({
+        text: `${itemToLevelUp.name} leveled up ${levelsGained} times! Now Lv. ${currentItem.level}!`,
+        type: "success",
+      });
+    } else {
+      if (currentItem.level >= MAX_EQUIPMENT_LEVELS[currentItem.rarity]) {
+        setMessage({
+          text: `${itemToLevelUp.name} is already at max level!`,
+          type: "error",
+        });
+      } else {
+        const costForNextLevel = calculateLevelUpCost(currentItem.level);
+        setMessage({
+          text: `Not enough coins to level up ${itemToLevelUp.name}! Need ${costForNextLevel} coins.`,
+          type: "error",
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => {
+        setMessage(null);
+      }, 3000); // Message disappears after 3 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-blue-900 text-white font-inter flex flex-col p-4 sm:p-8">
       <style>{`
@@ -176,6 +304,15 @@ const EquipmentManagementPage: React.FC<EquipmentManagementPageProps> = ({
           <span className="ml-2 text-xl font-semibold">{coins}</span>
         </div>
       </div>
+
+      {/* Message Display */}
+      {message && (
+        <div
+          className={`mb-4 p-3 rounded-lg text-center font-semibold ${message.type === "success" ? "bg-green-600" : "bg-red-600"} animate-fade-in`}
+        >
+          {message.text}
+        </div>
+      )}
 
       {/* Filters and Sort */}
       <div className="w-full max-w-6xl mx-auto bg-gray-800 p-4 rounded-lg shadow-lg mb-8">
@@ -248,6 +385,10 @@ const EquipmentManagementPage: React.FC<EquipmentManagementPageProps> = ({
               const rarityBorderClass =
                 RARITY_COLORS[item.rarity] || "border-gray-500";
               const rarityTextColorClass = getRarityTextColorClass(item.rarity);
+              const nextLevelCost = calculateLevelUpCost(item.level);
+              const isMaxLevel =
+                item.level >= MAX_EQUIPMENT_LEVELS[item.rarity];
+              const canAffordLevelUp = coins >= nextLevelCost;
 
               return (
                 <div
@@ -295,9 +436,11 @@ const EquipmentManagementPage: React.FC<EquipmentManagementPageProps> = ({
                         className="flex items-center text-green-200 text-sm"
                       >
                         {StatIcons[boost.statType]}{" "}
-                        {/* Invoking the function */}
                         <span className="ml-1">
-                          {formatStatValue(boost)} {StatType[boost.statType]}
+                          {formatStatValue(boost, item.level, true)}{" "}
+                          {item.level > 1 &&
+                            `(${getLeveledEquipmentValue(boost, 1, true)}) `}
+                          {StatType[boost.statType]}
                         </span>
                       </div>
                     ))}
@@ -317,7 +460,8 @@ const EquipmentManagementPage: React.FC<EquipmentManagementPageProps> = ({
                           {StatIcons[boost.statType]}{" "}
                           {/* Invoking the function */}
                           <span className="ml-1">
-                            {formatStatValue(boost)} {StatType[boost.statType]}
+                            {formatStatValue(boost, item.level, false)}{" "}
+                            {StatType[boost.statType]}
                           </span>
                         </div>
                       ))}
@@ -338,15 +482,49 @@ const EquipmentManagementPage: React.FC<EquipmentManagementPageProps> = ({
                     )}
                   </div>
 
-                  {/* Trash Button */}
-                  <button
-                    onClick={() => handleTrashClick(item)}
-                    className="mt-4 bg-red-700 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors duration-200 flex items-center justify-center"
-                  >
-                    {/* Invoking the function */}
-                    <span className="mr-1">{getEquipmentValue(item)}</span>
-                    {COIN_ICON}
-                  </button>
+                  {/* Level Up and Trash Buttons */}
+                  <div className="flex justify-between items-center mt-4">
+                    <div className="flex gap-2">
+                      {" "}
+                      {/* Group Level Up and Max Level */}
+                      <button
+                        onClick={() => handleLevelUp(item)}
+                        disabled={isMaxLevel || !canAffordLevelUp}
+                        className={`font-bold py-2 px-3 rounded-lg shadow-md transition-colors duration-200 flex items-center justify-center text-sm
+                                  ${
+                                    isMaxLevel || !canAffordLevelUp
+                                      ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                                      : "bg-blue-600 hover:bg-blue-700 text-white"
+                                  }`}
+                      >
+                        <span>
+                          Lv Up{" "}
+                          <span className="inline-flex items-center">
+                            <span className="mr-1">{nextLevelCost}</span>
+                            {COIN_ICON}
+                          </span>
+                        </span>
+                      </button>
+                      <button
+                        onClick={() => handleMaxLevelUp(item)}
+                        disabled={isMaxLevel || !canAffordLevelUp}
+                        className={`font-bold py-2 px-3 rounded-lg shadow-md transition-colors duration-200 flex items-center justify-center text-sm
+                                  ${
+                                    isMaxLevel || !canAffordLevelUp
+                                      ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                                      : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                                  }`}
+                      >
+                        Max Lv
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => handleTrashClick(item)}
+                      className="bg-red-700 hover:bg-red-600 text-white p-2 ml-2 rounded-lg shadow-md transition-colors duration-200 flex items-center justify-center"
+                    >
+                      <GiTrashCan className="text-lg" />
+                    </button>
+                  </div>
                 </div>
               );
             })}

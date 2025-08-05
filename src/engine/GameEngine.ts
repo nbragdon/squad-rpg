@@ -26,8 +26,16 @@ export function createDefaultGameEngine(): GameEngine {
       coins: 0,
       crystals: 0,
       equipment: {},
+      inventory: {},
       autoBattle: false,
       soloProgress: 1,
+      titanProgress: {
+        [Rarity.COMMON]: 0,
+        [Rarity.UNCOMMON]: 0,
+        [Rarity.RARE]: 0,
+        [Rarity.EPIC]: 0,
+        [Rarity.LEGENDARY]: 0,
+      },
       dungeonProgress: {
         [Rarity.COMMON]: {
           [EquipmentType.weapon]: false,

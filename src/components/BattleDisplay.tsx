@@ -9,6 +9,7 @@ import {
   AffinityIcons,
   COIN_ICON,
   EQUIPMENT_TYPE_ICONS,
+  getItemIcon,
   getRarityTextColorClass,
   RARITY_COLORS,
   RarityIcons,
@@ -23,19 +24,27 @@ import {
   CrystalReward,
   EquipmentReward,
   ExpReward,
+  ItemReward,
   Reward,
   RewardType,
 } from "types/reward";
-import { generateRandomEquipment } from "data/inventory/equipmentUtil";
-import { formatStatValue } from "./InventorySelectionModal";
+import {
+  formatStatValue,
+  generateRandomEquipment,
+} from "data/inventory/equipmentUtil";
 import { HiSparkles } from "react-icons/hi";
 import { FaGem } from "react-icons/fa";
 import { EquipmentItem, EquipmentType } from "types/inventory";
+import {
+  getCompletedThresholdRewards,
+  VictoryThreshold,
+} from "battle/victoryTreshholds";
 
 const AUTO_WAIT_TIME = 1500; // Time in ms for auto actions
 
 interface BattleDisplayProps {
   rewards: Reward[];
+  victoryThresholds?: VictoryThreshold[];
   onVictory?: () => void;
   onDefeat?: () => void;
   onFlee?: () => void;
@@ -43,6 +52,7 @@ interface BattleDisplayProps {
 
 const BattleDisplay: React.FC<BattleDisplayProps> = ({
   rewards,
+  victoryThresholds,
   onVictory,
   onDefeat,
   onFlee,
@@ -518,13 +528,34 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
             <p className="text-lg text-purple-300">+{crystalReward.amount}</p>
           </div>
         );
+      case RewardType.item:
+        const itemReward = reward as ItemReward;
+        const item = itemReward.item;
+        if (!item) return null;
+        const itemBorderClass = RARITY_COLORS[item.rarity] || "border-gray-500";
+        const itemTextColorClass = getRarityTextColorClass(item.rarity);
+        return (
+          <div
+            key={index}
+            className={`${commonCardClasses} ${itemBorderClass}`}
+            style={animationDelay}
+          >
+            <div className={`text-5xl ${itemTextColorClass}  mb-2`}>
+              {getItemIcon(item)}
+            </div>
+            <h3 className="text-xl font-bold text-white mb-1 capitalize">
+              {item.name}
+            </h3>
+            <p className={`text-lg ${itemTextColorClass}`}>+{item.quantity}</p>
+          </div>
+        );
       case RewardType.equipment:
         const equipmentReward = reward as EquipmentReward;
-        const item = equipmentReward.equipment;
-        if (!item) return null;
+        const equipment = equipmentReward.equipment;
+        if (!equipment) return null;
         const rarityBorderClass =
-          RARITY_COLORS[item.rarity] || "border-gray-500";
-        const rarityTextColorClass = getRarityTextColorClass(item.rarity);
+          RARITY_COLORS[equipment.rarity] || "border-gray-500";
+        const rarityTextColorClass = getRarityTextColorClass(equipment.rarity);
 
         return (
           <div
@@ -537,12 +568,12 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
           >
             <div className="flex justify-between items-start w-full mb-2">
               <h3 className="text-lg font-bold text-white leading-tight">
-                {item.name}
+                {equipment.name}
               </h3>
               <div className="flex items-center text-sm text-gray-300 ml-1">
                 Lv.{" "}
                 <span className="font-bold text-yellow-300 ml-1">
-                  {item.level}
+                  {equipment.level}
                 </span>
               </div>
             </div>
@@ -550,29 +581,30 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
             <div
               className={`text-sm font-semibold mb-2 ${rarityTextColorClass} flex items-center`}
             >
-              {RarityIcons[item.rarity]}
-              <span className="ml-1">{item.rarity.toUpperCase()}</span>
+              {RarityIcons[equipment.rarity]}
+              <span className="ml-1">{equipment.rarity.toUpperCase()}</span>
             </div>
 
             <div className="mb-2 flex items-center text-base">
-              {EQUIPMENT_TYPE_ICONS[item.equipmentType]}
-              <span className="ml-1 capitalize">{item.equipmentType}</span>
+              {EQUIPMENT_TYPE_ICONS[equipment.equipmentType]}
+              <span className="ml-1 capitalize">{equipment.equipmentType}</span>
             </div>
 
             {/* Main Stats */}
-            {item.mainBoosts.length > 0 && (
+            {equipment.mainBoosts.length > 0 && (
               <div className="w-full text-left mb-1">
                 <h4 className="text-xs font-semibold text-green-300 mb-0.5">
                   Main Stats:
                 </h4>
-                {item.mainBoosts.map((boost, idx) => (
+                {equipment.mainBoosts.map((boost, idx) => (
                   <div
                     key={idx}
                     className="flex items-center text-green-200 text-xs"
                   >
                     {StatIcons[boost.statType]}
                     <span className="ml-1">
-                      {formatStatValue(boost)} {StatType[boost.statType]}
+                      {formatStatValue(boost, equipment.level, true)}{" "}
+                      {StatType[boost.statType]}
                     </span>
                   </div>
                 ))}
@@ -580,19 +612,20 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
             )}
 
             {/* Sub Stats */}
-            {item.subBoosts.length > 0 && (
+            {equipment.subBoosts.length > 0 && (
               <div className="w-full text-left">
                 <h4 className="text-xs font-semibold text-gray-400 mb-0.5">
                   Sub Stats:
                 </h4>
-                {item.subBoosts.map((boost, idx) => (
+                {equipment.subBoosts.map((boost, idx) => (
                   <div
                     key={idx}
                     className="flex items-center text-gray-300 text-xs"
                   >
                     {StatIcons[boost.statType]}
                     <span className="ml-1">
-                      {formatStatValue(boost)} {StatType[boost.statType]}
+                      {formatStatValue(boost, equipment.level, false)}{" "}
+                      {StatType[boost.statType]}
                     </span>
                   </div>
                 ))}
@@ -614,7 +647,13 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
     let updatedEquipment = { ...updatedGameEngine.player.equipment };
     let crystals = updatedGameEngine.player.crystals;
     let coins = updatedGameEngine.player.coins;
-    rewards.forEach((reward) => {
+    let inventory = updatedGameEngine.player.inventory;
+    const thresholdRewards = victoryThresholds
+      ? getCompletedThresholdRewards(battleState)
+      : [];
+    console.log(thresholdRewards);
+    const allRewards = [...rewards, ...thresholdRewards];
+    allRewards.forEach((reward) => {
       if (reward.type === RewardType.exp) {
         const xpGained = getVictoryXp() * (reward.multiplier || 1);
         updatedBattleRewards.push({
@@ -652,6 +691,13 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
       } else if (reward.type === RewardType.coins && reward.amount) {
         updatedBattleRewards.push(reward);
         coins += reward.amount;
+      } else if (reward.type === RewardType.item && reward.item) {
+        if (inventory[reward.item.id]) {
+          inventory[reward.item.id].quantity += reward.item.quantity;
+        } else {
+          inventory[reward.item.id] = { ...reward.item };
+        }
+        updatedBattleRewards.push(reward);
       }
     });
 
@@ -756,7 +802,7 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
     <div className="max-w-3xl mx-auto p-6 bg-blue-900 text-white rounded-lg shadow-lg font-inter">
       <div className="mb-4 text-center">
         <strong className="text-lg font-semibold text-yellow-300">
-          Timeline:
+          Round {battleState.round}:
         </strong>{" "}
         <div className="flex flex-wrap justify-center items-center mt-2">
           {timeline}

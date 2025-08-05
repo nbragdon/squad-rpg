@@ -14,11 +14,9 @@ import {
 import { EquipmentItem, EquipmentType } from "types/inventory";
 import { useGameEngine } from "context/GameEngineContext";
 import { generateBaseCharacterProgress } from "data/characters";
-import {
-  formatStatValue,
-  InventorySelectionModal,
-} from "./InventorySelectionModal";
+import { InventorySelectionModal } from "./InventorySelectionModal";
 import { SkillDescriptionCard } from "./skillDescriptionCard";
+import { formatStatValue } from "data/inventory/equipmentUtil";
 
 interface CharacterModalProps {
   character: PlayerCharacter;
@@ -303,7 +301,11 @@ const CharacterModal: React.FC<CharacterModalProps> = ({
                           >
                             {StatIcons[boost.statType]}
                             <span className="ml-1">
-                              {formatStatValue(boost)}
+                              {formatStatValue(
+                                boost,
+                                equipedWeapon.level,
+                                true,
+                              )}
                             </span>
                           </span>
                         ))}
@@ -319,7 +321,11 @@ const CharacterModal: React.FC<CharacterModalProps> = ({
                             >
                               {StatIcons[boost.statType]}
                               <span className="ml-1">
-                                {formatStatValue(boost)}
+                                {formatStatValue(
+                                  boost,
+                                  equipedWeapon.level,
+                                  false,
+                                )}
                               </span>
                             </span>
                           ))}
@@ -370,7 +376,7 @@ const CharacterModal: React.FC<CharacterModalProps> = ({
                           >
                             {StatIcons[boost.statType]}
                             <span className="ml-1">
-                              {formatStatValue(boost)}
+                              {formatStatValue(boost, equipedArmor.level, true)}
                             </span>
                           </span>
                         ))}
@@ -386,7 +392,11 @@ const CharacterModal: React.FC<CharacterModalProps> = ({
                             >
                               {StatIcons[boost.statType]}
                               <span className="ml-1">
-                                {formatStatValue(boost)}
+                                {formatStatValue(
+                                  boost,
+                                  equipedArmor.level,
+                                  false,
+                                )}
                               </span>
                             </span>
                           ))}
@@ -440,7 +450,11 @@ const CharacterModal: React.FC<CharacterModalProps> = ({
                           >
                             {StatIcons[boost.statType]}
                             <span className="ml-1">
-                              {formatStatValue(boost)}
+                              {formatStatValue(
+                                boost,
+                                equipedTrinket0.level,
+                                true,
+                              )}
                             </span>
                           </span>
                         ))}
@@ -456,7 +470,11 @@ const CharacterModal: React.FC<CharacterModalProps> = ({
                             >
                               {StatIcons[boost.statType]}
                               <span className="ml-1">
-                                {formatStatValue(boost)}
+                                {formatStatValue(
+                                  boost,
+                                  equipedTrinket0.level,
+                                  false,
+                                )}
                               </span>
                             </span>
                           ))}
@@ -510,7 +528,11 @@ const CharacterModal: React.FC<CharacterModalProps> = ({
                           >
                             {StatIcons[boost.statType]}
                             <span className="ml-1">
-                              {formatStatValue(boost)}
+                              {formatStatValue(
+                                boost,
+                                equipedTrinket1.level,
+                                true,
+                              )}
                             </span>
                           </span>
                         ))}
@@ -526,7 +548,11 @@ const CharacterModal: React.FC<CharacterModalProps> = ({
                             >
                               {StatIcons[boost.statType]}
                               <span className="ml-1">
-                                {formatStatValue(boost)}
+                                {formatStatValue(
+                                  boost,
+                                  equipedTrinket1.level,
+                                  false,
+                                )}
                               </span>
                             </span>
                           ))}

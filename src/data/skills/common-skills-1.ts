@@ -80,10 +80,11 @@ const VenomDaggerApplyStatusEffect: ApplyStatusEffectSkillEffect = {
   statusEffectType: StatusEffectType.poison,
   targetType: TargetType.randomEnemy,
   affinities: [AffinityType.void],
+  stat: StatType.speed,
   duration: 3,
   stackable: false,
-  value: 30,
-  modifierType: ModifierType.Flat,
+  value: 0.2,
+  modifierType: ModifierType.Percentage,
 };
 
 export const VenomDaggerSkill: Skill = {
@@ -112,7 +113,7 @@ const QuickStabDamageEffect: DamageSkillEffect = {
 export const QuickStabSkill: Skill = {
   id: "quick_stab",
   name: "Quick Stab",
-  cost: 10,
+  cost: 5,
   costStat: StatType.energy,
   effects: [QuickStabDamageEffect],
 };

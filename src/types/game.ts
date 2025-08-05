@@ -1,4 +1,9 @@
-import { EquipmentItem, EquipmentType, EquippedItems } from "./inventory";
+import {
+  EquipmentItem,
+  EquipmentType,
+  EquippedItems,
+  InventoryItem,
+} from "./inventory";
 import { Rarity } from "./rarity";
 
 export interface CharacterProgress {
@@ -17,8 +22,12 @@ export interface PlayerProgress {
       [key in EquipmentType]: boolean;
     };
   };
+  titanProgress: {
+    [key in Rarity]: number;
+  };
   unlockedCharacters: string[]; // List of owned character IDs
   equipment: { [key in string]: EquipmentItem }; // Player's inventory
+  inventory: { [key in string]: InventoryItem };
   characterProgress?: {
     [characterId: string]: CharacterProgress;
   };
