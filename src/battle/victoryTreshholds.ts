@@ -1,7 +1,7 @@
 import { Reward, RewardType } from "types/reward";
 import { BattleState, DamageRecordType } from "./battleTypes";
 import { Rarity, RARITY_ORDER } from "types/rarity";
-import { InventoryType } from "types/inventory";
+import { InventoryType, ItemType, RARITY_TO_TICKET_ID } from "types/inventory";
 
 export type ThresholdType = DamageRecordType;
 
@@ -10,6 +10,25 @@ export type VictoryThreshold = {
   amount: number;
   reward: Reward;
 };
+
+function snakeCaseToCapitalizedWords(snakeCaseString: string) {
+  // 1. Replace underscores with spaces.
+  const spacedString = snakeCaseString.replace(/_/g, " ");
+
+  // 2. Split the string into words.
+  const words = spacedString.split(" ");
+
+  // 3. Capitalize the first letter of each word.
+  const capitalizedWords = words.map((word) => {
+    if (word.length === 0) {
+      return ""; // Handle empty strings that might result from multiple underscores
+    }
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  });
+
+  // 4. Join the capitalized words back together with spaces.
+  return capitalizedWords.join(" ");
+}
 
 export const getCompletedThresholdRewards = (battleState: BattleState) => {
   const rewards: Reward[] = [];
@@ -70,10 +89,8 @@ export function generateTitanVictoryThresholds(rarity: Rarity, level: number) {
       reward: {
         type: RewardType.item,
         item: {
-          id: `ticket_${rarity}`,
-          type: InventoryType.item,
-          name: `${rarity} Ticket`,
-          stackable: true,
+          id: RARITY_TO_TICKET_ID[rarity],
+          name: snakeCaseToCapitalizedWords(RARITY_TO_TICKET_ID[rarity]),
           quantity: i === 0 ? baseTicketReward : 1,
           rarity: rarity,
         },

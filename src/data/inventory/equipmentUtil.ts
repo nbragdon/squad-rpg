@@ -647,9 +647,6 @@ export function generateRandomEquipment(
     level: 1,
     name: uniqueName,
     id: crypto.randomUUID(),
-    type: InventoryType.equipment,
-    stackable: false,
-    quantity: 1,
     rarity: rarity,
   };
 }

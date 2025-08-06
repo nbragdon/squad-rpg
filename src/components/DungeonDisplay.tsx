@@ -4,7 +4,7 @@ import { generateRandomEquipment } from "data/inventory/equipmentUtil";
 import React, { useEffect, useState } from "react";
 import { useGameEngine } from "../context/GameEngineContext";
 import { PlayerCharacter } from "../types/character";
-import { EquipmentType } from "../types/inventory";
+import { EquipmentType, RARITY_TO_TICKET_ID } from "../types/inventory";
 import { Rarity, RARITY_ORDER } from "../types/rarity";
 import BattleDisplay from "./BattleDisplay";
 import { RARITY_COLORS } from "./utils";
@@ -12,6 +12,7 @@ import { getOwnedCharacters } from "data/characters/charUtil";
 import CharacterModal from "./CharacterModal";
 import { RewardType } from "types/reward";
 import { CharacterSelection } from "./CharacterCollection";
+import TicketSelection from "./TicketSelection";
 
 function getRandomItemType(favoredType: EquipmentType): EquipmentType {
   // Hardcoded drop rates
@@ -82,15 +83,16 @@ interface DungeonProps {
 const DungeonMode: React.FC<DungeonProps> = ({ onBack }) => {
   const { gameEngine, updateGameEngine } = useGameEngine();
   const [floor, setFloor] = useState(1);
-  const [selectedRarity, setSelectedRarity] = useState<Rarity | null>(null);
+  const [selectedRarity, setSelectedRarity] = useState<Rarity>(Rarity.COMMON);
   const [selectedDropPreference, setSelectedDropPreference] =
-    useState<EquipmentType | null>(null);
+    useState<EquipmentType>(EquipmentType.weapon);
   const [selectedCharacters, setSelectedCharacters] = useState<
     PlayerCharacter[]
   >([]);
   const [modalCharacter, setModalCharacter] = useState<PlayerCharacter | null>(
     null,
   );
+  const [ticketsToUse, setTicketsToUse] = useState<number>(0);
   // go through dungeon progress and if all 3 dungeon types for a single rarity are true, then that rarity is completed
   const getCompltedRarities = () => {
     const completedRarities: Rarity[] = [];
@@ -138,28 +140,28 @@ const DungeonMode: React.FC<DungeonProps> = ({ onBack }) => {
 
   const handleRaritySelect = (rarity: Rarity) => {
     setSelectedRarity(rarity);
+    setTicketsToUse(0);
   };
 
   const handleDropPreferenceSelect = (type: EquipmentType) => {
     setSelectedDropPreference(type);
   };
 
-  const handleCharacterSelect = (character: PlayerCharacter) => {
-    setSelectedCharacters((prevSelected) => {
-      if (prevSelected.some((char) => char.id === character.id)) {
-        // Deselect if already selected
-        return prevSelected.filter((char) => char.id !== character.id);
-      } else {
-        // Select if not selected, up to 3 characters
-        if (prevSelected.length < 3) {
-          return [...prevSelected, character];
-        } else {
-          // Optionally, show a message that max characters are selected
-          console.log("Maximum 3 characters can be selected.");
-          return prevSelected;
-        }
-      }
-    });
+  const generateEquipmentRewards = (
+    equipmentCount: number,
+    rarity: Rarity,
+    dropPreference: EquipmentType,
+  ) => {
+    const rewards = [];
+    for (let i = 0; i < equipmentCount; i++) {
+      rewards.push({
+        type: RewardType.equipment,
+        rarity: rarity,
+        equipmentType: getRandomItemType(dropPreference),
+      });
+    }
+
+    return rewards;
   };
 
   const isRarityDisabled = (rarity: Rarity): boolean => {
@@ -203,15 +205,6 @@ const DungeonMode: React.FC<DungeonProps> = ({ onBack }) => {
         inventory: engine.player.equipment,
       }),
     }));
-  };
-
-  // Pagination handlers
-  const goToNextPage = () => {
-    setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages));
-  };
-
-  const goToPrevPage = () => {
-    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
   };
 
   return (
@@ -328,9 +321,16 @@ const DungeonMode: React.FC<DungeonProps> = ({ onBack }) => {
           />
 
           {/* Start Dungeon Button */}
-          <button
-            onClick={handleStartDungeon}
-            className={`
+          <div className="flex justify-center items-center gap-2">
+            <TicketSelection
+              selectedRarity={selectedRarity}
+              onTicketsSelected={function (amount: number): void {
+                setTicketsToUse(amount);
+              }}
+            />
+            <button
+              onClick={handleStartDungeon}
+              className={`
           bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-4 px-10 rounded-xl
           shadow-xl text-2xl transition-all duration-200 mt-8
           ${
@@ -341,14 +341,15 @@ const DungeonMode: React.FC<DungeonProps> = ({ onBack }) => {
               : ""
           }
         `}
-            disabled={
-              !selectedRarity ||
-              !selectedDropPreference ||
-              selectedCharacters.length === 0
-            }
-          >
-            Start Dungeon
-          </button>
+              disabled={
+                !selectedRarity ||
+                !selectedDropPreference ||
+                selectedCharacters.length === 0
+              }
+            >
+              Start Dungeon
+            </button>
+          </div>
         </>
       )}
       {battleEngine && (
@@ -356,18 +357,35 @@ const DungeonMode: React.FC<DungeonProps> = ({ onBack }) => {
           rewards={[
             {
               type: RewardType.exp,
+              multiplier: ticketsToUse + 1,
             },
-            {
-              type: RewardType.equipment,
-              rarity: selectedRarity || Rarity.COMMON,
-              equipmentType: getRandomItemType(
-                selectedDropPreference || EquipmentType.weapon,
-              ),
-            },
+            ...generateEquipmentRewards(
+              ticketsToUse + 1,
+              selectedRarity,
+              selectedDropPreference,
+            ),
           ]}
           onVictory={() => {
             updateGameEngine((engine) => ({
               ...engine,
+              player: {
+                ...engine.player,
+                inventory: {
+                  ...engine.player.inventory,
+                  [RARITY_TO_TICKET_ID[selectedRarity]]: {
+                    ...engine.player.inventory[
+                      RARITY_TO_TICKET_ID[selectedRarity]
+                    ],
+                    quantity: engine.player.inventory[
+                      RARITY_TO_TICKET_ID[selectedRarity]
+                    ]
+                      ? engine.player.inventory[
+                          RARITY_TO_TICKET_ID[selectedRarity]
+                        ].quantity - ticketsToUse
+                      : 0,
+                  },
+                },
+              },
               battleEngine: null,
             }));
             setFloor(floor + 1);

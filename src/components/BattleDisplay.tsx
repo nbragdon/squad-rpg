@@ -1,6 +1,6 @@
 import { levelUp } from "data/leveling";
 import React, { useCallback, useEffect, useState } from "react";
-import { BattleCharacter, calculateBattleXp } from "../battle";
+import { BattleCharacter, BattleState, calculateBattleXp } from "../battle";
 import { useGameEngine } from "../context/GameEngineContext";
 import { adjustedStat, calculateStat } from "../data/statUtils";
 import { StatType } from "../types/stats";
@@ -39,6 +39,7 @@ import {
   getCompletedThresholdRewards,
   VictoryThreshold,
 } from "battle/victoryTreshholds";
+import { GameEngine } from "engine/GameEngine";
 
 const AUTO_WAIT_TIME = 1500; // Time in ms for auto actions
 
@@ -67,6 +68,95 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
   const battleEngine = gameEngine.battleEngine;
   const battleState = battleEngine?.getState();
   const auto = gameEngine.player.autoBattle;
+
+  const addRewardsToGameEngine = (
+    originalGameEngine: GameEngine,
+    currentBattleState: BattleState,
+  ) => {
+    let updatedGameEngine = { ...originalGameEngine };
+    const updatedBattleRewards: Reward[] = [];
+    let updatedCharacterProgress = {
+      ...updatedGameEngine.player.characterProgress,
+    };
+    let updatedEquipment = { ...updatedGameEngine.player.equipment };
+    let crystals = updatedGameEngine.player.crystals;
+    let coins = updatedGameEngine.player.coins;
+    let updatedInventory = { ...updatedGameEngine.player.inventory };
+    const thresholdRewards = victoryThresholds
+      ? getCompletedThresholdRewards(currentBattleState)
+      : [];
+    console.log(thresholdRewards);
+    const allRewards = [...rewards, ...thresholdRewards];
+    allRewards.forEach((reward) => {
+      if (reward.type === RewardType.exp) {
+        const xpGained = getVictoryXp() * (reward.multiplier || 1);
+        updatedBattleRewards.push({
+          ...reward,
+          amount: xpGained,
+        });
+        currentBattleState.playerTeam.forEach(
+          (char: { id: string | number }) => {
+            let characterToUpdate = updatedCharacterProgress[char.id];
+            if (!characterToUpdate) {
+              characterToUpdate = generateBaseCharacterProgress();
+            }
+            updatedCharacterProgress[char.id] = levelUp({
+              ...characterToUpdate,
+              xp: (characterToUpdate.xp || 0) + xpGained,
+            });
+          },
+        );
+      } else if (
+        reward.type === RewardType.equipment &&
+        reward.equipmentType &&
+        reward.rarity
+      ) {
+        const newEquipment = generateRandomEquipment(
+          reward.equipmentType,
+          reward.rarity,
+        );
+        updatedBattleRewards.push({
+          ...reward,
+          equipment: newEquipment,
+        });
+        updatedEquipment[newEquipment.id] = newEquipment;
+        reward.equipment = newEquipment;
+      } else if (reward.type === RewardType.crystal && reward.amount) {
+        updatedBattleRewards.push(reward);
+        crystals += reward.amount;
+      } else if (reward.type === RewardType.coins && reward.amount) {
+        updatedBattleRewards.push(reward);
+        coins += reward.amount;
+      } else if (reward.type === RewardType.item && reward.item) {
+        console.log("item reward");
+        const updatedItem = updatedInventory[reward.item.id];
+        if (updatedItem) {
+          updatedInventory[reward.item.id] = {
+            ...updatedItem,
+            quantity: updatedItem.quantity + reward.item.quantity,
+          };
+        } else {
+          updatedInventory[reward.item.id] = { ...reward.item };
+        }
+        updatedBattleRewards.push(reward);
+      }
+    });
+
+    return {
+      updatedGameEngine: {
+        ...updatedGameEngine,
+        player: {
+          ...updatedGameEngine.player,
+          characterProgress: { ...updatedCharacterProgress },
+          equipment: { ...updatedEquipment },
+          inventory: { ...updatedInventory },
+          crystals,
+          coins,
+        },
+      },
+      updatedBattleRewards,
+    };
+  };
 
   // Memoized onAutoTurn to prevent unnecessary re-creations
   const onAutoTurn = useCallback(
@@ -541,7 +631,7 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
             style={animationDelay}
           >
             <div className={`text-5xl ${itemTextColorClass}  mb-2`}>
-              {getItemIcon(item)}
+              {getItemIcon(item.id)}
             </div>
             <h3 className="text-xl font-bold text-white mb-1 capitalize">
               {item.name}
@@ -639,78 +729,10 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
   };
 
   if (isBattleOver) {
-    let updatedGameEngine = gameEngine;
-    const updatedBattleRewards: Reward[] = [];
-    let updatedCharacterProgress = {
-      ...updatedGameEngine.player.characterProgress,
-    };
-    let updatedEquipment = { ...updatedGameEngine.player.equipment };
-    let crystals = updatedGameEngine.player.crystals;
-    let coins = updatedGameEngine.player.coins;
-    let inventory = updatedGameEngine.player.inventory;
-    const thresholdRewards = victoryThresholds
-      ? getCompletedThresholdRewards(battleState)
-      : [];
-    console.log(thresholdRewards);
-    const allRewards = [...rewards, ...thresholdRewards];
-    allRewards.forEach((reward) => {
-      if (reward.type === RewardType.exp) {
-        const xpGained = getVictoryXp() * (reward.multiplier || 1);
-        updatedBattleRewards.push({
-          ...reward,
-          amount: xpGained,
-        });
-        battleState.playerTeam.forEach((char: { id: string | number }) => {
-          let characterToUpdate = updatedCharacterProgress[char.id];
-          if (!characterToUpdate) {
-            characterToUpdate = generateBaseCharacterProgress();
-          }
-          updatedCharacterProgress[char.id] = levelUp({
-            ...characterToUpdate,
-            xp: (characterToUpdate.xp || 0) + xpGained,
-          });
-        });
-      } else if (
-        reward.type === RewardType.equipment &&
-        reward.equipmentType &&
-        reward.rarity
-      ) {
-        const newEquipment = generateRandomEquipment(
-          reward.equipmentType,
-          reward.rarity,
-        );
-        updatedBattleRewards.push({
-          ...reward,
-          equipment: newEquipment,
-        });
-        updatedEquipment[newEquipment.id] = newEquipment;
-        reward.equipment = newEquipment;
-      } else if (reward.type === RewardType.crystal && reward.amount) {
-        updatedBattleRewards.push(reward);
-        crystals += reward.amount;
-      } else if (reward.type === RewardType.coins && reward.amount) {
-        updatedBattleRewards.push(reward);
-        coins += reward.amount;
-      } else if (reward.type === RewardType.item && reward.item) {
-        if (inventory[reward.item.id]) {
-          inventory[reward.item.id].quantity += reward.item.quantity;
-        } else {
-          inventory[reward.item.id] = { ...reward.item };
-        }
-        updatedBattleRewards.push(reward);
-      }
-    });
-
-    updatedGameEngine = {
-      ...updatedGameEngine,
-      player: {
-        ...updatedGameEngine.player,
-        characterProgress: { ...updatedCharacterProgress },
-        equipment: { ...updatedEquipment },
-        crystals,
-        coins,
-      },
-    };
+    const { updatedGameEngine, updatedBattleRewards } = addRewardsToGameEngine(
+      gameEngine,
+      battleState,
+    );
 
     console.log("updatedBattleRewards", updatedBattleRewards);
 
