@@ -22,6 +22,7 @@ import {
   GiAxeSword,
   GiBlackHoleBolas,
   GiChestArmor,
+  GiCoins,
   GiCrystalize,
   GiDropWeapon,
   GiLightningTrio,
@@ -128,6 +129,7 @@ export const StatusEffectIcons: Record<StatusEffectType, React.ReactNode> = {
     <FaQuestionCircle className="text-purple-400" />
   ),
   [StatusEffectType.disarm]: <GiDropWeapon className="text-gray-400" />,
+  [StatusEffectType.coins]: <GiCoins className="text-amber-500" />,
 };
 
 export const ABILITY_BG_COLOR = {

@@ -25,6 +25,7 @@ export interface PlayerProgress {
   titanProgress: {
     [key in Rarity]: number;
   };
+  raidProgress: number;
   unlockedCharacters: string[]; // List of owned character IDs
   equipment: { [key in string]: EquipmentItem }; // Player's inventory
   inventory: { [key in string]: InventoryItem };

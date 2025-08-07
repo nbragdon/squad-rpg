@@ -667,8 +667,6 @@ export function getAllEquipment(
     itemIds.includes(equipment.id),
   );
 
-  console.log(itermediate, itemIds, inventory);
-
   return itermediate;
 }
 

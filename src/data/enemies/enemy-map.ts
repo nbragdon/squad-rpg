@@ -18,6 +18,7 @@ import {
   ENEMY_CHAOS_TITAN,
 } from "./common-titans";
 import { BattleInitEnemy } from "battle/battleTypes";
+import { ENEMY_IRON_MIMIC_CHEST } from "./common-mimics";
 
 export const ALL_ENEMIES = [...COMMON_ENEMIES];
 
@@ -28,24 +29,24 @@ export const TITAN_ENEMY = {
     { id: ENEMY_CHAOS_TITAN, level: 15 },
   ],
   [Rarity.UNCOMMON]: [
-    { id: ENEMY_BEAST_TITAN, level: 5 },
-    { id: ENEMY_VOID_TITAN, level: 10 },
-    { id: ENEMY_CHAOS_TITAN, level: 15 },
+    { id: ENEMY_BEAST_TITAN, level: 10 },
+    { id: ENEMY_VOID_TITAN, level: 20 },
+    { id: ENEMY_CHAOS_TITAN, level: 30 },
   ],
   [Rarity.RARE]: [
-    { id: ENEMY_BEAST_TITAN, level: 5 },
-    { id: ENEMY_VOID_TITAN, level: 10 },
-    { id: ENEMY_CHAOS_TITAN, level: 15 },
+    { id: ENEMY_BEAST_TITAN, level: 25 },
+    { id: ENEMY_VOID_TITAN, level: 35 },
+    { id: ENEMY_CHAOS_TITAN, level: 50 },
   ],
   [Rarity.EPIC]: [
-    { id: ENEMY_BEAST_TITAN, level: 5 },
-    { id: ENEMY_VOID_TITAN, level: 10 },
-    { id: ENEMY_CHAOS_TITAN, level: 15 },
+    { id: ENEMY_BEAST_TITAN, level: 50 },
+    { id: ENEMY_VOID_TITAN, level: 60 },
+    { id: ENEMY_CHAOS_TITAN, level: 80 },
   ],
   [Rarity.LEGENDARY]: [
-    { id: ENEMY_BEAST_TITAN, level: 5 },
-    { id: ENEMY_VOID_TITAN, level: 10 },
-    { id: ENEMY_CHAOS_TITAN, level: 15 },
+    { id: ENEMY_BEAST_TITAN, level: 90 },
+    { id: ENEMY_VOID_TITAN, level: 110 },
+    { id: ENEMY_CHAOS_TITAN, level: 150 },
   ],
 };
 
@@ -62,6 +63,38 @@ export const STAGE_ENEMY = {
   9: ENEMY_BEETLE_IRON,
   10: ENEMY_MIMIC_CHEST,
 };
+
+export function getRaidEnemiesByRarityAndLevel(rarity: Rarity, level: number) {
+  const RAID_ENEMY_MAP = {
+    [Rarity.COMMON]: [
+      { id: ENEMY_IRON_MIMIC_CHEST, level: level },
+      { id: ENEMY_IRON_MIMIC_CHEST, level: level },
+      { id: ENEMY_IRON_MIMIC_CHEST, level: level },
+    ],
+    [Rarity.UNCOMMON]: [
+      { id: ENEMY_IRON_MIMIC_CHEST, level: level },
+      { id: ENEMY_IRON_MIMIC_CHEST, level: level },
+      { id: ENEMY_IRON_MIMIC_CHEST, level: level },
+    ],
+    [Rarity.RARE]: [
+      { id: ENEMY_IRON_MIMIC_CHEST, level: level },
+      { id: ENEMY_IRON_MIMIC_CHEST, level: level },
+      { id: ENEMY_IRON_MIMIC_CHEST, level: level },
+    ],
+    [Rarity.EPIC]: [
+      { id: ENEMY_IRON_MIMIC_CHEST, level: level },
+      { id: ENEMY_IRON_MIMIC_CHEST, level: level },
+      { id: ENEMY_IRON_MIMIC_CHEST, level: level },
+    ],
+    [Rarity.LEGENDARY]: [
+      { id: ENEMY_IRON_MIMIC_CHEST, level: level },
+      { id: ENEMY_IRON_MIMIC_CHEST, level: level },
+      { id: ENEMY_IRON_MIMIC_CHEST, level: level },
+    ],
+  };
+
+  return RAID_ENEMY_MAP[rarity];
+}
 
 export function getEnemyByChapterAndStage(chapter: number, stage: number) {
   const enemyId = STAGE_ENEMY[stage as keyof typeof STAGE_ENEMY];

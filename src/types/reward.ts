@@ -6,6 +6,7 @@ export enum RewardType {
   equipment = "equipment",
   crystal = "crystal",
   coins = "coins",
+  coins_status_effect = "coins_status_effect",
   item = "item",
 }
 
@@ -39,6 +40,10 @@ export interface CrystalReward extends Reward {
 export interface CoinsReward extends Reward {
   type: RewardType.coins;
   amount: number;
+}
+
+export interface CoinsStatusEffectReward extends Reward {
+  type: RewardType.coins_status_effect;
 }
 
 export interface ItemReward extends Reward {

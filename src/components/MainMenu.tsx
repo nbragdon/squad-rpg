@@ -25,23 +25,6 @@ const MainMenu: React.FC<MainMenuProps> = ({ onNavigate }) => {
         </p>
       </div>
 
-      <div className="bg-blue-800 text-white rounded-xl p-4 mb-8 shadow-xl border border-blue-700 flex items-center justify-center min-w-[200px] max-w-sm transform hover:scale-105 transition-transform duration-300 ease-out">
-        {<FaGem className="text-orange-700 text-3xl mr-3" />}
-        <span className="text-xl font-semibold">
-          Crystals:{" "}
-          <b className="text-white text-2xl ml-2 mr-4">
-            {playerProgress.crystals || 0}
-          </b>
-        </span>
-        {COIN_ICON}
-        <span className="text-xl font-semibold ml-2">
-          Coins:{" "}
-          <b className="text-white text-2xl ml-2">
-            {playerProgress.coins || 0}
-          </b>
-        </span>
-      </div>
-
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md">
         <button
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-blue-900"

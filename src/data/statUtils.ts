@@ -54,7 +54,6 @@ export function calculateStat(
 
   // Equipment bonus (player only)
   if (calculableStats.equipment) {
-    console.log(calculableStats);
     calculableStats.equipment.forEach((item) => {
       [...item.mainBoosts, ...item.subBoosts].forEach((boost) => {
         const isMainBoost = item.mainBoosts.includes(boost);
@@ -72,6 +71,18 @@ export function calculateStat(
         }
       });
     });
+  }
+
+  if (calculableStats.statusEffects) {
+    const coinsStatusEffect =
+      calculableStats.statusEffects[StatusEffectType.coins];
+    if (
+      coinsStatusEffect &&
+      coinsStatusEffect.value &&
+      coinsStatusEffect.value > 0
+    ) {
+      stat += baseValue * (1 + coinsStatusEffect.value * 0.01);
+    }
   }
   return Math.round(stat);
 }

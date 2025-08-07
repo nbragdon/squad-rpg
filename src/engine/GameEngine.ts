@@ -36,6 +36,7 @@ export function createDefaultGameEngine(): GameEngine {
         [Rarity.EPIC]: 0,
         [Rarity.LEGENDARY]: 0,
       },
+      raidProgress: 1,
       dungeonProgress: {
         [Rarity.COMMON]: {
           [EquipmentType.weapon]: false,

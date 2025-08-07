@@ -558,9 +558,10 @@ export class BattleEngine {
     Object.values(char.statusEffects).forEach((effect, idx) => {
       switch (effect.type) {
         case StatusEffectType.poison:
-          const poisonDmg =
+          const poisonDmg = Math.ceil(
             effect.value *
-            (100 / (100 + adjustedStat(StatType.magicDefense, char) * 2));
+              (100 / (100 + adjustedStat(StatType.magicDefense, char) * 2)),
+          );
           char.damage += poisonDmg;
           this.state.battleLog.push(
             `${char.name} takes ${poisonDmg} poison damage!`,
@@ -569,15 +570,19 @@ export class BattleEngine {
             this.recordDamage(poisonDmg, DamageRecordType.STATUS_EFFECT_DAMAGE);
           break;
         case StatusEffectType.burn:
-          const dmg = Math.floor(
+          const baseBurnDmg = Math.floor(
             adjustedStat(StatType.health, char) * (0.01 * effect.value),
           );
-          char.damage += dmg;
+          const burnDmg = Math.ceil(
+            baseBurnDmg *
+              (100 / (100 + adjustedStat(StatType.magicDefense, char) * 2)),
+          );
+          char.damage += burnDmg;
           this.state.battleLog.push(
-            `${char.name} takes ${effect.value} burn damage!`,
+            `${char.name} takes ${burnDmg} burn damage!`,
           );
           if (!char.isPlayer)
-            this.recordDamage(dmg, DamageRecordType.STATUS_EFFECT_DAMAGE);
+            this.recordDamage(burnDmg, DamageRecordType.STATUS_EFFECT_DAMAGE);
           break;
       }
       if (!effect.stackable) {

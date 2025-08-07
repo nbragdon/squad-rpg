@@ -68,7 +68,6 @@ const CharacterModal: React.FC<CharacterModalProps> = ({
         updatedCharacterProgress[character.id] =
           generateBaseCharacterProgress();
       }
-      console.log(updatedCharacterProgress);
       Object.entries(updatedCharacterProgress).forEach(([id, charProgress]) => {
         if (id === character.id) {
           updatedCharacterProgress[character.id] = {
@@ -148,7 +147,6 @@ const CharacterModal: React.FC<CharacterModalProps> = ({
     slotType: EquipmentType,
     trinketSlot?: 0 | 1,
   ): EquipmentItem | undefined => {
-    console.log(character);
     if (slotType === EquipmentType.trinket) {
       const itemId =
         character.equipedItems[EquipmentType.trinket][trinketSlot || 0];

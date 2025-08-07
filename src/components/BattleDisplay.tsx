@@ -69,6 +69,24 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
   const battleState = battleEngine?.getState();
   const auto = gameEngine.player.autoBattle;
 
+  const getCoinStatusBonus = (currentBattleState: BattleState) => {
+    let bonusCoins = 0;
+    currentBattleState.enemyTeam.forEach((battleChar) => {
+      if (
+        battleChar.statusEffects &&
+        battleChar.statusEffects[StatusEffectType.coins]
+      ) {
+        const coinValue =
+          battleChar.statusEffects[StatusEffectType.coins].value;
+        if (coinValue) {
+          bonusCoins += coinValue;
+        }
+      }
+    });
+
+    return bonusCoins;
+  };
+
   const addRewardsToGameEngine = (
     originalGameEngine: GameEngine,
     currentBattleState: BattleState,
@@ -82,10 +100,10 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
     let crystals = updatedGameEngine.player.crystals;
     let coins = updatedGameEngine.player.coins;
     let updatedInventory = { ...updatedGameEngine.player.inventory };
+    const bonusCoins = getCoinStatusBonus(currentBattleState);
     const thresholdRewards = victoryThresholds
       ? getCompletedThresholdRewards(currentBattleState)
       : [];
-    console.log(thresholdRewards);
     const allRewards = [...rewards, ...thresholdRewards];
     allRewards.forEach((reward) => {
       if (reward.type === RewardType.exp) {
@@ -126,9 +144,14 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
         crystals += reward.amount;
       } else if (reward.type === RewardType.coins && reward.amount) {
         updatedBattleRewards.push(reward);
-        coins += reward.amount;
+        coins += bonusCoins;
+      } else if (reward.type === RewardType.coins_status_effect && bonusCoins) {
+        updatedBattleRewards.push({
+          type: RewardType.coins,
+          amount: bonusCoins,
+        } as CoinsReward);
+        coins += bonusCoins * (reward.multiplier || 1);
       } else if (reward.type === RewardType.item && reward.item) {
-        console.log("item reward");
         const updatedItem = updatedInventory[reward.item.id];
         if (updatedItem) {
           updatedInventory[reward.item.id] = {
@@ -172,7 +195,6 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
       }
 
       if (battleEngine?.canUseSkill(skillId, player.id)) {
-        console.log("Auto-using skill:", skillId, "for", player.name);
         battleEngine.takeTurn("skill", skillId);
         // After using a skill, randomly pick a *new* skill for the *next* turn of this character
         setCharactersAutoSelection((prev) => ({
@@ -181,10 +203,8 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
             player.skills[Math.floor(Math.random() * player.skills.length)].id,
         }));
       } else if (battleEngine?.canAttack(player.id)) {
-        console.log("Auto-basic attacking for", player.name);
         battleEngine?.takeTurn("attack");
       } else {
-        console.log("Auto end turn for", player.name);
         battleEngine?.takeTurn("endTurn");
       }
 
@@ -215,7 +235,6 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
       setWaitingOnAutoAction(true); // Indicate we are processing an auto action
 
       setTimeout(() => {
-        console.log("Initiating auto turn sequence for:", currentPlayer.name);
         onAutoTurn(currentPlayer);
       }, AUTO_WAIT_TIME);
     }
@@ -733,8 +752,6 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
       gameEngine,
       battleState,
     );
-
-    console.log("updatedBattleRewards", updatedBattleRewards);
 
     const handleVictory = () => {
       updateGameEngine((engine) => {

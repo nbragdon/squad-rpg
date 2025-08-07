@@ -12,4 +12,5 @@ export enum StatusEffectType {
   slow = "slow",
   confusion = "confusion",
   disarm = "disarm",
+  coins = "coins",
 }

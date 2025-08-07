@@ -8,12 +8,10 @@ function loadGameEngine(): GameEngine {
   if (!raw) return createDefaultGameEngine();
   try {
     const defaultGameEngine = createDefaultGameEngine();
-    console.log(defaultGameEngine);
     const gameEngine: GameEngine = {
       ...defaultGameEngine,
       ...JSON.parse(raw),
     };
-    console.log(gameEngine);
     let validCharacterProgress: { [key in string]: CharacterProgress } = {};
     if (gameEngine.player.characterProgress) {
       Object.entries(gameEngine.player.characterProgress).forEach(

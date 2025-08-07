@@ -52,8 +52,13 @@ export function getStatusEffectValue(
     } else {
       dmg = statusEffect.value || 0;
     }
-    console.log(attacker, statusEffect, dmg);
     return dmg;
+  }
+  if (statusEffect.stackable === true) {
+    return (
+      (attacker.statusEffects[statusEffect.statusEffectType]?.value || 0) +
+      (statusEffect.value || 0)
+    );
   }
   return statusEffect.value || 0;
 }

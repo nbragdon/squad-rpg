@@ -12,6 +12,8 @@ import {
 } from "./data/characters";
 import EquipmentManagementPage from "components/EquipmentManagement";
 import TitanMode from "components/TitanDisplay";
+import RaidMode from "components/RaidDisplay";
+import TopBar from "components/TopBar";
 
 export enum GameScreen {
   SOLO = "solo",
@@ -66,6 +68,8 @@ function App() {
         );
       case GameScreen.TITAN:
         return <TitanMode onBack={() => handleNavigate(GameScreen.MENU)} />;
+      case GameScreen.RAID:
+        return <RaidMode onBack={() => handleNavigate(GameScreen.MENU)} />;
       default:
         return <MainMenu onNavigate={handleNavigate} />;
     }
@@ -73,7 +77,10 @@ function App() {
 
   return (
     <div className="App">
-      <main className="App-main">{renderScreen()}</main>
+      <main className="App-main">
+        <TopBar />
+        {renderScreen()}
+      </main>
     </div>
   );
 }
