@@ -10,6 +10,7 @@ import {
   HealSkillEffect,
   CleanseSkillEffect,
   CleansableEffect,
+  AdjustmentDirection,
 } from "types/skillTypes";
 import { StatType } from "types/stats";
 import { StatusEffectType } from "types/statusEffects";
@@ -35,8 +36,8 @@ const SteelBreakerDefenseDebuff: AdjustStatSkillEffect = {
   affinities: [AffinityType.gem],
   targetType: TargetType.randomEnemy,
   stat: StatType.defense,
-  modifierType: ModifierType.Percentage,
-  modifierValue: -30, // Reduce defense by 30%
+  direction: AdjustmentDirection.decrease,
+  modifierValue: 30, // Reduce defense by 30%
   duration: 3,
 };
 
@@ -94,8 +95,8 @@ const FrostGuardianDefenseBoost: AdjustStatSkillEffect = {
   affinities: [AffinityType.gem],
   targetType: TargetType.self,
   stat: StatType.defense,
-  modifierType: ModifierType.Percentage,
-  modifierValue: 60,
+  direction: AdjustmentDirection.increase,
+  modifierValue: 50,
   duration: 4,
 };
 
@@ -289,9 +290,10 @@ const RadiantWardMagicDefenseBoost: AdjustStatSkillEffect = {
   type: SkillEffectType.adjustStat,
   affinities: [AffinityType.radiance],
   targetType: TargetType.allAllies,
+  userStat: StatType.magic,
   stat: StatType.magicDefense,
-  modifierType: ModifierType.Flat,
-  modifierValue: 100,
+  direction: AdjustmentDirection.increase,
+  modifierValue: 55,
   duration: 4,
 };
 
@@ -476,8 +478,8 @@ const TerribleToxinMagicDefenseDebuff: AdjustStatSkillEffect = {
   affinities: [AffinityType.void],
   targetType: TargetType.randomEnemy,
   stat: StatType.magicDefense,
-  modifierType: ModifierType.Flat,
-  modifierValue: -100,
+  direction: AdjustmentDirection.decrease,
+  modifierValue: 35,
   duration: 3,
 };
 
@@ -500,7 +502,7 @@ const FieryRageStrengthBoost: AdjustStatSkillEffect = {
   affinities: [AffinityType.chaos],
   targetType: TargetType.self,
   stat: StatType.strength,
-  modifierType: ModifierType.Percentage,
+  direction: AdjustmentDirection.increase,
   modifierValue: 50,
   duration: 3,
 };
@@ -512,8 +514,8 @@ const FieryRageCritChanceBoost: AdjustStatSkillEffect = {
   affinities: [AffinityType.chaos],
   targetType: TargetType.self,
   stat: StatType.critChance,
-  modifierType: ModifierType.Flat,
-  modifierValue: 25,
+  direction: AdjustmentDirection.increase,
+  modifierValue: 200,
   duration: 3,
 };
 
@@ -653,9 +655,10 @@ const BloodPactStrengthBoost: AdjustStatSkillEffect = {
   type: SkillEffectType.adjustStat,
   affinities: [AffinityType.beast],
   targetType: TargetType.self,
+  userStat: StatType.health,
   stat: StatType.strength,
-  modifierType: ModifierType.Percentage,
-  modifierValue: 100,
+  direction: AdjustmentDirection.increase,
+  modifierValue: 25,
   duration: 4,
 };
 
@@ -666,8 +669,8 @@ const BloodPactEnergyGainBoost: AdjustStatSkillEffect = {
   affinities: [AffinityType.beast],
   targetType: TargetType.self,
   stat: StatType.energyGain,
-  modifierType: ModifierType.Percentage,
-  modifierValue: 50,
+  direction: AdjustmentDirection.increase,
+  modifierValue: 100,
   duration: 2,
 };
 
@@ -729,8 +732,8 @@ const SanguinateEnergyGainDebuff: AdjustStatSkillEffect = {
   affinities: [AffinityType.beast],
   targetType: TargetType.randomEnemy,
   stat: StatType.energyGain,
-  modifierType: ModifierType.Flat,
-  modifierValue: -3,
+  direction: AdjustmentDirection.decrease,
+  modifierValue: 40,
   duration: 3,
 };
 

@@ -2,7 +2,7 @@ import { levelUp } from "data/leveling";
 import React, { useCallback, useEffect, useState } from "react";
 import { BattleCharacter, BattleState, calculateBattleXp } from "../battle";
 import { useGameEngine } from "../context/GameEngineContext";
-import { adjustedStat, calculateStat } from "../data/statUtils";
+import { getInBattleStat } from "../data/statUtils";
 import { StatType } from "../types/stats";
 import {
   ABILITY_BG_COLOR,
@@ -262,7 +262,7 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
   const timeline = aliveCharacters
     .sort(
       (a, b) =>
-        calculateStat(StatType.speed, b) - calculateStat(StatType.speed, a),
+        getInBattleStat(StatType.speed, b) - getInBattleStat(StatType.speed, a),
     )
     .map((char) => {
       const acted = activatedCharacterIds.some((id) => id === char.id);
@@ -295,7 +295,7 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
 
   // Helper for info panel
   const renderCharInfo = (char: BattleCharacter) => {
-    const charHealth = adjustedStat(StatType.health, char);
+    const charHealth = getInBattleStat(StatType.health, char);
     const healthPercentage = Math.max(
       0,
       ((charHealth - char.damage) / charHealth) * 100,
@@ -457,7 +457,7 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
 
   // Ability grid
   const renderAbilityGrid = (player: BattleCharacter) => {
-    const adjustedStrength = adjustedStat(StatType.strength, player);
+    const adjustedStrength = getInBattleStat(StatType.strength, player);
     const abilities = [
       {
         key: "basic",

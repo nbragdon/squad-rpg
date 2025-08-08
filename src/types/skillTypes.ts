@@ -32,6 +32,11 @@ export enum ModifierType {
   Percentage = "percentage",
 }
 
+export enum AdjustmentDirection {
+  increase = "increase",
+  decrease = "decrease",
+}
+
 export interface SkillEffect {
   id: string;
   name: string;
@@ -123,9 +128,10 @@ export interface ApplyStunStatusEffectSkillEffect
 export interface AdjustStatSkillEffect extends SkillEffect {
   type: SkillEffectType.adjustStat;
   stat: StatType;
-  modifierType: ModifierType;
   modifierValue: number;
-  duration?: number; // Optional duration for damage over time effects
+  duration: number;
+  direction: AdjustmentDirection;
+  userStat?: StatType;
 }
 
 export interface Skill {

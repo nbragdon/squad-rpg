@@ -1,5 +1,6 @@
 import { AffinityType } from "../../types/affinity";
 import {
+  AdjustmentDirection,
   AdjustStatSkillEffect,
   ApplyStatusEffectSkillEffect,
   CleansableEffect,
@@ -69,8 +70,8 @@ const GemstoneBarrierDefenseBoost: AdjustStatSkillEffect = {
   affinities: [AffinityType.gem],
   targetType: TargetType.self,
   stat: StatType.defense,
-  modifierType: ModifierType.Percentage,
-  modifierValue: 40,
+  direction: AdjustmentDirection.increase,
+  modifierValue: 70,
   duration: 3,
 };
 
@@ -139,8 +140,8 @@ const SpiritLinkEnergyGain: AdjustStatSkillEffect = {
   affinities: [AffinityType.spirit],
   targetType: TargetType.allAllies,
   stat: StatType.energyGain,
-  modifierType: ModifierType.Flat,
-  modifierValue: 5,
+  direction: AdjustmentDirection.increase,
+  modifierValue: 120,
   duration: 3,
 };
 
@@ -174,9 +175,10 @@ const ArcaneBarrageMagicDefenseDebuff: AdjustStatSkillEffect = {
   type: SkillEffectType.adjustStat,
   affinities: [AffinityType.knowledge],
   targetType: TargetType.randomEnemy,
+  userStat: StatType.magic,
   stat: StatType.magicDefense,
-  modifierType: ModifierType.Percentage,
-  modifierValue: -25,
+  direction: AdjustmentDirection.decrease,
+  modifierValue: 35,
   duration: 3,
 };
 
@@ -199,8 +201,8 @@ const AncientWisdomMagicBoost: AdjustStatSkillEffect = {
   affinities: [AffinityType.knowledge],
   targetType: TargetType.self,
   stat: StatType.magic,
-  modifierType: ModifierType.Flat,
-  modifierValue: 50,
+  direction: AdjustmentDirection.increase,
+  modifierValue: 60,
   duration: 4,
 };
 
@@ -211,8 +213,8 @@ const AncientWisdomMagicDefenseBoost: AdjustStatSkillEffect = {
   affinities: [AffinityType.knowledge],
   targetType: TargetType.self,
   stat: StatType.magicDefense,
-  modifierType: ModifierType.Flat,
-  modifierValue: 50,
+  direction: AdjustmentDirection.increase,
+  modifierValue: 60,
   duration: 4,
 };
 
@@ -235,8 +237,8 @@ const TemporalShiftSpeedBoost: AdjustStatSkillEffect = {
   affinities: [AffinityType.chaos],
   targetType: TargetType.self,
   stat: StatType.speed,
-  modifierType: ModifierType.Percentage,
-  modifierValue: 30,
+  direction: AdjustmentDirection.increase,
+  modifierValue: 80,
   duration: 3,
 };
 
@@ -247,8 +249,8 @@ const TemporalShiftHaste: ApplyStatusEffectSkillEffect = {
   statusEffectType: StatusEffectType.haste,
   targetType: TargetType.self,
   affinities: [AffinityType.chaos],
-  value: 1, // Haste value (e.g., 1 means 1 extra turn)
-  stackable: false,
+  value: 20,
+  stackable: true,
 };
 
 export const TemporalShiftSkill: Skill = {
@@ -454,8 +456,8 @@ const WildChargeStrengthBoost: AdjustStatSkillEffect = {
   affinities: [AffinityType.beast],
   targetType: TargetType.self,
   stat: StatType.strength,
-  modifierType: ModifierType.Percentage,
-  modifierValue: 20,
+  direction: AdjustmentDirection.increase,
+  modifierValue: 65,
   duration: 2,
 };
 
@@ -478,8 +480,8 @@ const PrimalRoarDefenseDebuff: AdjustStatSkillEffect = {
   affinities: [AffinityType.beast],
   targetType: TargetType.allEnemies,
   stat: StatType.defense,
-  modifierType: ModifierType.Percentage,
-  modifierValue: -15,
+  direction: AdjustmentDirection.decrease,
+  modifierValue: 30,
   duration: 3,
 };
 
@@ -524,8 +526,8 @@ const FabricateArmorDefenseBoost: AdjustStatSkillEffect = {
   affinities: [AffinityType.textile],
   targetType: TargetType.allAllies,
   stat: StatType.defense,
-  modifierType: ModifierType.Flat,
-  modifierValue: 30,
+  direction: AdjustmentDirection.increase,
+  modifierValue: 40,
   duration: 3,
 };
 
@@ -560,8 +562,8 @@ const ThreadedBarrageSpeedDebuff: AdjustStatSkillEffect = {
   affinities: [AffinityType.textile],
   targetType: TargetType.allEnemies,
   stat: StatType.speed,
-  modifierType: ModifierType.Flat,
-  modifierValue: -20,
+  direction: AdjustmentDirection.decrease,
+  modifierValue: 40,
   duration: 3,
 };
 

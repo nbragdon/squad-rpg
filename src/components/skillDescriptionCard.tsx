@@ -9,6 +9,7 @@ import {
   ApplyStatusEffectSkillEffect,
   AdjustStatSkillEffect,
   CleanseSkillEffect,
+  AdjustmentDirection,
 } from "types/skillTypes";
 import { AllStats, StatType } from "types/stats";
 import { StatIcons, AffinityIcons } from "./utils";
@@ -144,7 +145,8 @@ export const SkillDescriptionCard: React.FC<SkillDescriptionCardProps> = ({
 
             {effect.type === SkillEffectType.adjustStat && (
               <p className="text-purple-300 text-sm">
-                {(effect as AdjustStatSkillEffect).modifierValue > 0
+                {(effect as AdjustStatSkillEffect).direction ===
+                AdjustmentDirection.increase
                   ? "Increases"
                   : "Reduces"}{" "}
                 <span className="font-bold capitalize">
@@ -153,10 +155,7 @@ export const SkillDescriptionCard: React.FC<SkillDescriptionCardProps> = ({
                 by{" "}
                 <span className="font-bold">
                   {(effect as AdjustStatSkillEffect).modifierValue}
-                  {(effect as AdjustStatSkillEffect).modifierType ===
-                  ModifierType.Percentage
-                    ? "%"
-                    : ""}
+                  {"%"}
                 </span>
                 {(effect as AdjustStatSkillEffect).duration &&
                   ` for ${(effect as AdjustStatSkillEffect).duration} turns`}

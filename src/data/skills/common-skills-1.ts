@@ -1,5 +1,6 @@
 import { AffinityType } from "../../types/affinity";
 import {
+  AdjustmentDirection,
   AdjustStatSkillEffect,
   ApplyStatusEffectSkillEffect,
   CleansableEffect,
@@ -46,8 +47,8 @@ const StoneSkinEffect: AdjustStatSkillEffect = {
   duration: 4,
   type: SkillEffectType.adjustStat,
   stat: StatType.defense,
-  modifierType: ModifierType.Flat,
-  modifierValue: 100,
+  direction: AdjustmentDirection.increase,
+  modifierValue: 35,
 };
 
 export const StoneSkinSkill: Skill = {
@@ -175,8 +176,8 @@ const ArcaneBoltAdjustStatEffect: AdjustStatSkillEffect = {
   duration: 1,
   type: SkillEffectType.adjustStat,
   stat: StatType.energyGain,
-  modifierType: ModifierType.Flat,
-  modifierValue: 15,
+  direction: AdjustmentDirection.increase,
+  modifierValue: 150,
 };
 
 export const ArcaneBoltSkill: Skill = {
@@ -264,9 +265,10 @@ const CripplingShotAdjustStatEffect: AdjustStatSkillEffect = {
   targetType: TargetType.lowestHealthEnemy,
   duration: 2,
   type: SkillEffectType.adjustStat,
+  userStat: StatType.strength,
   stat: StatType.defense,
-  modifierType: ModifierType.Flat,
-  modifierValue: -50,
+  direction: AdjustmentDirection.decrease,
+  modifierValue: 40,
 };
 
 export const CripplingShotSkill: Skill = {
@@ -320,9 +322,10 @@ const SpiritWardAdjustStatEffect: AdjustStatSkillEffect = {
   type: SkillEffectType.adjustStat,
   affinities: [AffinityType.spirit],
   targetType: TargetType.allAllies,
+  userStat: StatType.magic,
   stat: StatType.magicDefense,
-  modifierType: ModifierType.Flat,
-  modifierValue: 100,
+  direction: AdjustmentDirection.increase,
+  modifierValue: 50,
   duration: 4,
 };
 
@@ -381,8 +384,8 @@ const ShadowSlashSelfCritDamageBoost: AdjustStatSkillEffect = {
   affinities: [AffinityType.void],
   targetType: TargetType.self,
   stat: StatType.critDamage,
-  modifierType: ModifierType.Flat,
-  modifierValue: 40,
+  direction: AdjustmentDirection.increase,
+  modifierValue: 70,
   duration: 3,
 };
 
@@ -405,8 +408,8 @@ const ShadowStepSpeedBoost: AdjustStatSkillEffect = {
   affinities: [AffinityType.void],
   targetType: TargetType.self,
   stat: StatType.speed,
-  modifierType: ModifierType.Flat,
-  modifierValue: 40,
+  direction: AdjustmentDirection.increase,
+  modifierValue: 50,
   duration: 3,
 };
 
@@ -417,8 +420,8 @@ const ShadowStepCritChanceBoost: AdjustStatSkillEffect = {
   affinities: [AffinityType.void],
   targetType: TargetType.self,
   stat: StatType.critChance,
-  modifierType: ModifierType.Flat,
-  modifierValue: 15,
+  direction: AdjustmentDirection.increase,
+  modifierValue: 150,
   duration: 3,
 };
 
@@ -441,8 +444,8 @@ const PiercingArrowDefenseDebuff: AdjustStatSkillEffect = {
   affinities: [AffinityType.textile],
   targetType: TargetType.randomEnemy, // Or randomEnemy
   stat: StatType.defense,
-  modifierType: ModifierType.Flat,
-  modifierValue: -150,
+  direction: AdjustmentDirection.decrease,
+  modifierValue: 70,
   duration: 1,
 };
 
@@ -489,9 +492,10 @@ const PinDownSpeedDebuff: AdjustStatSkillEffect = {
   affinities: [AffinityType.beast],
   targetType: TargetType.randomEnemy,
   stat: StatType.speed,
-  modifierType: ModifierType.Flat,
-  modifierValue: -30, // Reduce speed by 30 flat
-  duration: 3, // Lasts for 2 turns
+  userStat: StatType.strength,
+  direction: AdjustmentDirection.decrease,
+  modifierValue: 35,
+  duration: 3,
 };
 
 export const PinDownSkill: Skill = {

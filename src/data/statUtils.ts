@@ -6,6 +6,7 @@ import { AllStats, StatType } from "../types/stats";
 import { StatusEffectType } from "../types/statusEffects";
 import { EquipmentItem } from "types/inventory";
 import { getLeveledEquipmentValue } from "./inventory/equipmentUtil";
+import { InBattleStatAdjustment } from "battle";
 
 const BRITTLE_MULTIPLIER = 0.02;
 const AFFINITY_DAMAGE_MULT = 1.3;
@@ -32,7 +33,7 @@ export interface CalculableStats {
       value: number;
     };
   };
-  statAdjustments?: AdjustStatSkillEffect[];
+  statAdjustments?: InBattleStatAdjustment[];
   equipment?: EquipmentItem[];
 }
 
@@ -73,6 +74,24 @@ export function calculateStat(
     });
   }
 
+  return Math.round(stat);
+}
+
+export function getInBattleStat(
+  statType: StatType,
+  calculableStats: CalculableStats,
+) {
+  let runningTotal = calculableStats.stats[statType];
+  runningTotal += getStatAdjustment(statType, calculableStats);
+  runningTotal += getStatusEffectChange(statType, calculableStats);
+  return Math.round(runningTotal);
+}
+
+function getStatusEffectChange(
+  statType: StatType,
+  calculableStats: CalculableStats,
+) {
+  let amount = 0;
   if (calculableStats.statusEffects) {
     const coinsStatusEffect =
       calculableStats.statusEffects[StatusEffectType.coins];
@@ -81,31 +100,29 @@ export function calculateStat(
       coinsStatusEffect.value &&
       coinsStatusEffect.value > 0
     ) {
-      stat += baseValue * (1 + coinsStatusEffect.value * 0.01);
+      amount +=
+        calculableStats.stats[statType] * (1 + coinsStatusEffect.value * 0.01);
     }
   }
-  return Math.round(stat);
+
+  return amount;
 }
 
-export function adjustedStat(
+function getStatAdjustment(
   statType: StatType,
   calculableStats: CalculableStats,
 ) {
-  let stat = calculableStats.stats[statType];
+  let amount = 0;
   if (calculableStats.statAdjustments) {
     // Apply stat adjustments
     for (const adjustment of calculableStats.statAdjustments) {
       if (adjustment.stat === statType && (adjustment.duration || 0) > 0) {
-        if (adjustment.modifierType === ModifierType.Flat) {
-          stat += adjustment.modifierValue;
-        } else if (adjustment.modifierType === ModifierType.Percentage) {
-          stat *= 1 + adjustment.modifierValue;
-        }
+        amount += adjustment.amount;
       }
     }
   }
 
-  return Math.round(Math.max(stat, 1));
+  return amount;
 }
 
 /**

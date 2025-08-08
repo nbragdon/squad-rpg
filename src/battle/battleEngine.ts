@@ -1,7 +1,8 @@
-import { adjustedStat, calculateDamage } from "data/statUtils";
+import { calculateDamage, getInBattleStat } from "data/statUtils";
 import { PlayerCharacter } from "../types/character";
 import { EnemyCharacter } from "../types/enemy";
 import {
+  AdjustmentDirection,
   AdjustStatSkillEffect,
   ApplyStatusEffectSkillEffect,
   CleansableEffect,
@@ -31,6 +32,12 @@ import {
 import { getAllEquipment } from "data/inventory/equipmentUtil";
 import { EquipmentItem } from "types/inventory";
 import { getCompletedThresholdRewards } from "./victoryTreshholds";
+
+export type InBattleStatAdjustment = {
+  stat: StatType;
+  amount: number;
+  duration: number;
+};
 
 function playerCharacterToBattle(
   char: PlayerCharacter,
@@ -280,18 +287,8 @@ export class BattleEngine {
     }
 
     const sortedEligibleCharacters = eligibleCharacters.sort((a, b) => {
-      const speedA = adjustedStat(StatType.speed, {
-        stats: a.stats,
-        level: a.level,
-        shards: a.shards,
-        rarity: a.rarity,
-      });
-      const speedB = adjustedStat(StatType.speed, {
-        stats: b.stats,
-        level: b.level,
-        shards: b.shards,
-        rarity: b.rarity,
-      });
+      const speedA = getInBattleStat(StatType.speed, a);
+      const speedB = getInBattleStat(StatType.speed, b);
 
       if (speedA !== speedB) {
         return speedB - speedA; // Higher speed acts first
@@ -401,7 +398,7 @@ export class BattleEngine {
       );
       // Apply damage
       target.damage += this.applyDamageToShield(target, dmg);
-      const targetHealth = adjustedStat(StatType.health, target);
+      const targetHealth = getInBattleStat(StatType.health, target);
       if (target.damage >= targetHealth) target.isAlive = false;
       this.state.battleLog.push(
         `${attacker.name} attacks ${target.name} for ${dmg} damage!`,
@@ -455,15 +452,26 @@ export class BattleEngine {
       delete target.statusEffects[randomStatus];
       cleanseCount--;
       effectsToCleanse.splice(randomIndex, 1);
+      this.state.battleLog.push(`${randomStatus} cleansed from ${target.name}`);
     }
   }
 
   cleanseAdjustedStats(target: BattleCharacter, amount: number | "all") {
-    let effectsToCleanse = target.statAdjustments;
+    let effectsToCleanse = target.statAdjustments.filter(
+      (statAdjustment) => statAdjustment.amount < 0,
+    );
     let cleanseCount = amount === "all" ? effectsToCleanse.length : amount;
     while (effectsToCleanse.length > 0 && cleanseCount > 0) {
       const randomIndex = Math.floor(Math.random() * effectsToCleanse.length);
+      const adjustmentToCleanse = effectsToCleanse[randomIndex];
+      const targetAdjustmentIndex =
+        target.statAdjustments.indexOf(adjustmentToCleanse);
+      target.statAdjustments.splice(targetAdjustmentIndex, 1);
       effectsToCleanse.splice(randomIndex, 1);
+      cleanseCount--;
+      this.state.battleLog.push(
+        `${adjustmentToCleanse.stat} debuff cleansed from ${target.name}`,
+      );
     }
   }
 
@@ -522,7 +530,7 @@ export class BattleEngine {
             dmg *= damageEffect.damageMultiplier || 1;
             dmg = Math.floor(dmg);
             target.damage += this.applyDamageToShield(target, dmg);
-            const targetHealth = adjustedStat(StatType.health, target);
+            const targetHealth = getInBattleStat(StatType.health, target);
             if (target.damage >= targetHealth) target.isAlive = false;
             this.state.battleLog.push(
               `${attacker.name} uses ${skill.name} on ${target.name} for ${dmg} damage!`,
@@ -575,19 +583,24 @@ export class BattleEngine {
           // Handle stat adjustments
           if (effect.type === SkillEffectType.adjustStat) {
             const adjustEffect = effect as AdjustStatSkillEffect;
-            target.statAdjustments.push(adjustEffect);
-            const currentStat = target.stats[adjustEffect.stat] || 0;
-            let flatValue = 0;
-
-            if (adjustEffect.modifierType === ModifierType.Flat) {
-              flatValue = adjustEffect.modifierValue || 0;
-            } else if (adjustEffect.modifierType === ModifierType.Percentage) {
-              flatValue = currentStat * (1 + (adjustEffect.modifierValue || 0));
+            let currentStat = target.stats[adjustEffect.stat] || 0;
+            if (adjustEffect.userStat) {
+              currentStat = attacker.stats[adjustEffect.userStat] || 0;
             }
+            const positiveOrNegative =
+              adjustEffect.direction === AdjustmentDirection.increase ? 1 : -1;
+            const flatValue = Math.round(
+              currentStat * (1 + adjustEffect.modifierValue * 0.01),
+            );
 
             this.state.battleLog.push(
-              `${target.name}'s ${adjustEffect.stat} adjusted by ${flatValue}!`,
+              `${target.name}'s ${adjustEffect.stat} ${adjustEffect.direction}d by ${flatValue}!`,
             );
+            target.statAdjustments.push({
+              stat: adjustEffect.stat,
+              amount: flatValue * positiveOrNegative,
+              duration: adjustEffect.duration,
+            } as InBattleStatAdjustment);
           }
 
           // Handle cleanse effects
@@ -645,15 +658,16 @@ export class BattleEngine {
       if (!adj.duration) return;
       adj.duration -= 1;
       if (adj.duration <= 0) {
-        // Remove the adjustment from the character
-        battleChar.statAdjustments = battleChar.statAdjustments.filter(
-          (a) => a.id !== adj.id,
-        );
         this.state.battleLog.push(
-          `${battleChar.name}'s ${adj.stat} adjustment expired!`,
+          `${battleChar.name}'s ${adj.stat} ${adj.amount < 0 ? "decrease" : "increase"} expired!`,
         );
       }
     });
+
+    // Remove the adjustment from the character
+    battleChar.statAdjustments = battleChar.statAdjustments.filter(
+      (a) => a.duration <= 0,
+    );
   }
 
   reduceSkillCooldowns(battleChar: BattleCharacter) {
@@ -677,7 +691,7 @@ export class BattleEngine {
         case StatusEffectType.poison:
           const poisonDmg = Math.ceil(
             effect.value *
-              (100 / (100 + adjustedStat(StatType.magicDefense, char) * 2)),
+              (100 / (100 + getInBattleStat(StatType.magicDefense, char) * 2)),
           );
           char.damage += poisonDmg;
           this.state.battleLog.push(
@@ -688,11 +702,11 @@ export class BattleEngine {
           break;
         case StatusEffectType.burn:
           const baseBurnDmg = Math.floor(
-            adjustedStat(StatType.health, char) * (0.01 * effect.value),
+            getInBattleStat(StatType.health, char) * (0.01 * effect.value),
           );
           const burnDmg = Math.ceil(
             baseBurnDmg *
-              (100 / (100 + adjustedStat(StatType.magicDefense, char) * 2)),
+              (100 / (100 + getInBattleStat(StatType.magicDefense, char) * 2)),
           );
           char.damage += burnDmg;
           this.state.battleLog.push(
@@ -782,7 +796,7 @@ export class BattleEngine {
       return;
     }
 
-    let gainAmount = adjustedStat(StatType.energyGain, battleCharacter);
+    let gainAmount = getInBattleStat(StatType.energyGain, battleCharacter);
 
     battleCharacter.stats[StatType.energy] =
       (battleCharacter.stats[StatType.energy] || 0) + gainAmount;

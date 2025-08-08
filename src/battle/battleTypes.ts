@@ -7,6 +7,7 @@ import { AdjustStatSkillEffect, Skill } from "../types/skillTypes";
 import { AllStats } from "../types/stats";
 import { StatusEffectType } from "../types/statusEffects";
 import { VictoryThreshold } from "./victoryTreshholds";
+import { InBattleStatAdjustment } from "./battleEngine";
 
 export type BattleParticipant = PlayerCharacter | EnemyCharacter;
 
@@ -28,7 +29,7 @@ export interface BattleCharacter {
       stackable: boolean;
     };
   };
-  statAdjustments: AdjustStatSkillEffect[];
+  statAdjustments: InBattleStatAdjustment[];
   weakAffinities: AffinityType[];
   strongAffinities: AffinityType[];
   isPlayer: boolean;
