@@ -4,13 +4,19 @@ import { EnemyCharacter } from "../types/enemy";
 import {
   AdjustStatSkillEffect,
   ApplyStatusEffectSkillEffect,
+  CleansableEffect,
+  CleanseSkillEffect,
   DamageSkillEffect,
   HealSkillEffect,
   ModifierType,
+  SkillEffectType,
   TargetType,
 } from "../types/skillTypes";
 import { StatType } from "../types/stats";
-import { StatusEffectType } from "../types/statusEffects";
+import {
+  CLEANSABLE_STATUS_EFFECTS,
+  StatusEffectType,
+} from "../types/statusEffects";
 import {
   BattleCharacter,
   BattleInitOptions,
@@ -22,7 +28,6 @@ import {
   getStackableStatusEffectReductionAmount,
   getStatusEffectValue,
 } from "./battleUtils";
-import { GameEngine } from "engine/GameEngine";
 import { getAllEquipment } from "data/inventory/equipmentUtil";
 import { EquipmentItem } from "types/inventory";
 import { getCompletedThresholdRewards } from "./victoryTreshholds";
@@ -77,6 +82,40 @@ function enemyCharacterToBattle(
   };
 }
 
+function targetHasTaunt(enemies: BattleCharacter[]): string | undefined {
+  let targetId;
+  enemies.forEach((enemy) => {
+    const tauntDuration = enemy.statusEffects[StatusEffectType.taunt]?.duration;
+    if (tauntDuration && enemy.isAlive) {
+      targetId = enemy.id;
+      return targetId;
+    }
+  });
+
+  return targetId;
+}
+
+function attackerHasConfusion(attacker: BattleCharacter) {
+  return (
+    (attacker.statusEffects[StatusEffectType.confusion]?.duration || 0) > 0
+  );
+}
+
+function affectedBySlow(attacker: BattleCharacter) {
+  const slowChance = attacker.statusEffects[StatusEffectType.slow]?.value || 0;
+  const randomNumber = Math.floor(Math.random() * 100) + 1;
+  if (slowChance >= randomNumber) return true;
+  return false;
+}
+
+function affectedByHaste(attacker: BattleCharacter) {
+  const hasteChance =
+    attacker.statusEffects[StatusEffectType.haste]?.value || 0;
+  const randomNumber = Math.floor(Math.random() * 100) + 1;
+  if (hasteChance >= randomNumber) return true;
+  return false;
+}
+
 /**
  * Determines the ID(s) of the target(s) based on the skill's TargetType.
  * Filters out characters that are not alive.
@@ -88,18 +127,23 @@ function enemyCharacterToBattle(
  */
 export function getTargetId(
   targetType: TargetType,
-  casterId: string,
+  caster: BattleCharacter,
   allies: BattleCharacter[],
   enemies: BattleCharacter[],
 ): string[] {
   // Filter out non-alive characters for all target types except 'self'
-  const aliveAllies = allies.filter((char) => char.isAlive);
-  const aliveEnemies = enemies.filter((char) => char.isAlive);
+  let aliveAllies = allies.filter((char) => char.isAlive);
+  let aliveEnemies = enemies.filter((char) => char.isAlive);
+
+  if (attackerHasConfusion(caster)) {
+    aliveAllies = [...aliveAllies, ...aliveEnemies];
+    aliveEnemies = [...aliveAllies, ...aliveEnemies];
+  }
 
   switch (targetType) {
     case TargetType.self:
       // For 'self', the caster's ID is the target
-      return [casterId];
+      return [caster.id];
 
     case TargetType.randomAlly:
       if (aliveAllies.length > 0) {
@@ -114,6 +158,8 @@ export function getTargetId(
 
     case TargetType.randomEnemy:
       if (aliveEnemies.length > 0) {
+        const tauntingEnemy = targetHasTaunt(aliveEnemies);
+        if (tauntingEnemy) return [tauntingEnemy];
         const randomIndex = Math.floor(Math.random() * aliveEnemies.length);
         return [aliveEnemies[randomIndex].id];
       }
@@ -278,7 +324,6 @@ export class BattleEngine {
   private checkBattleEnd() {
     const playerAlive = this.state.playerTeam.some((c) => c.isAlive);
     const enemyAlive = this.state.enemyTeam.some((c) => c.isAlive);
-    console.log(playerAlive, enemyAlive);
     if (!playerAlive && this.state.battlePhase !== "defeat") {
       this.state.battlePhase = "defeat";
       this.state.battleLog.push("Defeat! Your team has been defeated.");
@@ -290,7 +335,6 @@ export class BattleEngine {
       return true;
     }
     if (this.state.round >= this.state.maxRounds) {
-      console.log(this.state.victoryThresholds, this.state.battleRecords);
       if (getCompletedThresholdRewards(this.getState()).length > 0) {
         this.state.battlePhase = "victory";
         this.state.battleLog.push(
@@ -308,16 +352,33 @@ export class BattleEngine {
     return false;
   }
 
+  applyDamageToShield(target: BattleCharacter, damage: number) {
+    let leftoverDamage = damage;
+    const shieldAmount = target.statusEffects[StatusEffectType.shield]?.value;
+    if (target.statusEffects[StatusEffectType.shield] && shieldAmount) {
+      if (shieldAmount >= damage) {
+        target.statusEffects[StatusEffectType.shield].value =
+          shieldAmount - damage;
+        leftoverDamage = 0;
+      } else {
+        target.statusEffects[StatusEffectType.shield].value = 0;
+        leftoverDamage = damage - shieldAmount;
+      }
+    }
+
+    return leftoverDamage;
+  }
+
   attack(attackerId: string) {
-    console.log("attacking", attackerId);
     const allChars = [...this.state.playerTeam, ...this.state.enemyTeam];
     const attacker = allChars.find((c) => c.id === attackerId);
+    if (!attacker) return;
     const attackerIsPlayer = this.state.playerTeam.some(
       (c) => c.id === attackerId,
     );
     const targetId = getTargetId(
       TargetType.randomEnemy,
-      attackerId,
+      attacker,
       attackerIsPlayer ? this.state.playerTeam : this.state.enemyTeam,
       attackerIsPlayer ? this.state.enemyTeam : this.state.playerTeam,
     );
@@ -339,7 +400,7 @@ export class BattleEngine {
         this.state.battleLog,
       );
       // Apply damage
-      target.damage += dmg;
+      target.damage += this.applyDamageToShield(target, dmg);
       const targetHealth = adjustedStat(StatType.health, target);
       if (target.damage >= targetHealth) target.isAlive = false;
       this.state.battleLog.push(
@@ -381,6 +442,31 @@ export class BattleEngine {
     return true;
   }
 
+  cleanseStatusEffects(target: BattleCharacter, amount: number | "all") {
+    let effectsToCleanse = Object.values(target.statusEffects)
+      .filter((statusEffect) =>
+        CLEANSABLE_STATUS_EFFECTS.includes(statusEffect.type),
+      )
+      .map((statusEffect) => statusEffect.type);
+    let cleanseCount = amount === "all" ? effectsToCleanse.length : amount;
+    while (effectsToCleanse.length > 0 && cleanseCount > 0) {
+      const randomIndex = Math.floor(Math.random() * effectsToCleanse.length);
+      const randomStatus = effectsToCleanse[randomIndex];
+      delete target.statusEffects[randomStatus];
+      cleanseCount--;
+      effectsToCleanse.splice(randomIndex, 1);
+    }
+  }
+
+  cleanseAdjustedStats(target: BattleCharacter, amount: number | "all") {
+    let effectsToCleanse = target.statAdjustments;
+    let cleanseCount = amount === "all" ? effectsToCleanse.length : amount;
+    while (effectsToCleanse.length > 0 && cleanseCount > 0) {
+      const randomIndex = Math.floor(Math.random() * effectsToCleanse.length);
+      effectsToCleanse.splice(randomIndex, 1);
+    }
+  }
+
   canUseSkill(skillId: string, attackerId: string) {
     const attacker = this.getCharacter(attackerId);
     if (!attacker || !attacker.isAlive) return false;
@@ -396,7 +482,6 @@ export class BattleEngine {
   }
 
   useSkill(skillId: string, attackerId: string) {
-    console.log("using skill", skillId, attackerId);
     const allChars = [...this.state.playerTeam, ...this.state.enemyTeam];
     const attacker = this.getCharacter(attackerId);
     if (!attacker || !attacker.isAlive) return;
@@ -408,7 +493,7 @@ export class BattleEngine {
       skill.effects.forEach((effect) => {
         let targets = getTargetId(
           effect.targetType,
-          attackerId,
+          attacker,
           attackerIsPlayer ? this.state.playerTeam : this.state.enemyTeam,
           attackerIsPlayer ? this.state.enemyTeam : this.state.playerTeam,
         );
@@ -424,7 +509,7 @@ export class BattleEngine {
           if (!target || !target.isAlive) return;
 
           // Handle damage effects
-          if (effect.type === "damage") {
+          if (effect.type === SkillEffectType.damage) {
             const damageEffect = effect as DamageSkillEffect;
             let dmg = calculateDamage(
               attacker,
@@ -436,7 +521,7 @@ export class BattleEngine {
             );
             dmg *= damageEffect.damageMultiplier || 1;
             dmg = Math.floor(dmg);
-            target.damage += dmg;
+            target.damage += this.applyDamageToShield(target, dmg);
             const targetHealth = adjustedStat(StatType.health, target);
             if (target.damage >= targetHealth) target.isAlive = false;
             this.state.battleLog.push(
@@ -450,7 +535,7 @@ export class BattleEngine {
           }
 
           // Handle status effects
-          if (effect.type === "applyStatusEffect") {
+          if (effect.type === SkillEffectType.applyStatusEffect) {
             const applyStatusEffect = effect as ApplyStatusEffectSkillEffect;
             target.statusEffects[applyStatusEffect.statusEffectType] = {
               type: applyStatusEffect.statusEffectType,
@@ -463,7 +548,7 @@ export class BattleEngine {
             );
           }
           // Handle healing effects
-          if (effect.type === "heal") {
+          if (effect.type === SkillEffectType.heal) {
             const healEffect = effect as HealSkillEffect;
             const healAmount = Math.floor(
               (attacker.stats[healEffect.healStat] || 0) *
@@ -488,7 +573,7 @@ export class BattleEngine {
             }
           }
           // Handle stat adjustments
-          if (effect.type === "adjustStat") {
+          if (effect.type === SkillEffectType.adjustStat) {
             const adjustEffect = effect as AdjustStatSkillEffect;
             target.statAdjustments.push(adjustEffect);
             const currentStat = target.stats[adjustEffect.stat] || 0;
@@ -503,6 +588,39 @@ export class BattleEngine {
             this.state.battleLog.push(
               `${target.name}'s ${adjustEffect.stat} adjusted by ${flatValue}!`,
             );
+          }
+
+          // Handle cleanse effects
+          if (effect.type === SkillEffectType.cleanse) {
+            const cleanseEffect = effect as CleanseSkillEffect;
+            if (
+              cleanseEffect.cleansableEffect === CleansableEffect.statusEffect
+            ) {
+              this.cleanseStatusEffects(target, cleanseEffect.count);
+            } else if (
+              cleanseEffect.cleansableEffect === CleansableEffect.adjustedStat
+            ) {
+              this.cleanseAdjustedStats(target, cleanseEffect.count);
+            } else {
+              if (cleanseEffect.count === "all") {
+                this.cleanseStatusEffects(target, cleanseEffect.count);
+                this.cleanseAdjustedStats(target, cleanseEffect.count);
+              } else {
+                let cleanseCount = cleanseEffect.count;
+                while (cleanseCount > 0) {
+                  const randomType = Math.floor(Math.random() * 2) + 1;
+                  if (
+                    randomType === 1 &&
+                    Object.keys(target.statusEffects).length > 0
+                  ) {
+                    this.cleanseStatusEffects(target, 1);
+                  } else if (target.statAdjustments.length > 0) {
+                    this.cleanseAdjustedStats(target, 1);
+                  }
+                  cleanseCount--;
+                }
+              }
+            }
           }
         });
       });
@@ -524,7 +642,6 @@ export class BattleEngine {
 
   reduceStatAdjustmentDurations(battleChar: BattleCharacter) {
     battleChar.statAdjustments.forEach((adj) => {
-      console.log("adjustment", adj);
       if (!adj.duration) return;
       adj.duration -= 1;
       if (adj.duration <= 0) {
@@ -617,17 +734,16 @@ export class BattleEngine {
       }
     }
 
-    console.log(character);
-
     if (character) {
-      if (actionType === "attack") {
+      if (affectedBySlow(character)) {
+        // do nothing
+      } else if (actionType === "attack") {
         this.attack(character.id);
       } else if (actionType === "skill") {
         if (skillId) {
           this.useSkill(skillId, character.id);
         }
       }
-      console.log("about to trigger end turn");
       this.endTurn(character);
     }
 
@@ -635,7 +751,6 @@ export class BattleEngine {
   }
 
   processEnemyTurn() {
-    console.log("start enemy turn");
     // Find the current enemy
     const enemy = this.state.enemyTeam.find(
       (c) => c.id === this.getCurrentTurnCharacter()?.id && c.isAlive,
@@ -674,20 +789,18 @@ export class BattleEngine {
   }
 
   endTurn(battleCharacter: BattleCharacter) {
-    console.log("starting end turn");
     // Energy gain for the character who just acted
     const actedChar = battleCharacter;
-    console.log(actedChar);
     if (actedChar.isAlive) {
       this.gainEnergy(actedChar);
       this.reduceStatAdjustmentDurations(actedChar);
       this.reduceSkillCooldowns(actedChar);
       this.processStatusEffects(actedChar);
-      this.state.activatedCharactersThisRound.push(actedChar.id);
+      if (!affectedByHaste(battleCharacter))
+        this.state.activatedCharactersThisRound.push(actedChar.id);
       const allAliveChars = this.state.playerTeam
         .concat(this.state.enemyTeam)
         .filter((c) => c.isAlive);
-      console.log(this.state.activatedCharactersThisRound, allAliveChars);
       if (
         this.state.activatedCharactersThisRound.length >= allAliveChars.length
       ) {
@@ -699,10 +812,8 @@ export class BattleEngine {
     }
     this.state.turnCount += 1;
     const nextTurnCharacter = this.getCurrentTurnCharacter();
-    console.log("finished next turn", nextTurnCharacter);
     if (nextTurnCharacter && !nextTurnCharacter.isPlayer) {
       // Process enemy turn
-      console.log("processing enemy turn", nextTurnCharacter);
       this.processEnemyTurn();
     }
   }

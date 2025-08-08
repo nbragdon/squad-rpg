@@ -8,7 +8,7 @@ import { EquipmentItem } from "types/inventory";
 import { getLeveledEquipmentValue } from "./inventory/equipmentUtil";
 
 const BRITTLE_MULTIPLIER = 0.02;
-const AFFINITY_DAMAGE_MULT = 1.25;
+const AFFINITY_DAMAGE_MULT = 1.3;
 const STAT_GROWTH_PER_LEVEL = 1.05;
 
 // Shard bonus per rarity

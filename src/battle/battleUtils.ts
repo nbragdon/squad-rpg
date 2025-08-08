@@ -6,6 +6,25 @@ import { EnemyCharacter } from "../types/enemy";
 import { BattleCharacter } from "./battleTypes";
 import { calculateStat } from "data/statUtils";
 
+const STATUS_EFFECT_VALUE_MAX: {
+  [key in StatusEffectType]: number | undefined;
+} = {
+  [StatusEffectType.burn]: 20,
+  [StatusEffectType.brittle]: undefined,
+  [StatusEffectType.poison]: undefined,
+  [StatusEffectType.shock]: undefined,
+  [StatusEffectType.bleed]: undefined,
+  [StatusEffectType.stun]: 1,
+  [StatusEffectType.silence]: 3,
+  [StatusEffectType.taunt]: 3,
+  [StatusEffectType.shield]: undefined,
+  [StatusEffectType.haste]: 30,
+  [StatusEffectType.slow]: 30,
+  [StatusEffectType.confusion]: 3,
+  [StatusEffectType.disarm]: 3,
+  [StatusEffectType.coins]: undefined,
+};
+
 export function isPlayerCharacter(
   char: PlayerCharacter | BattleCharacter | EnemyCharacter,
 ): char is PlayerCharacter | BattleCharacter {
@@ -33,6 +52,8 @@ export function getStackableStatusEffectReductionAmount(
       return Math.ceil(value / 4);
     case StatusEffectType.stun:
       return value;
+    case StatusEffectType.slow:
+      return Math.min(value, 5);
     default:
       return 1;
   }
@@ -55,12 +76,18 @@ export function getStatusEffectValue(
     return dmg;
   }
   if (statusEffect.stackable === true) {
-    return (
+    return Math.min(
       (attacker.statusEffects[statusEffect.statusEffectType]?.value || 0) +
-      (statusEffect.value || 0)
+        (statusEffect.value || 0),
+      STATUS_EFFECT_VALUE_MAX[statusEffect.statusEffectType] ||
+        Number.POSITIVE_INFINITY,
     );
   }
-  return statusEffect.value || 0;
+  return Math.min(
+    statusEffect.value || 0,
+    STATUS_EFFECT_VALUE_MAX[statusEffect.statusEffectType] ||
+      Number.POSITIVE_INFINITY,
+  );
 }
 
 export function getCalculatedStats(battleCharacter: BattleCharacter): AllStats {

@@ -14,3 +14,16 @@ export enum StatusEffectType {
   disarm = "disarm",
   coins = "coins",
 }
+
+export const CLEANSABLE_STATUS_EFFECTS = [
+  StatusEffectType.burn,
+  StatusEffectType.brittle,
+  StatusEffectType.poison,
+  StatusEffectType.shock,
+  StatusEffectType.bleed,
+  StatusEffectType.stun,
+  StatusEffectType.silence,
+  StatusEffectType.slow,
+  StatusEffectType.confusion,
+  StatusEffectType.disarm,
+];

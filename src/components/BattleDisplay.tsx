@@ -144,13 +144,15 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
         crystals += reward.amount;
       } else if (reward.type === RewardType.coins && reward.amount) {
         updatedBattleRewards.push(reward);
-        coins += bonusCoins;
+        const gainedCoins = (reward.amount || 1) * (reward.multiplier || 1);
+        coins += gainedCoins;
       } else if (reward.type === RewardType.coins_status_effect && bonusCoins) {
+        const gainedStatusCoins = bonusCoins * (reward.multiplier || 1);
         updatedBattleRewards.push({
           type: RewardType.coins,
-          amount: bonusCoins,
+          amount: gainedStatusCoins,
         } as CoinsReward);
-        coins += bonusCoins * (reward.multiplier || 1);
+        coins += gainedStatusCoins;
       } else if (reward.type === RewardType.item && reward.item) {
         const updatedItem = updatedInventory[reward.item.id];
         if (updatedItem) {
