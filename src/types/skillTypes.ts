@@ -85,11 +85,18 @@ export interface ApplyPoisonStatusEffectSkillEffect
   stackable: false;
 }
 
+export interface ApplyShieldStatusEffectSkillEffect
+  extends ApplyStatusEffectSkillEffect {
+  statusEffectType: StatusEffectType.shield;
+  stat: StatType;
+  value: number; // Optional value for the status effect
+  stackable: true;
+}
+
 export interface ApplyBurnStatusEffectSkillEffect
   extends ApplyStatusEffectSkillEffect {
   statusEffectType: StatusEffectType.burn;
   value: number; // Optional value for the status effect
-  duration: undefined; // Optional duration for damage over time effects
   stackable: true;
 }
 
@@ -105,7 +112,6 @@ export interface ApplyBleedStatusEffectSkillEffect
   extends ApplyStatusEffectSkillEffect {
   statusEffectType: StatusEffectType.bleed;
   value: number; // Optional value for the status effect
-  duration: undefined; // Optional duration for damage over time effects
   stackable: true;
 }
 
@@ -113,7 +119,6 @@ export interface ApplyBrittleStatusEffectSkillEffect
   extends ApplyStatusEffectSkillEffect {
   statusEffectType: StatusEffectType.brittle;
   value: number; // Optional value for the status effect
-  duration: undefined; // Optional duration for damage over time effects
   stackable: true;
 }
 
@@ -121,8 +126,49 @@ export interface ApplyStunStatusEffectSkillEffect
   extends ApplyStatusEffectSkillEffect {
   statusEffectType: StatusEffectType.stun;
   value: number; // Optional value for the status effect
-  duration: undefined; // Optional duration for damage over time effects
-  stackable: false;
+  stackable: true;
+}
+
+export interface ApplyConfusionStatusEffectSkillEffect
+  extends ApplyStatusEffectSkillEffect {
+  statusEffectType: StatusEffectType.confusion;
+  value: number; // Optional value for the status effect
+  stackable: true;
+}
+
+export interface ApplyCoinsStatusEffectSkillEffect
+  extends ApplyStatusEffectSkillEffect {
+  statusEffectType: StatusEffectType.coins;
+  value: number; // Optional value for the status effect
+  stackable: true;
+}
+
+export interface ApplyDisarmStatusEffectSkillEffect
+  extends ApplyStatusEffectSkillEffect {
+  statusEffectType: StatusEffectType.disarm;
+  value: number; // Optional value for the status effect
+  stackable: true;
+}
+
+export interface ApplySilenceStatusEffectSkillEffect
+  extends ApplyStatusEffectSkillEffect {
+  statusEffectType: StatusEffectType.silence;
+  value: number; // Optional value for the status effect
+  stackable: true;
+}
+
+export interface ApplyTauntStatusEffectSkillEffect
+  extends ApplyStatusEffectSkillEffect {
+  statusEffectType: StatusEffectType.taunt;
+  value: number; // Optional value for the status effect
+  stackable: true;
+}
+
+export interface ApplySlowStatusEffectSkillEffect
+  extends ApplyStatusEffectSkillEffect {
+  statusEffectType: StatusEffectType.slow;
+  value: number; // Optional value for the status effect
+  stackable: true;
 }
 
 export interface AdjustStatSkillEffect extends SkillEffect {
