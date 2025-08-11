@@ -29,7 +29,7 @@ export const epicCharacters: CharacterBase[] = [
     stats: {
       [StatType.health]: BASELINE.EPIC[StatType.health] + 30,
       [StatType.energy]: 20,
-      [StatType.energyGain]: BASELINE.EPIC[StatType.energyGain] + 10,
+      [StatType.energyGain]: BASELINE.EPIC[StatType.energyGain] + 4,
       [StatType.strength]: BASELINE.EPIC[StatType.strength],
       [StatType.defense]: BASELINE.EPIC[StatType.defense] - 10,
       [StatType.magic]: BASELINE.EPIC[StatType.magic] + 10,
@@ -50,7 +50,7 @@ export const epicCharacters: CharacterBase[] = [
     stats: {
       [StatType.health]: BASELINE.EPIC[StatType.health] - 20,
       [StatType.energy]: 15,
-      [StatType.energyGain]: BASELINE.EPIC[StatType.energyGain] + 8,
+      [StatType.energyGain]: BASELINE.EPIC[StatType.energyGain] + 3,
       [StatType.strength]: BASELINE.EPIC[StatType.strength] + 15,
       [StatType.defense]: BASELINE.EPIC[StatType.defense] - 20,
       [StatType.magic]: BASELINE.EPIC[StatType.magic] + 45,
@@ -92,7 +92,7 @@ export const epicCharacters: CharacterBase[] = [
     stats: {
       [StatType.health]: BASELINE.EPIC[StatType.health] + 70,
       [StatType.energy]: 0,
-      [StatType.energyGain]: BASELINE.EPIC[StatType.energyGain] + 4,
+      [StatType.energyGain]: BASELINE.EPIC[StatType.energyGain] + 2,
       [StatType.strength]: BASELINE.EPIC[StatType.strength] + 20,
       [StatType.defense]: BASELINE.EPIC[StatType.defense] + 25,
       [StatType.magic]: BASELINE.EPIC[StatType.magic] + 20,
@@ -113,7 +113,7 @@ export const epicCharacters: CharacterBase[] = [
     stats: {
       [StatType.health]: BASELINE.EPIC[StatType.health] - 10,
       [StatType.energy]: 0,
-      [StatType.energyGain]: BASELINE.EPIC[StatType.energyGain] + 5,
+      [StatType.energyGain]: BASELINE.EPIC[StatType.energyGain] + 3,
       [StatType.strength]: BASELINE.EPIC[StatType.strength] + 30,
       [StatType.defense]: BASELINE.EPIC[StatType.defense] - 10,
       [StatType.magic]: BASELINE.EPIC[StatType.magic] + 30,

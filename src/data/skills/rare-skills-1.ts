@@ -2,7 +2,14 @@ import { AffinityType } from "../../types/affinity";
 import {
   AdjustmentDirection,
   AdjustStatSkillEffect,
+  ApplyBleedStatusEffectSkillEffect,
+  ApplyBurnStatusEffectSkillEffect,
+  ApplyConfusionStatusEffectSkillEffect,
+  ApplyHasteStatusEffectSkillEffect,
+  ApplyShieldStatusEffectSkillEffect,
   ApplyStatusEffectSkillEffect,
+  ApplyStunStatusEffectSkillEffect,
+  ApplyTauntStatusEffectSkillEffect,
   CleansableEffect,
   CleanseSkillEffect,
   DamageSkillEffect,
@@ -33,7 +40,7 @@ const TempestsFuryDamageEffect: DamageSkillEffect = {
   targetType: TargetType.allEnemies,
 };
 
-const TempestsFuryHasteEffect: ApplyStatusEffectSkillEffect = {
+const TempestsFuryHasteEffect: ApplyHasteStatusEffectSkillEffect = {
   id: "tempests_fury_haste_effect",
   name: "Tempest's Fury Haste",
   type: SkillEffectType.applyStatusEffect,
@@ -80,15 +87,16 @@ const TwinInsightCritChanceBuff: AdjustStatSkillEffect = {
   duration: 3,
 };
 
-const TwinInsightShield: ApplyStatusEffectSkillEffect = {
+const TwinInsightShield: ApplyShieldStatusEffectSkillEffect = {
   id: "twin_insight_shield",
   name: "Twin Insight Shield",
   type: SkillEffectType.applyStatusEffect,
   statusEffectType: StatusEffectType.shield,
   targetType: TargetType.allAllies,
   affinities: [AffinityType.gem],
-  value: 75,
+  value: 0.45,
   stackable: true,
+  stat: StatType.speed,
 };
 
 export const TwinInsightSkill: Skill = {
@@ -257,7 +265,7 @@ const TemporalShiftSpeedBoost: AdjustStatSkillEffect = {
   duration: 3,
 };
 
-const TemporalShiftHaste: ApplyStatusEffectSkillEffect = {
+const TemporalShiftHaste: ApplyHasteStatusEffectSkillEffect = {
   id: "temporal_shift_haste",
   name: "Temporal Shift Haste",
   type: SkillEffectType.applyStatusEffect,
@@ -292,7 +300,7 @@ const LostToTimeDamage: DamageSkillEffect = {
   duration: undefined,
 };
 
-const LostToTimeConfusion: ApplyStatusEffectSkillEffect = {
+const LostToTimeConfusion: ApplyConfusionStatusEffectSkillEffect = {
   id: "lost_to_time_confusion",
   name: "Lost To Time Confusion",
   type: SkillEffectType.applyStatusEffect,
@@ -338,7 +346,7 @@ const VoidRendDamage: DamageSkillEffect = {
   duration: undefined,
 };
 
-const VoidRendBleed: ApplyStatusEffectSkillEffect = {
+const VoidRendBleed: ApplyBleedStatusEffectSkillEffect = {
   id: "void_rend_bleed",
   name: "Void Rend Bleed",
   type: SkillEffectType.applyStatusEffect,
@@ -372,15 +380,16 @@ const ShadowEmbraceHeal: HealSkillEffect = {
   duration: undefined,
 };
 
-const ShadowEmbraceShield: ApplyStatusEffectSkillEffect = {
+const ShadowEmbraceShield: ApplyShieldStatusEffectSkillEffect = {
   id: "shadow_embrace_shield",
   name: "Shadow Embrace Shield",
   type: SkillEffectType.applyStatusEffect,
   statusEffectType: StatusEffectType.shield,
   targetType: TargetType.self,
   affinities: [AffinityType.void],
-  value: 120,
+  value: 0.55,
   stackable: true,
+  stat: StatType.magic,
 };
 
 export const ShadowEmbraceSkill: Skill = {
@@ -406,7 +415,7 @@ const SunfireBurstDamage: DamageSkillEffect = {
   targetType: TargetType.allEnemies,
 };
 
-const SunfireBurstBurn: ApplyStatusEffectSkillEffect = {
+const SunfireBurstBurn: ApplyBurnStatusEffectSkillEffect = {
   id: "sunfire_burst_burn",
   name: "Sunfire Burst Burn",
   type: SkillEffectType.applyStatusEffect,
@@ -429,15 +438,16 @@ export const SunfireBurstSkill: Skill = {
 
 // 12. Divine Shield - Applies a large shield to all allies, cleanses 1 status effect
 //-----------------------------------------------------------------------------
-const DivineShieldApplyShield: ApplyStatusEffectSkillEffect = {
+const DivineShieldApplyShield: ApplyShieldStatusEffectSkillEffect = {
   id: "divine_shield_apply_shield",
   name: "Divine Shield Shield",
   type: SkillEffectType.applyStatusEffect,
   statusEffectType: StatusEffectType.shield,
   targetType: TargetType.allAllies,
   affinities: [AffinityType.radiance],
-  value: 150,
+  value: 0.75,
   stackable: true,
+  stat: StatType.magicDefense,
 };
 
 const DivineShieldCleanse: CleanseSkillEffect = {
@@ -524,7 +534,7 @@ const PrimalRoarDefenseDebuff: AdjustStatSkillEffect = {
   duration: 3,
 };
 
-const PrimalRoarTaunt: ApplyStatusEffectSkillEffect = {
+const PrimalRoarTaunt: ApplyTauntStatusEffectSkillEffect = {
   id: "primal_roar_taunt",
   name: "Primal Roar Taunt",
   type: SkillEffectType.applyStatusEffect,
@@ -532,7 +542,7 @@ const PrimalRoarTaunt: ApplyStatusEffectSkillEffect = {
   targetType: TargetType.randomEnemy,
   affinities: [AffinityType.beast],
   value: 1,
-  stackable: false,
+  stackable: true,
 };
 
 export const PrimalRoarSkill: Skill = {
@@ -594,7 +604,7 @@ const ThreadedBarrageDamage: DamageSkillEffect = {
   duration: undefined,
 };
 
-const ThreadedBarrageStun: ApplyStatusEffectSkillEffect = {
+const ThreadedBarrageStun: ApplyStunStatusEffectSkillEffect = {
   id: "fabricate_armor_stun",
   name: "Fabricate Armor Stun",
   type: SkillEffectType.applyStatusEffect,

@@ -30,7 +30,7 @@ export const legendaryCharacters: CharacterBase[] = [
     stats: {
       [StatType.health]: BASELINE.LEGENDARY[StatType.health] + 30,
       [StatType.energy]: 20,
-      [StatType.energyGain]: BASELINE.LEGENDARY[StatType.energyGain] + 4,
+      [StatType.energyGain]: BASELINE.LEGENDARY[StatType.energyGain] + 3,
       [StatType.strength]: BASELINE.LEGENDARY[StatType.strength] - 40,
       [StatType.defense]: BASELINE.LEGENDARY[StatType.defense] + 30,
       [StatType.magic]: BASELINE.LEGENDARY[StatType.magic] + 50,
@@ -51,7 +51,7 @@ export const legendaryCharacters: CharacterBase[] = [
     stats: {
       [StatType.health]: BASELINE.LEGENDARY[StatType.health] - 50,
       [StatType.energy]: 0,
-      [StatType.energyGain]: BASELINE.LEGENDARY[StatType.energyGain] + 5,
+      [StatType.energyGain]: BASELINE.LEGENDARY[StatType.energyGain] + 3,
       [StatType.strength]: BASELINE.LEGENDARY[StatType.strength] + 80,
       [StatType.defense]: BASELINE.LEGENDARY[StatType.defense] - 40,
       [StatType.magic]: BASELINE.LEGENDARY[StatType.magic] - 50,
@@ -72,7 +72,7 @@ export const legendaryCharacters: CharacterBase[] = [
     stats: {
       [StatType.health]: BASELINE.LEGENDARY[StatType.health],
       [StatType.energy]: 10,
-      [StatType.energyGain]: BASELINE.LEGENDARY[StatType.energyGain] + 5,
+      [StatType.energyGain]: BASELINE.LEGENDARY[StatType.energyGain] + 3,
       [StatType.strength]: BASELINE.LEGENDARY[StatType.strength] - 60,
       [StatType.defense]: BASELINE.LEGENDARY[StatType.defense] - 50,
       [StatType.magic]: BASELINE.LEGENDARY[StatType.magic] + 70,
@@ -93,7 +93,7 @@ export const legendaryCharacters: CharacterBase[] = [
     stats: {
       [StatType.health]: BASELINE.LEGENDARY[StatType.health] + 60,
       [StatType.energy]: 0,
-      [StatType.energyGain]: BASELINE.LEGENDARY[StatType.energyGain] + 3,
+      [StatType.energyGain]: BASELINE.LEGENDARY[StatType.energyGain] + 2,
       [StatType.strength]: BASELINE.LEGENDARY[StatType.strength] + 50,
       [StatType.defense]: BASELINE.LEGENDARY[StatType.defense] + 70,
       [StatType.magic]: BASELINE.LEGENDARY[StatType.magic] - 50,
@@ -114,7 +114,7 @@ export const legendaryCharacters: CharacterBase[] = [
     stats: {
       [StatType.health]: BASELINE.LEGENDARY[StatType.health],
       [StatType.energy]: 20,
-      [StatType.energyGain]: BASELINE.LEGENDARY[StatType.energyGain] + 10,
+      [StatType.energyGain]: BASELINE.LEGENDARY[StatType.energyGain] + 4,
       [StatType.strength]: BASELINE.LEGENDARY[StatType.strength] - 20,
       [StatType.defense]: BASELINE.LEGENDARY[StatType.defense] - 10,
       [StatType.magic]: BASELINE.LEGENDARY[StatType.magic] + 50,
@@ -156,7 +156,7 @@ export const legendaryCharacters: CharacterBase[] = [
     stats: {
       [StatType.health]: BASELINE.LEGENDARY[StatType.health] + 100,
       [StatType.energy]: 10,
-      [StatType.energyGain]: BASELINE.LEGENDARY[StatType.energyGain] + 3,
+      [StatType.energyGain]: BASELINE.LEGENDARY[StatType.energyGain] + 2,
       [StatType.strength]: BASELINE.LEGENDARY[StatType.strength] + 20,
       [StatType.defense]: BASELINE.LEGENDARY[StatType.defense] + 50,
       [StatType.magic]: BASELINE.LEGENDARY[StatType.magic] + 30,

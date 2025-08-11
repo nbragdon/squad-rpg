@@ -11,6 +11,14 @@ import {
   CleanseSkillEffect,
   CleansableEffect,
   AdjustmentDirection,
+  ApplyBurnStatusEffectSkillEffect,
+  ApplyShieldStatusEffectSkillEffect,
+  ApplyBrittleStatusEffectSkillEffect,
+  ApplyBleedStatusEffectSkillEffect,
+  ApplyConfusionStatusEffectSkillEffect,
+  ApplyPoisonStatusEffectSkillEffect,
+  ApplyStunStatusEffectSkillEffect,
+  ApplyDisarmStatusEffectSkillEffect,
 } from "types/skillTypes";
 import { StatType } from "types/stats";
 import { StatusEffectType } from "types/statusEffects";
@@ -65,7 +73,7 @@ const BurningBladeDamageEffect: DamageSkillEffect = {
   duration: undefined,
 };
 
-const BurningBladeApplyBurn: ApplyStatusEffectSkillEffect = {
+const BurningBladeApplyBurn: ApplyBurnStatusEffectSkillEffect = {
   id: "burning_blade_apply_burn",
   name: "Burning Blade Burn",
   type: SkillEffectType.applyStatusEffect,
@@ -100,15 +108,16 @@ const FrostGuardianDefenseBoost: AdjustStatSkillEffect = {
   duration: 4,
 };
 
-const FrostGuardianApplyShield: ApplyStatusEffectSkillEffect = {
+const FrostGuardianApplyShield: ApplyShieldStatusEffectSkillEffect = {
   id: "frost_guard_shield_boost",
   name: "Frost Guardian Shield",
   type: SkillEffectType.applyStatusEffect,
   affinities: [AffinityType.gem],
   targetType: TargetType.self,
   statusEffectType: StatusEffectType.shield,
-  value: 150,
+  value: 0.8,
   stackable: true,
+  stat: StatType.defense,
 };
 
 export const FrostGuardianSkill: Skill = {
@@ -123,18 +132,19 @@ export const FrostGuardianSkill: Skill = {
 
 // Icicle Shield - gives shield and reduces speed on self (debuff)
 //-----------------------------------------------------------------------------
-const IcicleShieldApplyShield: ApplyStatusEffectSkillEffect = {
+const IcicleShieldApplyShield: ApplyShieldStatusEffectSkillEffect = {
   id: "icicle_shield_apply_shield",
   name: "Icicle Shield",
   type: SkillEffectType.applyStatusEffect,
   affinities: [AffinityType.gem],
   targetType: TargetType.self,
   statusEffectType: StatusEffectType.shield,
-  value: 100,
+  value: 0.65,
   stackable: true,
+  stat: StatType.defense,
 };
 
-const IcicleShieldApplyBrittle: ApplyStatusEffectSkillEffect = {
+const IcicleShieldApplyBrittle: ApplyBrittleStatusEffectSkillEffect = {
   id: "icicle_shield_apply_brittle",
   name: "Icicle Shield",
   type: SkillEffectType.applyStatusEffect,
@@ -169,7 +179,7 @@ const PyreBlastDamageEffect: DamageSkillEffect = {
   duration: undefined,
 };
 
-const PyreBlastApplyBurn: ApplyStatusEffectSkillEffect = {
+const PyreBlastApplyBurn: ApplyBurnStatusEffectSkillEffect = {
   id: "pyre_blast_apply_burn",
   name: "Pyre Blast Burn",
   type: SkillEffectType.applyStatusEffect,
@@ -192,7 +202,7 @@ export const PyreBlastSkill: Skill = {
 
 // Fire Wall - applies Burn and reduces defense on all enemies
 //-----------------------------------------------------------------------------
-const FireWallApplyBurn: ApplyStatusEffectSkillEffect = {
+const FireWallApplyBurn: ApplyBurnStatusEffectSkillEffect = {
   id: "fire_wall_apply_burn",
   name: "Fire Wall Burn",
   type: SkillEffectType.applyStatusEffect,
@@ -203,15 +213,16 @@ const FireWallApplyBurn: ApplyStatusEffectSkillEffect = {
   stackable: true,
 };
 
-const FireWallApplyShield: ApplyStatusEffectSkillEffect = {
+const FireWallApplyShield: ApplyShieldStatusEffectSkillEffect = {
   id: "fire_wall_apply_shield",
   name: "Fire Wall Apply Shield",
   type: SkillEffectType.applyStatusEffect,
   affinities: [AffinityType.knowledge],
-  targetType: TargetType.allEnemies,
+  targetType: TargetType.allAllies,
   statusEffectType: StatusEffectType.shield,
-  value: 50,
+  value: 0.4,
   stackable: true,
+  stat: StatType.magic,
 };
 
 export const FireWallSkill: Skill = {
@@ -238,7 +249,7 @@ const IceBlastDamageEffect: DamageSkillEffect = {
   duration: undefined,
 };
 
-const IceBlastApplyBrittle: ApplyStatusEffectSkillEffect = {
+const IceBlastApplyBrittle: ApplyBrittleStatusEffectSkillEffect = {
   id: "ice_blast_apply_brittle",
   name: "Ice Blast Brittle",
   type: SkillEffectType.applyStatusEffect,
@@ -261,7 +272,7 @@ export const IceBlastSkill: Skill = {
 
 // Cryo Spike - magic damage and applies Brittle
 //-----------------------------------------------------------------------------
-const CryoSpikeApplyBrittle: ApplyStatusEffectSkillEffect = {
+const CryoSpikeApplyBrittle: ApplyBrittleStatusEffectSkillEffect = {
   id: "cryo_spike_apply_brittle",
   name: "Cryo Spike Brittle",
   type: SkillEffectType.applyStatusEffect,
@@ -365,7 +376,7 @@ const ShadowHealEffect: HealSkillEffect = {
   duration: undefined,
 };
 
-const ShadowHealTargetBleed: ApplyStatusEffectSkillEffect = {
+const ShadowHealTargetBleed: ApplyBleedStatusEffectSkillEffect = {
   id: "shadow_heal_apply_bleed",
   name: "Shadow Heal Self Bleed",
   type: SkillEffectType.applyStatusEffect,
@@ -400,7 +411,7 @@ const MindCorruptionDamageEffect: DamageSkillEffect = {
   duration: undefined,
 };
 
-const MindCorruptionApplyConfusion: ApplyStatusEffectSkillEffect = {
+const MindCorruptionApplyConfusion: ApplyConfusionStatusEffectSkillEffect = {
   id: "mind_corruption_apply_confusion",
   name: "Mind Corruption Confusion",
   type: SkillEffectType.applyStatusEffect,
@@ -458,7 +469,7 @@ export const LifeDrainSkill: Skill = {
 
 // Terrible Toxin - applies Poison and reduces defense
 //-----------------------------------------------------------------------------
-const TerribleToxinApplyPoison: ApplyStatusEffectSkillEffect = {
+const TerribleToxinApplyPoison: ApplyPoisonStatusEffectSkillEffect = {
   id: "terrible_toxin_apply_poison",
   name: "Terrible Toxin Poison",
   type: SkillEffectType.applyStatusEffect,
@@ -543,7 +554,7 @@ const InfernalChainsDamageEffect: DamageSkillEffect = {
   duration: undefined,
 };
 
-const InfernalChainsApplyStun: ApplyStatusEffectSkillEffect = {
+const InfernalChainsApplyStun: ApplyStunStatusEffectSkillEffect = {
   id: "infernal_chains_apply_stun",
   name: "Infernal Chains Stun",
   type: SkillEffectType.applyStatusEffect,
@@ -578,7 +589,7 @@ const DarkFlameDamageEffect: DamageSkillEffect = {
   duration: undefined,
 };
 
-const DarkFlameApplyBurn: ApplyStatusEffectSkillEffect = {
+const DarkFlameApplyBurn: ApplyBurnStatusEffectSkillEffect = {
   id: "dark_flame_apply_burn",
   name: "Dark Flame Burn",
   type: SkillEffectType.applyStatusEffect,
@@ -589,7 +600,7 @@ const DarkFlameApplyBurn: ApplyStatusEffectSkillEffect = {
   stackable: true,
 };
 
-const DarkFlameApplyBleed: ApplyStatusEffectSkillEffect = {
+const DarkFlameApplyBleed: ApplyBleedStatusEffectSkillEffect = {
   id: "dark_flame_apply_bleed",
   name: "Dark Flame Bleed",
   type: SkillEffectType.applyStatusEffect,
@@ -612,7 +623,7 @@ export const DarkFlameSkill: Skill = {
 
 // Burning Corruption - applies Burn and Poison
 //-----------------------------------------------------------------------------
-const BurningCorruptionApplyBurn: ApplyStatusEffectSkillEffect = {
+const BurningCorruptionApplyBurn: ApplyBurnStatusEffectSkillEffect = {
   id: "burning_corruption_apply_burn",
   name: "Burning Corruption Burn",
   type: SkillEffectType.applyStatusEffect,
@@ -623,7 +634,7 @@ const BurningCorruptionApplyBurn: ApplyStatusEffectSkillEffect = {
   stackable: true,
 };
 
-const BurningCorruptionApplyPoison: ApplyStatusEffectSkillEffect = {
+const BurningCorruptionApplyPoison: ApplyPoisonStatusEffectSkillEffect = {
   id: "burning_corruption_apply_poison",
   name: "Burning Corruption Poison",
   type: SkillEffectType.applyStatusEffect,
@@ -753,7 +764,7 @@ export const SanguinateSkill: Skill = {
 
 // Break Weapon - reduces strength and applies Disarm
 //-----------------------------------------------------------------------------
-const BreakWeaponApplyDisarm: ApplyStatusEffectSkillEffect = {
+const BreakWeaponApplyDisarm: ApplyDisarmStatusEffectSkillEffect = {
   id: "break_weapon_disarm",
   name: "Break Weapon Disarm",
   type: SkillEffectType.applyStatusEffect,

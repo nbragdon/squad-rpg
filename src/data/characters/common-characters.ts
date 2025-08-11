@@ -72,7 +72,7 @@ export const commonCharacters: CharacterBase[] = [
     stats: {
       [StatType.health]: BASELINE.COMMON[StatType.health] - 40,
       [StatType.energy]: 0,
-      [StatType.energyGain]: BASELINE.COMMON[StatType.energyGain] + 2,
+      [StatType.energyGain]: BASELINE.COMMON[StatType.energyGain] + 1,
       [StatType.strength]: BASELINE.COMMON[StatType.strength] - 20,
       [StatType.defense]: BASELINE.COMMON[StatType.defense] - 20,
       [StatType.magic]: BASELINE.COMMON[StatType.magic] + 40,
@@ -156,7 +156,7 @@ export const commonCharacters: CharacterBase[] = [
     stats: {
       [StatType.health]: BASELINE.COMMON[StatType.health] - 30,
       [StatType.energy]: 0,
-      [StatType.energyGain]: BASELINE.COMMON[StatType.energyGain] + 3,
+      [StatType.energyGain]: BASELINE.COMMON[StatType.energyGain] + 2,
       [StatType.strength]: BASELINE.COMMON[StatType.strength] + 30,
       [StatType.defense]: BASELINE.COMMON[StatType.defense] - 20,
       [StatType.magic]: BASELINE.COMMON[StatType.magic],

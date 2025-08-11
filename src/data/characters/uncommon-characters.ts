@@ -79,7 +79,7 @@ export const uncommonCharacters: CharacterBase[] = [
     stats: {
       [StatType.health]: BASELINE.UNCOMMON[StatType.health] - 30,
       [StatType.energy]: 0,
-      [StatType.energyGain]: BASELINE.UNCOMMON[StatType.energyGain] + 4,
+      [StatType.energyGain]: BASELINE.UNCOMMON[StatType.energyGain] + 2,
       [StatType.strength]: BASELINE.UNCOMMON[StatType.strength],
       [StatType.defense]: BASELINE.UNCOMMON[StatType.defense] - 10,
       [StatType.magic]: BASELINE.UNCOMMON[StatType.magic] + 50,
@@ -100,7 +100,7 @@ export const uncommonCharacters: CharacterBase[] = [
     stats: {
       [StatType.health]: BASELINE.UNCOMMON[StatType.health],
       [StatType.energy]: 10,
-      [StatType.energyGain]: BASELINE.UNCOMMON[StatType.energyGain] + 4,
+      [StatType.energyGain]: BASELINE.UNCOMMON[StatType.energyGain] + 2,
       [StatType.strength]: BASELINE.UNCOMMON[StatType.strength],
       [StatType.defense]: BASELINE.UNCOMMON[StatType.defense],
       [StatType.magic]: BASELINE.UNCOMMON[StatType.magic] + 20,
@@ -121,7 +121,7 @@ export const uncommonCharacters: CharacterBase[] = [
     stats: {
       [StatType.health]: BASELINE.UNCOMMON[StatType.health],
       [StatType.energy]: 0,
-      [StatType.energyGain]: BASELINE.UNCOMMON[StatType.energyGain] + 5,
+      [StatType.energyGain]: BASELINE.UNCOMMON[StatType.energyGain] + 2,
       [StatType.strength]: BASELINE.UNCOMMON[StatType.strength] - 30,
       [StatType.defense]: BASELINE.UNCOMMON[StatType.defense],
       [StatType.magic]: BASELINE.UNCOMMON[StatType.magic] + 15,
@@ -163,7 +163,7 @@ export const uncommonCharacters: CharacterBase[] = [
     stats: {
       [StatType.health]: BASELINE.UNCOMMON[StatType.health] + 15,
       [StatType.energy]: 8,
-      [StatType.energyGain]: BASELINE.UNCOMMON[StatType.energyGain] + 3,
+      [StatType.energyGain]: BASELINE.UNCOMMON[StatType.energyGain] + 1,
       [StatType.strength]: BASELINE.UNCOMMON[StatType.strength] + 15,
       [StatType.defense]: BASELINE.UNCOMMON[StatType.defense] + 15,
       [StatType.magic]: BASELINE.UNCOMMON[StatType.magic] + 15,
@@ -205,7 +205,7 @@ export const uncommonCharacters: CharacterBase[] = [
     stats: {
       [StatType.health]: BASELINE.UNCOMMON[StatType.health],
       [StatType.energy]: 6,
-      [StatType.energyGain]: BASELINE.UNCOMMON[StatType.energyGain] + 2,
+      [StatType.energyGain]: BASELINE.UNCOMMON[StatType.energyGain] + 1,
       [StatType.strength]: BASELINE.UNCOMMON[StatType.strength] - 50,
       [StatType.defense]: BASELINE.UNCOMMON[StatType.defense],
       [StatType.magic]: BASELINE.UNCOMMON[StatType.magic] + 70,
@@ -226,7 +226,7 @@ export const uncommonCharacters: CharacterBase[] = [
     stats: {
       [StatType.health]: BASELINE.UNCOMMON[StatType.health] + 120,
       [StatType.energy]: 0,
-      [StatType.energyGain]: BASELINE.UNCOMMON[StatType.energyGain] + 4,
+      [StatType.energyGain]: BASELINE.UNCOMMON[StatType.energyGain] + 2,
       [StatType.strength]: BASELINE.UNCOMMON[StatType.strength],
       [StatType.defense]: BASELINE.UNCOMMON[StatType.defense] - 10,
       [StatType.magic]: BASELINE.UNCOMMON[StatType.magic],

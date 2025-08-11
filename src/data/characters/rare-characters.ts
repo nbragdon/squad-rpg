@@ -30,7 +30,7 @@ export const rareCharacters: CharacterBase[] = [
     stats: {
       [StatType.health]: BASELINE.RARE[StatType.health],
       [StatType.energy]: BASELINE.RARE[StatType.energy],
-      [StatType.energyGain]: BASELINE.RARE[StatType.energyGain] + 5,
+      [StatType.energyGain]: BASELINE.RARE[StatType.energyGain] + 3,
       [StatType.strength]: BASELINE.RARE[StatType.strength] - 20,
       [StatType.defense]: BASELINE.RARE[StatType.defense] + 5,
       [StatType.magic]: BASELINE.RARE[StatType.magic],
@@ -51,7 +51,7 @@ export const rareCharacters: CharacterBase[] = [
     stats: {
       [StatType.health]: BASELINE.RARE[StatType.health] - 15,
       [StatType.energy]: BASELINE.RARE[StatType.energy] + 20,
-      [StatType.energyGain]: BASELINE.RARE[StatType.energyGain] + 5,
+      [StatType.energyGain]: BASELINE.RARE[StatType.energyGain] + 3,
       [StatType.strength]: BASELINE.RARE[StatType.strength] - 20,
       [StatType.defense]: BASELINE.RARE[StatType.defense] - 20,
       [StatType.magic]: BASELINE.RARE[StatType.magic] + 70,
@@ -72,7 +72,7 @@ export const rareCharacters: CharacterBase[] = [
     stats: {
       [StatType.health]: BASELINE.RARE[StatType.health] - 50,
       [StatType.energy]: BASELINE.RARE[StatType.energy] + 10,
-      [StatType.energyGain]: BASELINE.RARE[StatType.energyGain] + 3,
+      [StatType.energyGain]: BASELINE.RARE[StatType.energyGain] + 2,
       [StatType.strength]: BASELINE.RARE[StatType.strength] - 30,
       [StatType.defense]: BASELINE.RARE[StatType.defense] - 10,
       [StatType.magic]: BASELINE.RARE[StatType.magic] + 80,
@@ -93,7 +93,7 @@ export const rareCharacters: CharacterBase[] = [
     stats: {
       [StatType.health]: BASELINE.RARE[StatType.health],
       [StatType.energy]: BASELINE.RARE[StatType.energy] + 15,
-      [StatType.energyGain]: BASELINE.RARE[StatType.energyGain] + 4,
+      [StatType.energyGain]: BASELINE.RARE[StatType.energyGain] + 2,
       [StatType.strength]: BASELINE.RARE[StatType.strength] - 10,
       [StatType.defense]: BASELINE.RARE[StatType.defense],
       [StatType.magic]: BASELINE.RARE[StatType.magic] + 50,
@@ -114,7 +114,7 @@ export const rareCharacters: CharacterBase[] = [
     stats: {
       [StatType.health]: BASELINE.RARE[StatType.health] + 20,
       [StatType.energy]: BASELINE.RARE[StatType.energy],
-      [StatType.energyGain]: BASELINE.RARE[StatType.energyGain] + 2,
+      [StatType.energyGain]: BASELINE.RARE[StatType.energyGain] + 1,
       [StatType.strength]: BASELINE.RARE[StatType.strength] + 50,
       [StatType.defense]: BASELINE.RARE[StatType.defense] + 10,
       [StatType.magic]: BASELINE.RARE[StatType.magic] - 30,
@@ -156,7 +156,7 @@ export const rareCharacters: CharacterBase[] = [
     stats: {
       [StatType.health]: BASELINE.RARE[StatType.health] + 30,
       [StatType.energy]: BASELINE.RARE[StatType.energy] + 10,
-      [StatType.energyGain]: BASELINE.RARE[StatType.energyGain] + 5,
+      [StatType.energyGain]: BASELINE.RARE[StatType.energyGain] + 3,
       [StatType.strength]: BASELINE.RARE[StatType.strength] + 30,
       [StatType.defense]: BASELINE.RARE[StatType.defense] + 15,
       [StatType.magic]: BASELINE.RARE[StatType.magic],
@@ -177,7 +177,7 @@ export const rareCharacters: CharacterBase[] = [
     stats: {
       [StatType.health]: BASELINE.RARE[StatType.health] - 20,
       [StatType.energy]: BASELINE.RARE[StatType.energy] + 10,
-      [StatType.energyGain]: BASELINE.RARE[StatType.energyGain] + 8,
+      [StatType.energyGain]: BASELINE.RARE[StatType.energyGain] + 3,
       [StatType.strength]: BASELINE.RARE[StatType.strength] + 15,
       [StatType.defense]: BASELINE.RARE[StatType.defense] + 15,
       [StatType.magic]: BASELINE.RARE[StatType.magic],

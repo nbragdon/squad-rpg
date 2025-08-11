@@ -11,6 +11,17 @@ import {
   CleanseSkillEffect,
   CleansableEffect,
   AdjustmentDirection,
+  ApplyHasteStatusEffectSkillEffect,
+  ApplySlowStatusEffectSkillEffect,
+  ApplyStunStatusEffectSkillEffect,
+  ApplySilenceStatusEffectSkillEffect,
+  ApplyBleedStatusEffectSkillEffect,
+  ApplyShockStatusEffectSkillEffect,
+  ApplyDisarmStatusEffectSkillEffect,
+  ApplyPoisonStatusEffectSkillEffect,
+  ApplyConfusionStatusEffectSkillEffect,
+  ApplyBrittleStatusEffectSkillEffect,
+  ApplyBurnStatusEffectSkillEffect,
 } from "types/skillTypes";
 import { StatType } from "types/stats";
 import { StatusEffectType } from "types/statusEffects";
@@ -33,7 +44,7 @@ const TimeshiftDamageEffect: DamageSkillEffect = {
   duration: undefined,
 };
 
-const TimeshiftHasteBuff: ApplyStatusEffectSkillEffect = {
+const TimeshiftHasteBuff: ApplyHasteStatusEffectSkillEffect = {
   id: "timeshift_haste_buff",
   name: "Timeshift Haste",
   type: SkillEffectType.applyStatusEffect,
@@ -44,7 +55,7 @@ const TimeshiftHasteBuff: ApplyStatusEffectSkillEffect = {
   stackable: true,
 };
 
-const TimeshiftSlowDebuff: ApplyStatusEffectSkillEffect = {
+const TimeshiftSlowDebuff: ApplySlowStatusEffectSkillEffect = {
   id: "timeshift_slow_debuff",
   name: "Timeshift Slow",
   type: SkillEffectType.applyStatusEffect,
@@ -65,7 +76,7 @@ export const TimeshiftSkill: Skill = {
 
 // Temporal Warp - applies a slow debuff to all enemies and a haste buff to all allies
 // ---------------------------------------------------------------------------------
-const TemporalWarpSlowDebuff: ApplyStatusEffectSkillEffect = {
+const TemporalWarpSlowDebuff: ApplySlowStatusEffectSkillEffect = {
   id: "temporal_warp_slow_debuff",
   name: "Temporal Warp Slow",
   type: SkillEffectType.applyStatusEffect,
@@ -76,7 +87,7 @@ const TemporalWarpSlowDebuff: ApplyStatusEffectSkillEffect = {
   stackable: true,
 };
 
-const TemporalWarpHasteBuff: ApplyStatusEffectSkillEffect = {
+const TemporalWarpHasteBuff: ApplyHasteStatusEffectSkillEffect = {
   id: "temporal_warp_haste_buff",
   name: "Temporal Warp Haste",
   type: SkillEffectType.applyStatusEffect,
@@ -110,7 +121,7 @@ const ChronoBlastDamageEffect: DamageSkillEffect = {
   duration: undefined,
 };
 
-const ChronoBlastStunEffect: ApplyStatusEffectSkillEffect = {
+const ChronoBlastStunEffect: ApplyStunStatusEffectSkillEffect = {
   id: "chrono_blast_stun_effect",
   name: "Chrono Blast Stun",
   type: SkillEffectType.applyStatusEffect,
@@ -118,8 +129,7 @@ const ChronoBlastStunEffect: ApplyStatusEffectSkillEffect = {
   targetType: TargetType.randomEnemy,
   statusEffectType: StatusEffectType.stun,
   value: 1, // Stun for 1 turn
-  stackable: false,
-  duration: 1,
+  stackable: true,
 };
 
 export const ChronoBlastSkill: Skill = {
@@ -149,7 +159,7 @@ const GravityWellDamageEffect: DamageSkillEffect = {
   duration: undefined,
 };
 
-const GravityWellStunEffect: ApplyStatusEffectSkillEffect = {
+const GravityWellStunEffect: ApplyStunStatusEffectSkillEffect = {
   id: "gravity_well_stun_effect",
   name: "Gravity Well Stun",
   type: SkillEffectType.applyStatusEffect,
@@ -183,14 +193,15 @@ const CosmicShatterDamageEffect: DamageSkillEffect = {
   duration: undefined,
 };
 
-const CosmicShatterSilenceDebuff: ApplyStatusEffectSkillEffect = {
+const CosmicShatterSilenceDebuff: ApplySilenceStatusEffectSkillEffect = {
   id: "cosmic_shatter_slow_debuff",
   name: "Cosmic Shatter Silence",
   type: SkillEffectType.applyStatusEffect,
   affinities: [AffinityType.radiance, AffinityType.knowledge],
   targetType: TargetType.allEnemies,
   statusEffectType: StatusEffectType.silence,
-  duration: 2,
+  value: 2,
+  stackable: true,
 };
 
 export const CosmicShatterSkill: Skill = {
@@ -304,7 +315,7 @@ const SoulRendDamageEffect: DamageSkillEffect = {
   duration: undefined,
 };
 
-const SoulRendBleedEffect: ApplyStatusEffectSkillEffect = {
+const SoulRendBleedEffect: ApplyBleedStatusEffectSkillEffect = {
   id: "soul_rend_bleed_effect",
   name: "Soul Rend Bleed",
   type: SkillEffectType.applyStatusEffect,
@@ -316,17 +327,18 @@ const SoulRendBleedEffect: ApplyStatusEffectSkillEffect = {
   duration: 3,
 };
 
-const SoulRendShockEffect: ApplyStatusEffectSkillEffect = {
+const SoulRendShockEffect: ApplyShockStatusEffectSkillEffect = {
   id: "soul_rend_shock_effect",
   name: "Soul Rend Shock",
   type: SkillEffectType.applyStatusEffect,
   affinities: [AffinityType.chaos],
   targetType: TargetType.randomEnemy,
   statusEffectType: StatusEffectType.shock,
-  duration: 2,
+  value: 2,
+  stackable: true,
 };
 
-const SoulRendDisarmEffect: ApplyStatusEffectSkillEffect = {
+const SoulRendDisarmEffect: ApplyDisarmStatusEffectSkillEffect = {
   id: "soul_rend_disarm_effect",
   name: "Soul Rend Disarm",
   type: SkillEffectType.applyStatusEffect,
@@ -389,15 +401,17 @@ export const ReapSoulSkill: Skill = {
 
 // Malignant Growth - applies poison to all enemies and heals the user
 // ---------------------------------------------------------------------------------
-const MalignantGrowthPoisonEffect: ApplyStatusEffectSkillEffect = {
+const MalignantGrowthPoisonEffect: ApplyPoisonStatusEffectSkillEffect = {
   id: "malignant_growth_poison_effect",
   name: "Malignant Growth Poison",
   type: SkillEffectType.applyStatusEffect,
   affinities: [AffinityType.beast, AffinityType.textile],
   targetType: TargetType.allEnemies,
   statusEffectType: StatusEffectType.poison,
-  value: 0.6, // Poison damage per turn
+  value: 0.45, // Poison damage per turn
   duration: 3,
+  stat: StatType.magic,
+  stackable: false,
 };
 
 const MalignantGrowthHealEffect: HealSkillEffect = {
@@ -405,7 +419,7 @@ const MalignantGrowthHealEffect: HealSkillEffect = {
   name: "Malignant Growth Heal",
   type: SkillEffectType.heal,
   affinities: [AffinityType.beast, AffinityType.textile],
-  healMultiplier: 0.7,
+  healMultiplier: 0.55,
   healStat: StatType.defense,
   targetType: TargetType.self,
   duration: undefined,
@@ -421,7 +435,7 @@ export const MalignantGrowthSkill: Skill = {
 
 // Fungal Spores - applies confusion to a random enemy and silences them
 // ---------------------------------------------------------------------------------
-const FungalSporesConfusionEffect: ApplyStatusEffectSkillEffect = {
+const FungalSporesConfusionEffect: ApplyConfusionStatusEffectSkillEffect = {
   id: "fungal_spores_confusion_effect",
   name: "Fungal Spores Confusion",
   type: SkillEffectType.applyStatusEffect,
@@ -432,7 +446,7 @@ const FungalSporesConfusionEffect: ApplyStatusEffectSkillEffect = {
   stackable: true,
 };
 
-const FungalSporesSilenceEffect: ApplyStatusEffectSkillEffect = {
+const FungalSporesSilenceEffect: ApplySilenceStatusEffectSkillEffect = {
   id: "fungal_spores_silence_effect",
   name: "Fungal Spores Silence",
   type: SkillEffectType.applyStatusEffect,
@@ -454,7 +468,7 @@ export const FungalSporesSkill: Skill = {
 
 // Contagion - ultimate skill, deals damage over time to all enemies and spreads all debuffs from the user to all enemies
 // ---------------------------------------------------------------------------------
-const ContagionPoisonEffect: ApplyStatusEffectSkillEffect = {
+const ContagionPoisonEffect: ApplyPoisonStatusEffectSkillEffect = {
   id: "contagion_poison_effect",
   name: "Contagion Poison",
   type: SkillEffectType.applyStatusEffect,
@@ -462,11 +476,12 @@ const ContagionPoisonEffect: ApplyStatusEffectSkillEffect = {
   targetType: TargetType.allEnemies,
   statusEffectType: StatusEffectType.poison,
   value: 20, // Poison damage per turn
-  stackable: true,
+  stackable: false,
   duration: 4,
+  stat: StatType.magic,
 };
 
-const ContagionBleedEffect: ApplyStatusEffectSkillEffect = {
+const ContagionBleedEffect: ApplyBleedStatusEffectSkillEffect = {
   id: "contagion_bleed_effect",
   name: "Contagion Bleed",
   type: SkillEffectType.applyStatusEffect,
@@ -503,7 +518,7 @@ const WarpedRealityDamageEffect: DamageSkillEffect = {
   defenseStat: StatType.defense,
   targetType: TargetType.allEnemies,
 };
-const WarpedRealityConfusionEffect: ApplyStatusEffectSkillEffect = {
+const WarpedRealityConfusionEffect: ApplyConfusionStatusEffectSkillEffect = {
   id: "warped_reality_confusion_effect",
   name: "Warped Reality Confusion",
   type: SkillEffectType.applyStatusEffect,
@@ -514,7 +529,7 @@ const WarpedRealityConfusionEffect: ApplyStatusEffectSkillEffect = {
   stackable: true,
 };
 
-const WarpedRealityShockEffect: ApplyStatusEffectSkillEffect = {
+const WarpedRealityShockEffect: ApplyShockStatusEffectSkillEffect = {
   id: "warped_reality_confusion_effect",
   name: "Warped Reality Confusion",
   type: SkillEffectType.applyStatusEffect,
@@ -552,7 +567,7 @@ const DimensionalRiftDamageEffect: DamageSkillEffect = {
   duration: undefined,
 };
 
-const DimensionalRiftBrittleEffect: ApplyStatusEffectSkillEffect = {
+const DimensionalRiftBrittleEffect: ApplyBrittleStatusEffectSkillEffect = {
   id: "dimensional_rift_brittle_effect",
   name: "Dimensional Rift Brittle",
   type: SkillEffectType.applyStatusEffect,
@@ -586,7 +601,7 @@ const EldritchTorrentDamageEffect: DamageSkillEffect = {
   duration: undefined,
 };
 
-const EldritchTorrentBurnEffect: ApplyStatusEffectSkillEffect = {
+const EldritchTorrentBurnEffect: ApplyBurnStatusEffectSkillEffect = {
   id: "eldritch_torrent_burn_effect",
   name: "Eldritch Torrent Burn",
   type: SkillEffectType.applyStatusEffect,

@@ -11,6 +11,18 @@ import {
   AdjustStatSkillEffect,
   AdjustmentDirection,
   ModifierType,
+  ApplyShieldStatusEffectSkillEffect,
+  ApplyHasteStatusEffectSkillEffect,
+  ApplyTauntStatusEffectSkillEffect,
+  ApplySilenceStatusEffectSkillEffect,
+  ApplyStunStatusEffectSkillEffect,
+  ApplyDisarmStatusEffectSkillEffect,
+  ApplyBrittleStatusEffectSkillEffect,
+  ApplyBurnStatusEffectSkillEffect,
+  ApplyConfusionStatusEffectSkillEffect,
+  ApplyPoisonStatusEffectSkillEffect,
+  ApplyBleedStatusEffectSkillEffect,
+  ApplySlowStatusEffectSkillEffect,
 } from "types/skillTypes";
 import { StatType } from "types/stats";
 import { StatusEffectType } from "types/statusEffects";
@@ -45,7 +57,7 @@ export const DivineRestorationSkill: Skill = {
 };
 
 // Aegis of Light: Applies a powerful shield and haste to all allies.
-const AegisOfLightShieldEffect: ApplyStatusEffectSkillEffect = {
+const AegisOfLightShieldEffect: ApplyShieldStatusEffectSkillEffect = {
   id: "aegis_of_light_shield_effect",
   name: "Aegis of Light Shield",
   type: SkillEffectType.applyStatusEffect,
@@ -57,7 +69,7 @@ const AegisOfLightShieldEffect: ApplyStatusEffectSkillEffect = {
   stackable: true,
 };
 
-const AegisOfLightHasteEffect: ApplyStatusEffectSkillEffect = {
+const AegisOfLightHasteEffect: ApplyHasteStatusEffectSkillEffect = {
   id: "aegis_of_light_haste_effect",
   name: "Aegis of Light Haste",
   type: SkillEffectType.applyStatusEffect,
@@ -68,7 +80,7 @@ const AegisOfLightHasteEffect: ApplyStatusEffectSkillEffect = {
   stackable: true,
 };
 
-const AegisOfLightTauntEffect: ApplyStatusEffectSkillEffect = {
+const AegisOfLightTauntEffect: ApplyTauntStatusEffectSkillEffect = {
   id: "aegis_of_light_taunt_effect",
   name: "Aegis of Light Taunt",
   type: SkillEffectType.applyStatusEffect,
@@ -105,28 +117,26 @@ const ShadowStrikeDamageEffect: DamageSkillEffect = {
   targetType: TargetType.randomEnemy,
 };
 
-const ShadowStrikeSilenceEffect: ApplyStatusEffectSkillEffect = {
+const ShadowStrikeSilenceEffect: ApplySilenceStatusEffectSkillEffect = {
   id: "shadow_strike_silence_effect",
   name: "Shadow Strike Silence",
   type: SkillEffectType.applyStatusEffect,
   affinities: [AffinityType.void, AffinityType.textile],
   targetType: TargetType.randomEnemy,
   statusEffectType: StatusEffectType.silence,
-  value: 0,
-  duration: 2,
-  stackable: false,
+  value: 2,
+  stackable: true,
 };
 
-const ShadowStrikeStunEffect: ApplyStatusEffectSkillEffect = {
+const ShadowStrikeStunEffect: ApplyStunStatusEffectSkillEffect = {
   id: "shadow_strike_stun_effect",
   name: "Shadow Strike Stun",
   type: SkillEffectType.applyStatusEffect,
   affinities: [AffinityType.void, AffinityType.textile],
   targetType: TargetType.randomEnemy,
   statusEffectType: StatusEffectType.stun,
-  value: 0,
-  duration: 1,
-  stackable: false,
+  value: 1,
+  stackable: true,
 };
 
 export const ShadowStrikeSkill: Skill = {
@@ -153,16 +163,15 @@ const EchoingVoidDamageEffect: DamageSkillEffect = {
   targetType: TargetType.allEnemies,
 };
 
-const EchoingVoidDisarmEffect: ApplyStatusEffectSkillEffect = {
+const EchoingVoidDisarmEffect: ApplyDisarmStatusEffectSkillEffect = {
   id: "echoing_void_disarm_effect",
   name: "Echoing Void Disarm",
   type: SkillEffectType.applyStatusEffect,
   affinities: [AffinityType.void, AffinityType.textile],
   targetType: TargetType.allEnemies,
   statusEffectType: StatusEffectType.disarm,
-  value: 0,
-  duration: 3,
-  stackable: false,
+  value: 3,
+  stackable: true,
 };
 
 export const EchoingVoidSkill: Skill = {
@@ -199,16 +208,15 @@ const MountainStanceMagicDefenseBuff: AdjustStatSkillEffect = {
   duration: 3,
 };
 
-const MountainStanceTauntEffect: ApplyStatusEffectSkillEffect = {
+const MountainStanceTauntEffect: ApplyTauntStatusEffectSkillEffect = {
   id: "mountain_stance_taunt_effect",
   name: "Mountain's Stance Taunt",
   type: SkillEffectType.applyStatusEffect,
   affinities: [AffinityType.gem, AffinityType.knowledge],
   targetType: TargetType.self,
   statusEffectType: StatusEffectType.taunt,
-  value: 0,
-  duration: 2,
-  stackable: false,
+  value: 2,
+  stackable: true,
 };
 
 export const MountainStanceSkill: Skill = {
@@ -235,7 +243,7 @@ const GeodeCrushDamageEffect: DamageSkillEffect = {
   targetType: TargetType.randomEnemy,
 };
 
-const GeodeCrushBrittleEffect: ApplyStatusEffectSkillEffect = {
+const GeodeCrushBrittleEffect: ApplyBrittleStatusEffectSkillEffect = {
   id: "geode_crush_brittle_effect",
   name: "Geode Crush Brittle",
   type: SkillEffectType.applyStatusEffect,
@@ -268,7 +276,7 @@ const InfernoNovaDamageEffect: DamageSkillEffect = {
   targetType: TargetType.allEnemies,
 };
 
-const InfernoNovaBurnEffect: ApplyStatusEffectSkillEffect = {
+const InfernoNovaBurnEffect: ApplyBurnStatusEffectSkillEffect = {
   id: "inferno_nova_burn_effect",
   name: "Inferno Nova Burn",
   type: SkillEffectType.applyStatusEffect,
@@ -301,16 +309,15 @@ const CinderfallDamageEffect: DamageSkillEffect = {
   targetType: TargetType.randomEnemy,
 };
 
-const CinderfallStunEffect: ApplyStatusEffectSkillEffect = {
+const CinderfallStunEffect: ApplyStunStatusEffectSkillEffect = {
   id: "cinderfall_stun_effect",
   name: "Cinderfall Stun",
   type: SkillEffectType.applyStatusEffect,
   affinities: [AffinityType.chaos, AffinityType.beast],
   targetType: TargetType.randomEnemy,
   statusEffectType: StatusEffectType.stun,
-  value: 0,
-  duration: 1,
-  stackable: false,
+  value: 1,
+  stackable: true,
 };
 
 export const CinderfallSkill: Skill = {
@@ -333,7 +340,7 @@ const NatureHarmonyHealEffect: HealSkillEffect = {
   targetType: TargetType.lowestHealthAlly,
 };
 
-const NatureHarmonyHasteEffect: ApplyStatusEffectSkillEffect = {
+const NatureHarmonyHasteEffect: ApplyHasteStatusEffectSkillEffect = {
   id: "nature_harmony_haste_effect",
   name: "Nature's Harmony Haste",
   type: SkillEffectType.applyStatusEffect,
@@ -354,7 +361,7 @@ export const NatureHarmonySkill: Skill = {
 };
 
 // Whispers of the Forest: AoE slow and random confusion.
-const WhispersBrittleEffect: ApplyStatusEffectSkillEffect = {
+const WhispersBrittleEffect: ApplyBrittleStatusEffectSkillEffect = {
   id: "whispers_brittle_effect",
   name: "Whispers of the Forest Brittle",
   type: SkillEffectType.applyStatusEffect,
@@ -365,7 +372,7 @@ const WhispersBrittleEffect: ApplyStatusEffectSkillEffect = {
   stackable: true,
 };
 
-const WhispersConfusionEffect: ApplyStatusEffectSkillEffect = {
+const WhispersConfusionEffect: ApplyConfusionStatusEffectSkillEffect = {
   id: "whispers_confusion_effect",
   name: "Whispers of the Forest Confusion",
   type: SkillEffectType.applyStatusEffect,
@@ -413,7 +420,7 @@ const VirulentTouchDamageEffect: DamageSkillEffect = {
   targetType: TargetType.randomEnemy,
 };
 
-const VirulentTouchPoisonEffect: ApplyStatusEffectSkillEffect = {
+const VirulentTouchPoisonEffect: ApplyPoisonStatusEffectSkillEffect = {
   id: "virulent_touch_poison_effect",
   name: "Virulent Touch Poison",
   type: SkillEffectType.applyStatusEffect,
@@ -423,6 +430,7 @@ const VirulentTouchPoisonEffect: ApplyStatusEffectSkillEffect = {
   stat: StatType.magic,
   value: 0.35,
   duration: 4,
+  stackable: false,
 };
 
 export const VirulentTouchSkill: Skill = {
@@ -435,7 +443,7 @@ export const VirulentTouchSkill: Skill = {
 };
 
 // Debilitating Haze: An AoE debuff that slows all enemies and can confuse a random one.
-const DebilitatingHazePoisonEffect: ApplyStatusEffectSkillEffect = {
+const DebilitatingHazePoisonEffect: ApplyPoisonStatusEffectSkillEffect = {
   id: "debilitating_haze_poison_effect",
   name: "Debilitating Haze Poison",
   type: SkillEffectType.applyStatusEffect,
@@ -443,11 +451,12 @@ const DebilitatingHazePoisonEffect: ApplyStatusEffectSkillEffect = {
   targetType: TargetType.allEnemies,
   statusEffectType: StatusEffectType.poison,
   stat: StatType.magic,
-  value: 0.25,
+  value: 0.35,
   duration: 4,
+  stackable: false,
 };
 
-const DebilitatingHazeConfusionEffect: ApplyStatusEffectSkillEffect = {
+const DebilitatingHazeConfusionEffect: ApplyConfusionStatusEffectSkillEffect = {
   id: "debilitating_haze_confusion_effect",
   name: "Debilitating Haze Confusion",
   type: SkillEffectType.applyStatusEffect,
@@ -528,7 +537,7 @@ const ChaosBaneDamageEffect: DamageSkillEffect = {
   targetType: TargetType.randomEnemy,
 };
 
-const ChaosBaneBleedEffect: ApplyStatusEffectSkillEffect = {
+const ChaosBaneBleedEffect: ApplyBleedStatusEffectSkillEffect = {
   id: "chaos_bane_bleed_effect",
   name: "Chaos Bane Bleed",
   type: SkillEffectType.applyStatusEffect,
@@ -577,7 +586,7 @@ const ResplendentWeaveDamageEffect: DamageSkillEffect = {
   targetType: TargetType.allEnemies,
 };
 
-const ResplendentWeaveSlowEffect: ApplyStatusEffectSkillEffect = {
+const ResplendentWeaveSlowEffect: ApplySlowStatusEffectSkillEffect = {
   id: "resplendent_weave_slow_effect",
   name: "Resplendent Weave Slow",
   type: SkillEffectType.applyStatusEffect,
@@ -647,7 +656,7 @@ const AethericSiphonEnergyTransferEffect: AdjustStatSkillEffect = {
   duration: 2,
 };
 
-const AethericSiphonHasteEffect: ApplyStatusEffectSkillEffect = {
+const AethericSiphonHasteEffect: ApplyHasteStatusEffectSkillEffect = {
   id: "aetheric_siphon_haste_effect",
   name: "Aetheric Siphon Haste",
   type: SkillEffectType.applyStatusEffect,
@@ -742,16 +751,16 @@ export const WardingGlyphsSkill: Skill = {
 };
 
 // Runic Aegis: Ultimate skill that gives a massive shield to all allies
-const RunicAegisShieldEffect: ApplyStatusEffectSkillEffect = {
+const RunicAegisShieldEffect: ApplyShieldStatusEffectSkillEffect = {
   id: "runic_aegis_shield_effect",
   name: "Runic Aegis Shield",
   type: SkillEffectType.applyStatusEffect,
   affinities: [AffinityType.gem, AffinityType.textile],
   targetType: TargetType.allAllies,
   statusEffectType: StatusEffectType.shield,
-  value: 2.0, // 200% of the user's defense stat
-  duration: 3,
-  stackable: false,
+  value: 1.2, // 200% of the user's defense stat
+  stackable: true,
+  stat: StatType.defense,
 };
 
 const RunicAegisEnergyGainEffect: AdjustStatSkillEffect = {
@@ -788,7 +797,7 @@ const ShiftingSandsDamageEffect: DamageSkillEffect = {
   targetType: TargetType.allEnemies,
 };
 
-const ShiftingSandsSlowEffect: ApplyStatusEffectSkillEffect = {
+const ShiftingSandsSlowEffect: ApplySlowStatusEffectSkillEffect = {
   id: "shifting_sands_slow_effect",
   name: "Shifting Sands Slow",
   type: SkillEffectType.applyStatusEffect,
@@ -852,7 +861,7 @@ const SeismicShiftDamageEffect: DamageSkillEffect = {
   targetType: TargetType.allEnemies,
 };
 
-const SeismicShiftBrittleEffect: ApplyStatusEffectSkillEffect = {
+const SeismicShiftBrittleEffect: ApplyBrittleStatusEffectSkillEffect = {
   id: "seismic_shift_brittle_effect",
   name: "Seismic Shift Brittle",
   type: SkillEffectType.applyStatusEffect,
@@ -864,16 +873,15 @@ const SeismicShiftBrittleEffect: ApplyStatusEffectSkillEffect = {
   stackable: true,
 };
 
-const SeismicShiftStunEffect: ApplyStatusEffectSkillEffect = {
+const SeismicShiftStunEffect: ApplyStunStatusEffectSkillEffect = {
   id: "seismic_shift_stun_effect",
   name: "Seismic Shift Stun",
   type: SkillEffectType.applyStatusEffect,
   affinities: [AffinityType.gem, AffinityType.beast],
   targetType: TargetType.randomEnemy,
   statusEffectType: StatusEffectType.stun,
-  value: 0,
-  duration: 1,
-  stackable: false,
+  value: 1,
+  stackable: true,
 };
 
 const SeismicShiftStrengthBuff: AdjustStatSkillEffect = {

@@ -104,7 +104,6 @@ export interface ApplyShockStatusEffectSkillEffect
   extends ApplyStatusEffectSkillEffect {
   statusEffectType: StatusEffectType.shock;
   value: number; // Optional value for the status effect
-  duration: undefined; // Optional duration for damage over time effects
   stackable: true;
 }
 
@@ -167,6 +166,13 @@ export interface ApplyTauntStatusEffectSkillEffect
 export interface ApplySlowStatusEffectSkillEffect
   extends ApplyStatusEffectSkillEffect {
   statusEffectType: StatusEffectType.slow;
+  value: number; // Optional value for the status effect
+  stackable: true;
+}
+
+export interface ApplyHasteStatusEffectSkillEffect
+  extends ApplyStatusEffectSkillEffect {
+  statusEffectType: StatusEffectType.haste;
   value: number; // Optional value for the status effect
   stackable: true;
 }

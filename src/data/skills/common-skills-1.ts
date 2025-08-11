@@ -2,6 +2,10 @@ import { AffinityType } from "../../types/affinity";
 import {
   AdjustmentDirection,
   AdjustStatSkillEffect,
+  ApplyBleedStatusEffectSkillEffect,
+  ApplyPoisonStatusEffectSkillEffect,
+  ApplyShieldStatusEffectSkillEffect,
+  ApplyShockStatusEffectSkillEffect,
   ApplyStatusEffectSkillEffect,
   CleansableEffect,
   CleanseSkillEffect,
@@ -74,7 +78,7 @@ const VenomDaggerDamageEffect: DamageSkillEffect = {
   duration: undefined, // No duration for damage effects
 };
 
-const VenomDaggerApplyStatusEffect: ApplyStatusEffectSkillEffect = {
+const VenomDaggerApplyStatusEffect: ApplyPoisonStatusEffectSkillEffect = {
   id: "venom_dagger_apply_status_effect",
   name: "Venom Dagger Poison",
   type: SkillEffectType.applyStatusEffect,
@@ -134,15 +138,15 @@ const ThunderClapDamageEffect: DamageSkillEffect = {
   duration: undefined, // No duration for damage effects
 };
 
-const ThunderClapApplyStatusEffect: ApplyStatusEffectSkillEffect = {
+const ThunderClapApplyStatusEffect: ApplyShockStatusEffectSkillEffect = {
   id: "thunder_clap_apply_status_effect",
   name: "Thunder Clap Shock",
   type: SkillEffectType.applyStatusEffect,
   statusEffectType: StatusEffectType.shock,
   targetType: TargetType.allEnemies,
   affinities: [AffinityType.chaos],
-  duration: 3,
-  stackable: false,
+  value: 3,
+  stackable: true,
 };
 
 export const ThunderClapSkill: Skill = {
@@ -295,7 +299,7 @@ const DeepGashDamageEffect: DamageSkillEffect = {
   duration: undefined, // No duration for damage effects
 };
 
-const DeepGashApplyStatusEffect: ApplyStatusEffectSkillEffect = {
+const DeepGashApplyStatusEffect: ApplyBleedStatusEffectSkillEffect = {
   id: "deep_gash_apply_status_effect",
   name: "Deep Gash Bleed",
   type: SkillEffectType.applyStatusEffect,
@@ -341,16 +345,16 @@ export const SpiritWardSkill: Skill = {
 
 // Ethereal Barrier - gives all allies shield status effect
 //-----------------------------------------------------------------------------
-const EtherealBarrierApplyStatusEffect: ApplyStatusEffectSkillEffect = {
+const EtherealBarrierApplyStatusEffect: ApplyShieldStatusEffectSkillEffect = {
   id: "ethereal_barrier_apply_status_effect",
   name: "Ethereal Barrier Shield",
   type: SkillEffectType.applyStatusEffect,
   affinities: [AffinityType.spirit],
   targetType: TargetType.allAllies,
   statusEffectType: StatusEffectType.shield,
-  value: 100,
-  duration: undefined,
+  value: 0.5,
   stackable: true,
+  stat: StatType.magic,
 };
 
 export const EtherealBarrierSkill: Skill = {
