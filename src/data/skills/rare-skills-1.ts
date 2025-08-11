@@ -15,75 +15,90 @@ import {
 import { StatType } from "../../types/stats";
 import { StatusEffectType } from "../../types/statusEffects";
 
-// 1. Crystal Shard Barrage - Deals magic damage to all enemies, applies brittle
-//-----------------------------------------------------------------------------
-const CrystalShardBarrageDamage: DamageSkillEffect = {
-  id: "crystal_shard_barrage_damage",
-  name: "Crystal Shard Barrage Damage",
+//----------------------------------------------------------------------------
+// Gemini Guardian's Skills
+//----------------------------------------------------------------------------
+
+// 1) Tempest's Fury - Deals magic damage to all enemies and applies a slow.
+// This skill is an offensive ability that combines air manipulation with intellect.
+// The guardian uses its mental agility to create a wide-spread storm that hinders enemies.
+const TempestsFuryDamageEffect: DamageSkillEffect = {
+  id: "tempests_fury_damage_effect",
+  name: "Tempest's Fury Damage",
   type: SkillEffectType.damage,
   affinities: [AffinityType.gem],
-  damageMultiplier: 0.9,
-  damageStat: StatType.magic,
-  defenseStat: StatType.magicDefense,
+  damageMultiplier: 1.5,
+  damageStat: StatType.speed,
+  defenseStat: StatType.speed,
   targetType: TargetType.allEnemies,
-  duration: undefined,
 };
 
-const CrystalShardBarrageBrittle: ApplyStatusEffectSkillEffect = {
-  id: "crystal_shard_barrage_brittle",
-  name: "Crystal Shard Barrage Brittle",
+const TempestsFuryHasteEffect: ApplyStatusEffectSkillEffect = {
+  id: "tempests_fury_haste_effect",
+  name: "Tempest's Fury Haste",
   type: SkillEffectType.applyStatusEffect,
-  statusEffectType: StatusEffectType.brittle,
-  targetType: TargetType.allEnemies,
   affinities: [AffinityType.gem],
+  targetType: TargetType.allAllies,
+  statusEffectType: StatusEffectType.haste,
   value: 15,
   stackable: true,
 };
 
-export const CrystalShardBarrageSkill: Skill = {
-  id: "crystal_shard_barrage",
-  name: "Crystal Shard Barrage",
+export const TempestsFurySkill: Skill = {
+  id: "tempests_fury",
+  name: "Tempest's Fury",
   cost: 35,
   costStat: StatType.energy,
-  cooldownTurns: 4,
-  effects: [CrystalShardBarrageDamage, CrystalShardBarrageBrittle],
-};
-//-----------------------------------------------------------------------------
-
-// 2. Gemstone Barrier - Applies a large shield to self, increases defense
-//-----------------------------------------------------------------------------
-const GemstoneBarrierShield: ApplyStatusEffectSkillEffect = {
-  id: "gemstone_barrier_shield",
-  name: "Gemstone Barrier Shield",
-  type: SkillEffectType.applyStatusEffect,
-  statusEffectType: StatusEffectType.shield,
-  targetType: TargetType.self,
-  affinities: [AffinityType.gem],
-  value: 200,
-  stackable: true,
+  effects: [TempestsFuryDamageEffect, TempestsFuryHasteEffect],
 };
 
-const GemstoneBarrierDefenseBoost: AdjustStatSkillEffect = {
-  id: "gemstone_barrier_defense_boost",
-  name: "Gemstone Barrier Defense Boost",
+// 2) Twin Insight - Buffs all allies with increased speed and crit chance.
+// This ability reflects the guardian's mental agility and duality, granting allies
+// a "split decision" state of hyper-focus that enhances their combat prowess.
+const TwinInsightSpeedBuff: AdjustStatSkillEffect = {
+  id: "twin_insight_speed_buff",
+  name: "Twin Insight Speed Buff",
   type: SkillEffectType.adjustStat,
   affinities: [AffinityType.gem],
-  targetType: TargetType.self,
-  stat: StatType.defense,
+  targetType: TargetType.allAllies,
+  stat: StatType.speed,
   direction: AdjustmentDirection.increase,
-  modifierValue: 70,
+  modifierValue: 30, // 30% speed increase
   duration: 3,
 };
 
-export const GemstoneBarrierSkill: Skill = {
-  id: "gemstone_barrier",
-  name: "Gemstone Barrier",
-  cost: 30,
-  costStat: StatType.energy,
-  cooldownTurns: 3,
-  effects: [GemstoneBarrierShield, GemstoneBarrierDefenseBoost],
+const TwinInsightCritChanceBuff: AdjustStatSkillEffect = {
+  id: "twin_insight_crit_chance_buff",
+  name: "Twin Insight Crit Chance Buff",
+  type: SkillEffectType.adjustStat,
+  affinities: [AffinityType.gem],
+  targetType: TargetType.allAllies,
+  userStat: StatType.critChance,
+  stat: StatType.critChance,
+  direction: AdjustmentDirection.increase,
+  modifierValue: 100,
+  duration: 3,
 };
-//-----------------------------------------------------------------------------
+
+const TwinInsightShield: ApplyStatusEffectSkillEffect = {
+  id: "twin_insight_shield",
+  name: "Twin Insight Shield",
+  type: SkillEffectType.applyStatusEffect,
+  statusEffectType: StatusEffectType.shield,
+  targetType: TargetType.allAllies,
+  affinities: [AffinityType.gem],
+  value: 75,
+  stackable: true,
+};
+
+export const TwinInsightSkill: Skill = {
+  id: "twin_insight",
+  name: "Twin Insight",
+  cost: 35,
+  costStat: StatType.energy,
+  cooldownTurns: 0,
+  effects: [TwinInsightSpeedBuff, TwinInsightCritChanceBuff, TwinInsightShield],
+};
 
 // 3. Soul Siphon - Deals magic damage to a single enemy, heals self for a portion
 //-----------------------------------------------------------------------------
@@ -185,7 +200,7 @@ const ArcaneBarrageMagicDefenseDebuff: AdjustStatSkillEffect = {
 export const ArcaneBarrageSkill: Skill = {
   id: "arcane_barrage",
   name: "Arcane Barrage",
-  cost: 30,
+  cost: 35,
   costStat: StatType.energy,
   cooldownTurns: 0,
   effects: [ArcaneBarrageDamage, ArcaneBarrageMagicDefenseDebuff],
@@ -202,8 +217,8 @@ const AncientWisdomMagicBoost: AdjustStatSkillEffect = {
   targetType: TargetType.self,
   stat: StatType.magic,
   direction: AdjustmentDirection.increase,
-  modifierValue: 60,
-  duration: 4,
+  modifierValue: 50,
+  duration: 3,
 };
 
 const AncientWisdomMagicDefenseBoost: AdjustStatSkillEffect = {
@@ -214,14 +229,14 @@ const AncientWisdomMagicDefenseBoost: AdjustStatSkillEffect = {
   targetType: TargetType.self,
   stat: StatType.magicDefense,
   direction: AdjustmentDirection.increase,
-  modifierValue: 60,
-  duration: 4,
+  modifierValue: 50,
+  duration: 3,
 };
 
 export const AncientWisdomSkill: Skill = {
   id: "ancient_wisdom",
   name: "Ancient Wisdom",
-  cost: 20,
+  cost: 25,
   costStat: StatType.energy,
   cooldownTurns: 3,
   effects: [AncientWisdomMagicBoost, AncientWisdomMagicDefenseBoost],
@@ -263,38 +278,49 @@ export const TemporalShiftSkill: Skill = {
 };
 //-----------------------------------------------------------------------------
 
-// 8. Chaotic Strike - Deals physical damage to a random enemy, applies Confusion
+// 8. Lost To Time - Deals physical damage to a random enemy, applies Confusion
 //-----------------------------------------------------------------------------
-const ChaoticStrikeDamage: DamageSkillEffect = {
-  id: "chaotic_strike_damage",
-  name: "Chaotic Strike Damage",
+const LostToTimeDamage: DamageSkillEffect = {
+  id: "lost_to_time_damage",
+  name: "Lost To Time Damage",
   type: SkillEffectType.damage,
   affinities: [AffinityType.chaos],
-  damageMultiplier: 1.8,
-  damageStat: StatType.strength,
-  defenseStat: StatType.defense,
+  damageMultiplier: 1.3,
+  damageStat: StatType.magic,
+  defenseStat: StatType.magicDefense,
   targetType: TargetType.randomEnemy,
   duration: undefined,
 };
 
-const ChaoticStrikeConfusion: ApplyStatusEffectSkillEffect = {
-  id: "chaotic_strike_confusion",
-  name: "Chaotic Strike Confusion",
+const LostToTimeConfusion: ApplyStatusEffectSkillEffect = {
+  id: "lost_to_time_confusion",
+  name: "Lost To Time Confusion",
   type: SkillEffectType.applyStatusEffect,
   statusEffectType: StatusEffectType.confusion,
   targetType: TargetType.randomEnemy,
   affinities: [AffinityType.chaos],
   value: 1,
-  stackable: false,
+  stackable: true,
 };
 
-export const ChaoticStrikeSkill: Skill = {
-  id: "chaotic_strike",
-  name: "Chaotic Strike",
+const LostToTimeSlow: ApplyStatusEffectSkillEffect = {
+  id: "lost_to_time_slow",
+  name: "Lost To Time Slow",
+  type: SkillEffectType.applyStatusEffect,
+  statusEffectType: StatusEffectType.slow,
+  targetType: TargetType.randomEnemy,
+  affinities: [AffinityType.chaos],
+  value: 15,
+  stackable: true,
+};
+
+export const LostToTimeSkill: Skill = {
+  id: "lost_to_time",
+  name: "Lost To Time",
   cost: 25,
   costStat: StatType.energy,
-  cooldownTurns: 0,
-  effects: [ChaoticStrikeDamage, ChaoticStrikeConfusion],
+  cooldownTurns: 2,
+  effects: [LostToTimeDamage, LostToTimeConfusion, LostToTimeSlow],
 };
 //-----------------------------------------------------------------------------
 
@@ -319,7 +345,7 @@ const VoidRendBleed: ApplyStatusEffectSkillEffect = {
   statusEffectType: StatusEffectType.bleed,
   targetType: TargetType.randomEnemy,
   affinities: [AffinityType.void],
-  value: 5,
+  value: 4,
   stackable: true,
 };
 
@@ -374,11 +400,10 @@ const SunfireBurstDamage: DamageSkillEffect = {
   name: "Sunfire Burst Damage",
   type: SkillEffectType.damage,
   affinities: [AffinityType.radiance],
-  damageMultiplier: 1.1,
+  damageMultiplier: 1.3,
   damageStat: StatType.magic,
   defenseStat: StatType.magicDefense,
   targetType: TargetType.allEnemies,
-  duration: undefined,
 };
 
 const SunfireBurstBurn: ApplyStatusEffectSkillEffect = {
@@ -388,7 +413,7 @@ const SunfireBurstBurn: ApplyStatusEffectSkillEffect = {
   statusEffectType: StatusEffectType.burn,
   targetType: TargetType.allEnemies,
   affinities: [AffinityType.radiance],
-  value: 8,
+  value: 10,
   stackable: true,
 };
 
@@ -421,8 +446,18 @@ const DivineShieldCleanse: CleanseSkillEffect = {
   type: SkillEffectType.cleanse,
   affinities: [AffinityType.radiance],
   cleansableEffect: CleansableEffect.statusEffect,
-  count: 1,
+  count: 2,
   targetType: TargetType.allAllies,
+};
+
+const DivineShieldApplyTaunt: ApplyStatusEffectSkillEffect = {
+  id: "divine_shield_apply_taunt",
+  name: "Divine Shield Taunt",
+  type: SkillEffectType.applyStatusEffect,
+  statusEffectType: StatusEffectType.taunt,
+  targetType: TargetType.self,
+  affinities: [AffinityType.radiance],
+  duration: 2,
 };
 
 export const DivineShieldSkill: Skill = {
@@ -431,7 +466,11 @@ export const DivineShieldSkill: Skill = {
   cost: 45,
   costStat: StatType.energy,
   cooldownTurns: 5,
-  effects: [DivineShieldApplyShield, DivineShieldCleanse],
+  effects: [
+    DivineShieldApplyShield,
+    DivineShieldCleanse,
+    DivineShieldApplyTaunt,
+  ],
 };
 //-----------------------------------------------------------------------------
 
@@ -464,7 +503,7 @@ const WildChargeStrengthBoost: AdjustStatSkillEffect = {
 export const WildChargeSkill: Skill = {
   id: "wild_charge",
   name: "Wild Charge",
-  cost: 20,
+  cost: 30,
   costStat: StatType.energy,
   cooldownTurns: 0,
   effects: [WildChargeDamage, WildChargeStrengthBoost],
@@ -548,31 +587,30 @@ const ThreadedBarrageDamage: DamageSkillEffect = {
   name: "Threaded Barrage Damage",
   type: SkillEffectType.damage,
   affinities: [AffinityType.textile],
-  damageMultiplier: 0.8,
+  damageMultiplier: 1.2,
   damageStat: StatType.strength,
   defenseStat: StatType.defense,
   targetType: TargetType.allEnemies,
   duration: undefined,
 };
 
-const ThreadedBarrageSpeedDebuff: AdjustStatSkillEffect = {
-  id: "threaded_barrage_speed_debuff",
-  name: "Threaded Barrage Speed Reduction",
-  type: SkillEffectType.adjustStat,
-  affinities: [AffinityType.textile],
+const ThreadedBarrageStun: ApplyStatusEffectSkillEffect = {
+  id: "fabricate_armor_stun",
+  name: "Fabricate Armor Stun",
+  type: SkillEffectType.applyStatusEffect,
+  statusEffectType: StatusEffectType.stun,
   targetType: TargetType.allEnemies,
-  stat: StatType.speed,
-  direction: AdjustmentDirection.decrease,
-  modifierValue: 40,
-  duration: 3,
+  affinities: [AffinityType.textile],
+  value: 1,
+  stackable: true,
 };
 
 export const ThreadedBarrageSkill: Skill = {
   id: "threaded_barrage",
   name: "Threaded Barrage",
-  cost: 25,
+  cost: 50,
   costStat: StatType.energy,
-  cooldownTurns: 0,
-  effects: [ThreadedBarrageDamage, ThreadedBarrageSpeedDebuff],
+  cooldownTurns: 5,
+  effects: [ThreadedBarrageDamage, ThreadedBarrageStun],
 };
 //-----------------------------------------------------------------------------

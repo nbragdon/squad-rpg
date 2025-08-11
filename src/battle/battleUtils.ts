@@ -54,6 +54,8 @@ export function getStackableStatusEffectReductionAmount(
       return value;
     case StatusEffectType.slow:
       return Math.min(value, 5);
+    case StatusEffectType.shield:
+      return Math.min(value, 10);
     default:
       return 1;
   }
@@ -64,16 +66,19 @@ export function getStatusEffectValue(
   statusEffect: ApplyStatusEffectSkillEffect,
 ): number {
   if (statusEffect.statusEffectType === StatusEffectType.poison) {
-    let dmg = 0;
-    if (statusEffect.modifierType === ModifierType.Percentage) {
-      dmg = Math.floor(
-        attacker.stats[statusEffect.stat || StatType.magic] *
-          (statusEffect.value || 0),
+    return Math.floor(
+      attacker.stats[statusEffect.stat || StatType.magic] *
+        (statusEffect.value || 0),
+    );
+  }
+  if (statusEffect.statusEffectType === StatusEffectType.shield) {
+    if (statusEffect.stat) {
+      return Math.round(
+        attacker.stats[statusEffect.stat] * (statusEffect.value || 0),
       );
     } else {
-      dmg = statusEffect.value || 0;
+      return Math.round(statusEffect.value || 0);
     }
-    return dmg;
   }
   if (statusEffect.stackable === true) {
     return Math.min(

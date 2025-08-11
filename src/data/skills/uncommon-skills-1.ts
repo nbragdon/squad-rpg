@@ -162,7 +162,7 @@ const PyreBlastDamageEffect: DamageSkillEffect = {
   name: "Pyre Blast Damage",
   type: SkillEffectType.damage,
   affinities: [AffinityType.knowledge],
-  damageMultiplier: 1.0,
+  damageMultiplier: 1.1,
   damageStat: StatType.magic,
   defenseStat: StatType.magicDefense,
   targetType: TargetType.allEnemies,
@@ -372,7 +372,7 @@ const ShadowHealTargetBleed: ApplyStatusEffectSkillEffect = {
   affinities: [AffinityType.void],
   targetType: TargetType.lowestHealthAlly,
   statusEffectType: StatusEffectType.bleed,
-  value: 2,
+  value: 3,
   stackable: true,
 };
 
@@ -393,7 +393,7 @@ const MindCorruptionDamageEffect: DamageSkillEffect = {
   name: "Mind Corruption Damage",
   type: SkillEffectType.damage,
   affinities: [AffinityType.void],
-  damageMultiplier: 1.0,
+  damageMultiplier: 1.2,
   damageStat: StatType.magic,
   defenseStat: StatType.magicDefense,
   targetType: TargetType.randomEnemy,
@@ -416,7 +416,7 @@ export const MindCorruptionSkill: Skill = {
   name: "Mind Corruption",
   cost: 20,
   costStat: StatType.energy,
-  cooldownTurns: 3,
+  cooldownTurns: 2,
   effects: [MindCorruptionDamageEffect, MindCorruptionApplyConfusion],
 };
 //-----------------------------------------------------------------------------
@@ -467,7 +467,7 @@ const TerribleToxinApplyPoison: ApplyStatusEffectSkillEffect = {
   statusEffectType: StatusEffectType.poison,
   stat: StatType.magic,
   value: 0.8, // Poison damage per turn
-  duration: 3,
+  duration: 2,
   stackable: false,
 };
 
@@ -559,7 +559,7 @@ export const InfernalChainsSkill: Skill = {
   name: "Infernal Chains",
   cost: 25,
   costStat: StatType.energy,
-  cooldownTurns: 5,
+  cooldownTurns: 4,
   effects: [InfernalChainsDamageEffect, InfernalChainsApplyStun],
 };
 //-----------------------------------------------------------------------------
@@ -585,7 +585,7 @@ const DarkFlameApplyBurn: ApplyStatusEffectSkillEffect = {
   affinities: [AffinityType.chaos],
   targetType: TargetType.randomEnemy,
   statusEffectType: StatusEffectType.burn,
-  value: 3,
+  value: 10,
   stackable: true,
 };
 
@@ -596,7 +596,7 @@ const DarkFlameApplyBleed: ApplyStatusEffectSkillEffect = {
   affinities: [AffinityType.chaos],
   targetType: TargetType.randomEnemy,
   statusEffectType: StatusEffectType.bleed,
-  value: 10,
+  value: 3,
   stackable: true,
 };
 

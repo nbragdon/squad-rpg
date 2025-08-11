@@ -57,7 +57,6 @@ const EquipmentManagementPage: React.FC<EquipmentManagementPageProps> = ({
       const selectedChar = ownedChars.find(
         (character) => character.id === characterId,
       );
-      console.log(selectedChar);
       if (selectedChar) {
         if (char.equipedItems[EquipmentType.weapon])
           map.set(char.equipedItems[EquipmentType.weapon], selectedChar);
