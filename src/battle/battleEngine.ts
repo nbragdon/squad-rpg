@@ -590,7 +590,7 @@ export class BattleEngine {
             const positiveOrNegative =
               adjustEffect.direction === AdjustmentDirection.increase ? 1 : -1;
             const flatValue = Math.round(
-              currentStat * (1 + adjustEffect.modifierValue * 0.01),
+              currentStat * (adjustEffect.modifierValue * 0.01),
             );
 
             this.state.battleLog.push(
@@ -666,7 +666,7 @@ export class BattleEngine {
 
     // Remove the adjustment from the character
     battleChar.statAdjustments = battleChar.statAdjustments.filter(
-      (a) => a.duration <= 0,
+      (a) => a.duration > 0,
     );
   }
 
@@ -727,10 +727,16 @@ export class BattleEngine {
         if (effect.value <= 0) effectsToRemove.push(effect.type);
       }
     });
+
     // Remove expired effects
     effectsToRemove.forEach((type) => {
       delete char.statusEffects[type];
     });
+
+    if (char.damage >= getInBattleStat(StatType.health, char)) {
+      char.isAlive = false;
+      this.state.battleLog.push(`${char.name} is defeated!`);
+    }
   }
 
   takeTurn(actionType: "attack" | "skill" | "endTurn", skillId?: string) {
@@ -830,6 +836,7 @@ export class BattleEngine {
       // Process enemy turn
       this.processEnemyTurn();
     }
+    this.checkBattleEnd();
   }
 }
 
@@ -844,7 +851,7 @@ export function calculateBattleXp(
     playerChars.length;
   const avgEnemyLevel =
     enemyChars.reduce((sum, c) => sum + (c.level || 1), 0) / enemyChars.length;
-  let xp = 10;
+  let xp = 10 * (1 + 0.2 * (avgEnemyLevel - 1));
   const diff = avgPlayerLevel - avgEnemyLevel;
   if (diff > 0) {
     xp = xp * Math.pow(0.5, diff); // reduce by 50% per level above

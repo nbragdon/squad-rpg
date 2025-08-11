@@ -679,7 +679,7 @@ const BloodPactSelfDamage: DamageSkillEffect = {
   name: "Blood Pact Self Damage",
   type: SkillEffectType.damage,
   affinities: [AffinityType.beast],
-  damageMultiplier: 0.2, // Deals 20% of strength as damage to self
+  damageMultiplier: 0.25, // Deals 20% of strength as damage to self
   damageStat: StatType.health, // Use strength to calculate self-damage
   defenseStat: StatType.health, // Not directly used for self-damage in this context, but required by type
   targetType: TargetType.self,

@@ -36,6 +36,7 @@ export const ENEMY_IRON_MIMIC_CHEST: EnemyCharacter = {
       name: "Iron Shavings",
       cost: 20,
       costStat: StatType.energy,
+      cooldownTurns: 3,
       effects: [
         {
           id: "iron_shavings_stun_effect",

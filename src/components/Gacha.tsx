@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { useGameEngine } from "../context/GameEngineContext";
-import { gachaCharacters } from "../data/characters";
+import {
+  gachaCharacters,
+  generateBaseCharacterProgress,
+} from "../data/characters";
 import { CharacterBase, PlayerCharacter } from "../types/character";
 import { Rarity } from "../types/rarity";
 import "./Gacha.css";
@@ -34,9 +37,7 @@ function getRandomCharacter(rarity: Rarity): CharacterBase {
 function createPlayerCharacter(base: CharacterBase): PlayerCharacter {
   return {
     ...base,
-    level: 1,
-    xp: 0,
-    shards: 0,
+    ...generateBaseCharacterProgress(),
   };
 }
 
@@ -171,11 +172,8 @@ const Gacha: React.FC<GachaProps> = ({ onBack }) => {
           if (!newProgress.characterProgress) {
             newProgress.characterProgress = {};
           }
-          newProgress.characterProgress[char.id] = {
-            level: char.level,
-            xp: char.xp,
-            shards: char.shards,
-          };
+          newProgress.characterProgress[char.id] =
+            generateBaseCharacterProgress();
         } else {
           // Increase shards of existing character
           if (

@@ -8,9 +8,17 @@ import BattleDisplay from "./BattleDisplay";
 import { CharacterSelection } from "./CharacterCollection";
 import CharacterModal from "./CharacterModal";
 import { RewardType } from "types/reward";
+import { GameEngine } from "engine/GameEngine";
 
 const CHAPTERS_ARRAY = Array.from({ length: 5 }, (_, i) => `Chapter ${i + 1}`);
 const STAGES_PER_CHAPTER = 10;
+
+function getCharacterProgress(characterId: string, gameEngine: GameEngine) {
+  const characterProgress = gameEngine.player.characterProgress;
+  if (characterProgress) {
+    return characterProgress[characterId];
+  }
+}
 
 function getCrystalReward(
   chapter: number,
@@ -90,7 +98,10 @@ const SoloMode: React.FC<SoloModeProps> = ({ onNavigate }) => {
       return;
     }
     // Prepare player and enemy arrays for the engine
-    const playerArr = selectedCharacters.map((char) => ({ ...char })); // Use selectedCharacters
+    const playerArr = selectedCharacters.map((char) => ({
+      ...char,
+      level: getCharacterProgress(char.id, gameEngine)?.level || 1,
+    })); // Use selectedCharacters
     const enemyArr = getEnemyByChapterAndStage(chapter, stage);
     const newBattleEngine = new BattleEngine({
       playerCharacters: playerArr,
@@ -102,18 +113,6 @@ const SoloMode: React.FC<SoloModeProps> = ({ onNavigate }) => {
       battleEngine: newBattleEngine,
     }));
   }
-
-  // Handler for CharacterSelection component
-  const handleCharacterSelect = (character: PlayerCharacter) => {
-    setSelectedCharacters((prevSelected) => {
-      if (prevSelected.some((char) => char.id === character.id)) {
-        // Deselect if already selected
-        return prevSelected.filter((char) => char.id !== character.id);
-      } else {
-        return [character];
-      }
-    });
-  };
 
   const currentStageNum = getSoloStageNumber(chapter, stage);
   const crystalReward = getCrystalReward(
@@ -277,8 +276,16 @@ const SoloMode: React.FC<SoloModeProps> = ({ onNavigate }) => {
             },
           ]}
           onVictory={() => {
+            const nextStageNumber = getSoloStageNumber(chapter, stage) + 1;
             updateGameEngine((engine) => ({
               ...engine,
+              player: {
+                ...engine.player,
+                soloProgress:
+                  engine.player.soloProgress > nextStageNumber
+                    ? engine.player.soloProgress
+                    : nextStageNumber,
+              },
               battleEngine: null,
             }));
           }}
