@@ -6,13 +6,11 @@ import {
   AdjustStatSkillEffect,
   ApplyBurnStatusEffectSkillEffect,
   ApplyPoisonStatusEffectSkillEffect,
-  ApplyStunStatusEffectSkillEffect,
   DamageSkillEffect,
   HealSkillEffect,
   Skill,
   SkillEffectType,
   TargetType,
-  ApplyStatusEffectSkillEffect,
   ApplyShieldStatusEffectSkillEffect,
   ApplySilenceStatusEffectSkillEffect,
   ApplyBrittleStatusEffectSkillEffect,
@@ -152,7 +150,7 @@ const CosmicWhisperSilenceEffect: ApplySilenceStatusEffectSkillEffect = {
   affinities: [AffinityType.void],
   targetType: TargetType.randomEnemy,
   statusEffectType: StatusEffectType.silence,
-  value: 3,
+  value: 2,
   stackable: true,
 };
 
