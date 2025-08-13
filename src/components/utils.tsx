@@ -46,6 +46,8 @@ import { StatType } from "../types/stats";
 import { SkillEffectType } from "types/skillTypes";
 import { EquipmentType, InventoryItem, ItemType } from "types/inventory";
 import { StatusEffectType } from "types/statusEffects";
+import { BRITTLE_MULTIPLIER } from "data/statUtils";
+import { STATUS_EFFECT_VALUE_MAX } from "battle";
 
 export const getRarityTextColorClass = (rarity: Rarity): string => {
   switch (rarity) {
@@ -174,3 +176,58 @@ export const getItemIcon = (itemType: ItemType) => {
 
   return <GiStandingPotion />;
 };
+
+export const STAT_READABLE_STRING = {
+  [StatType.critChance]: "Crit Chance",
+  [StatType.critDamage]: "Crit Damage",
+  [StatType.defense]: "Defense",
+  [StatType.energy]: "Energy",
+  [StatType.energyGain]: "Energy Gain",
+  [StatType.health]: "Health",
+  [StatType.magic]: "Magic",
+  [StatType.magicDefense]: "Magic Defense",
+  [StatType.speed]: "Speed",
+  [StatType.strength]: "Strength",
+};
+
+/**
+ * Returns a human-readable string summarizing the effect of a given StatusEffectType.
+ *
+ * @param effectType The StatusEffectType to get a summary for.
+ * @returns A string describing the status effect and its unique properties.
+ */
+export function getStatusEffectSummary(effectType: StatusEffectType): string {
+  // Use a switch statement to handle each status effect type and provide a custom description.
+  switch (effectType) {
+    case StatusEffectType.burn:
+      return `Applies damage each turn equal to 1% per stack of the character's health. Reduced by ${STAT_READABLE_STRING[StatType.magicDefense]}. Lose half stacks per turn. Max ${STATUS_EFFECT_VALUE_MAX[StatusEffectType.burn]} stacks.`;
+    case StatusEffectType.brittle:
+      return `Increases the damage taken from attacks by ${BRITTLE_MULTIPLIER * 100}% per stack. Lose 1/4 of the stacks per turn.`;
+    case StatusEffectType.poison:
+      return `Applies damage each turn for a set duration. Reduced by ${STAT_READABLE_STRING[StatType.magicDefense]}.`;
+    case StatusEffectType.shock:
+      return `Cannot crit while affected by shock and lasts a set duration.`;
+    case StatusEffectType.bleed:
+      return "Cannot be healed while affected by bleed. Lose 1 stack per turn.";
+    case StatusEffectType.stun:
+      return "Cannot use basic attack or abilities while stunned. Lose all stacks at end of turn.";
+    case StatusEffectType.silence:
+      return `Cannot use abilities while affected by silence. Decays by 1 stack per turn. Max ${STATUS_EFFECT_VALUE_MAX[StatusEffectType.silence]} stacks.`;
+    case StatusEffectType.taunt:
+      return `All random enemy attacks will target the character with taunt. Decays by 1 stack per turn. Max ${STATUS_EFFECT_VALUE_MAX[StatusEffectType.taunt]} stacks.`;
+    case StatusEffectType.shield:
+      return "Damage is dealt to shield before health. Lose 10% per turn.";
+    case StatusEffectType.haste:
+      return `% chance to gain an extra turn equal to the number of stacks. Max ${STATUS_EFFECT_VALUE_MAX[StatusEffectType.haste]} stacks.`;
+    case StatusEffectType.slow:
+      return `Decreases the character's speed, causing them to act more slowly. Decays by 1 stack per turn. Max ${STATUS_EFFECT_VALUE_MAX[StatusEffectType.slow]} stacks.`;
+    case StatusEffectType.confusion:
+      return `All random enemy attacks can target any enemy or any ally (self included). Decays by 1 stack per turn. Max ${STATUS_EFFECT_VALUE_MAX[StatusEffectType.confusion]} stacks.`;
+    case StatusEffectType.disarm:
+      return `Cannot use basic attacks while disarmed. Decays by 1 stack per turn. Max ${STATUS_EFFECT_VALUE_MAX[StatusEffectType.disarm]} stacks.`;
+    case StatusEffectType.coins:
+      return "Increases all stats by 2% per stack of coins. Do not lose any stacks each turn.";
+    default:
+      return "Unknown status effect.";
+  }
+}

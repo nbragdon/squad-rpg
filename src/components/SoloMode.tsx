@@ -2,7 +2,11 @@ import React, { useState } from "react";
 import { BattleEngine } from "../battle";
 import { useGameEngine } from "../context/GameEngineContext";
 import { getOwnedCharacters } from "../data/characters/charUtil";
-import { getEnemyByChapterAndStage } from "../data/enemies/enemy-map";
+import {
+  getEnemyByChapterAndStage,
+  getSoloStageNumber,
+  STAGES_PER_CHAPTER,
+} from "../data/enemies/enemy-map";
 import { PlayerCharacter } from "../types/character";
 import BattleDisplay from "./BattleDisplay";
 import { CharacterSelection } from "./CharacterCollection";
@@ -11,7 +15,6 @@ import { RewardType } from "types/reward";
 import { GameEngine } from "engine/GameEngine";
 
 const CHAPTERS_ARRAY = Array.from({ length: 5 }, (_, i) => `Chapter ${i + 1}`);
-const STAGES_PER_CHAPTER = 10;
 
 function getCharacterProgress(characterId: string, gameEngine: GameEngine) {
   const characterProgress = gameEngine.player.characterProgress;
@@ -27,7 +30,7 @@ function getCrystalReward(
   newSoloProgress: number,
 ) {
   // Simple reward logic: 10 crystals per stage, bonus for chapter completion
-  let reward = 50 * chapter;
+  let reward = 50 + (chapter - 1) * 15;
   if (newSoloProgress >= currentSoloProgress) {
     if (chapter === 1) {
       reward += 250;
@@ -43,10 +46,6 @@ function getCrystalReward(
   }
 
   return reward;
-}
-
-function getSoloStageNumber(chapter: number, stage: number) {
-  return (chapter - 1) * STAGES_PER_CHAPTER + stage;
 }
 
 function isUnlocked(chapter: number, stage: number, soloProgress?: number) {
@@ -68,12 +67,6 @@ const SoloMode: React.FC<SoloModeProps> = ({ onNavigate }) => {
   >([]);
   const [modalCharacter, setModalCharacter] = useState<PlayerCharacter | null>(
     null,
-  );
-
-  // Simulate completed stages for progression logic
-  // Example: initially only Chapter 1, Stage 1 is completed
-  const [completedStages, setCompletedStages] = useState<Set<string>>(
-    new Set(["Chapter 1_Stage 1"]),
   );
 
   const battleEngine = gameEngine.battleEngine;
@@ -198,8 +191,9 @@ const SoloMode: React.FC<SoloModeProps> = ({ onNavigate }) => {
                   gameEngine.player.soloProgress,
                 );
                 const isSelected = stage === i + 1;
-                const stageKey = `${CHAPTERS_ARRAY[chapter - 1]}_${stageName}`; // For completion check
-                const isCompleted = completedStages.has(stageKey);
+                const isCompleted =
+                  getSoloStageNumber(chapter, i + 1) <
+                  gameEngine.player.soloProgress;
 
                 return (
                   <button

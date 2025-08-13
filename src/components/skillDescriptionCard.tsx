@@ -12,8 +12,9 @@ import {
   AdjustmentDirection,
 } from "types/skillTypes";
 import { AllStats, StatType } from "types/stats";
-import { StatIcons, AffinityIcons } from "./utils";
+import { StatIcons, AffinityIcons, getStatusEffectSummary } from "./utils";
 import { PlayerCharacter } from "types/character";
+import { useState } from "react";
 
 interface SkillDescriptionCardProps {
   skill: Skill;
@@ -25,6 +26,16 @@ export const SkillDescriptionCard: React.FC<SkillDescriptionCardProps> = ({
   skill,
   character,
 }) => {
+  const [hoveredEffectId, setHoveredEffectId] = useState<string | null>(null);
+
+  const handleMouseEnter = (effectId: string) => {
+    setHoveredEffectId(effectId);
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredEffectId(null);
+  };
+
   const calculateDamageOrHeal = (
     effect: DamageSkillEffect | HealSkillEffect,
     stats: AllStats,
@@ -131,8 +142,22 @@ export const SkillDescriptionCard: React.FC<SkillDescriptionCardProps> = ({
             {effect.type === SkillEffectType.applyStatusEffect && (
               <p className="text-orange-300 text-sm">
                 Applies{" "}
-                <span className="font-bold capitalize">
+                <span
+                  // The tooltip is now rendered as an absolute-positioned child of this relative span.
+                  className="font-bold underline cursor-pointer relative"
+                  onMouseEnter={() => handleMouseEnter(effect.id)}
+                  onMouseLeave={handleMouseLeave}
+                >
                   {(effect as ApplyStatusEffectSkillEffect).statusEffectType}
+                  {/* Tooltip for status effects */}
+                  {hoveredEffectId === effect.id && (
+                    <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 p-2 text-xs text-white bg-gray-900 rounded-md shadow-xl  w-44">
+                      {getStatusEffectSummary(
+                        (effect as ApplyStatusEffectSkillEffect)
+                          .statusEffectType,
+                      )}
+                    </div>
+                  )}
                 </span>{" "}
                 {(effect as ApplyStatusEffectSkillEffect).value &&
                   `(${(effect as ApplyStatusEffectSkillEffect).stat ? Math.floor(character.stats[(effect as ApplyStatusEffectSkillEffect).stat || StatType.magic] * ((effect as ApplyStatusEffectSkillEffect).value || 0)) : (effect as ApplyStatusEffectSkillEffect).value}) `}

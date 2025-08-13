@@ -8,9 +8,9 @@ import { EquipmentItem } from "types/inventory";
 import { getLeveledEquipmentValue } from "./inventory/equipmentUtil";
 import { InBattleStatAdjustment } from "battle";
 
-const BRITTLE_MULTIPLIER = 0.02;
-const AFFINITY_DAMAGE_MULT = 1.3;
-const STAT_GROWTH_PER_LEVEL = 1.05;
+export const BRITTLE_MULTIPLIER = 0.02;
+export const AFFINITY_DAMAGE_MULT = 1.3;
+export const STAT_GROWTH_PER_LEVEL = 1.05;
 
 // Shard bonus per rarity
 const SHARD_BONUS: Record<Rarity, number> = {
@@ -101,7 +101,7 @@ function getStatusEffectChange(
       coinsStatusEffect.value > 0
     ) {
       amount +=
-        calculableStats.stats[statType] * (1 + coinsStatusEffect.value * 0.01);
+        calculableStats.stats[statType] * (coinsStatusEffect.value * 0.01);
     }
   }
 

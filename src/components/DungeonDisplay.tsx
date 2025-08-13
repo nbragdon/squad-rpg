@@ -1,5 +1,5 @@
 import { BattleEngine } from "battle/battleEngine";
-import { getRandomEnemy } from "data/enemies/enemy-map";
+import { getRandomDungeonTeam, getRandomEnemy } from "data/enemies/enemy-map";
 import { generateRandomEquipment } from "data/inventory/equipmentUtil";
 import React, { useEffect, useState } from "react";
 import { useGameEngine } from "../context/GameEngineContext";
@@ -197,11 +197,7 @@ const DungeonMode: React.FC<DungeonProps> = ({ onBack }) => {
       ...engine,
       battleEngine: new BattleEngine({
         playerCharacters: selectedCharacters,
-        enemies: [
-          getRandomEnemy(enemyLevel, selectedRarity),
-          getRandomEnemy(enemyLevel, selectedRarity),
-          getRandomEnemy(enemyLevel, selectedRarity),
-        ],
+        enemies: getRandomDungeonTeam(enemyLevel, selectedRarity),
         inventory: engine.player.equipment,
       }),
     }));
@@ -389,6 +385,7 @@ const DungeonMode: React.FC<DungeonProps> = ({ onBack }) => {
               battleEngine: null,
             }));
             setFloor(floor + 1);
+            setTicketsToUse(0);
           }}
           onDefeat={() => {
             updateGameEngine((engine) => ({
@@ -396,6 +393,7 @@ const DungeonMode: React.FC<DungeonProps> = ({ onBack }) => {
               battleEngine: null,
             }));
             setFloor(1);
+            setTicketsToUse(0);
             setSelectedCharacters([]); // Clear selected characters after battle
           }}
         />

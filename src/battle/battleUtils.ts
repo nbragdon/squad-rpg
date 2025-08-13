@@ -6,7 +6,7 @@ import { EnemyCharacter } from "../types/enemy";
 import { BattleCharacter } from "./battleTypes";
 import { calculateStat } from "data/statUtils";
 
-const STATUS_EFFECT_VALUE_MAX: {
+export const STATUS_EFFECT_VALUE_MAX: {
   [key in StatusEffectType]: number | undefined;
 } = {
   [StatusEffectType.burn]: 20,
@@ -55,7 +55,9 @@ export function getStackableStatusEffectReductionAmount(
     case StatusEffectType.slow:
       return Math.min(value, 5);
     case StatusEffectType.shield:
-      return Math.min(value, 10);
+      return Math.ceil(value / 10);
+    case StatusEffectType.coins:
+      return 0;
     default:
       return 1;
   }
