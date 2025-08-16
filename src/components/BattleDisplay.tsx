@@ -13,6 +13,7 @@ import {
   getRarityTextColorClass,
   RARITY_COLORS,
   RarityIcons,
+  STAT_READABLE_STRING,
   StatIcons,
   StatusEffectIcons,
 } from "./utils";
@@ -68,6 +69,16 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
   const battleEngine = gameEngine.battleEngine;
   const battleState = battleEngine?.getState();
   const auto = gameEngine.player.autoBattle;
+
+  const handlFree = () => {
+    updateGameEngine((engine) => {
+      return {
+        ...engine,
+        battleEngine: null,
+      };
+    });
+    if (onFlee) onFlee();
+  };
 
   const getCoinStatusBonus = (currentBattleState: BattleState) => {
     let bonusCoins = 0;
@@ -204,10 +215,13 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
           [player.id]:
             player.skills[Math.floor(Math.random() * player.skills.length)].id,
         }));
+        console.log("used skill", player);
       } else if (battleEngine?.canAttack(player.id)) {
         battleEngine?.takeTurn("attack");
+        console.log("used attack", player);
       } else {
         battleEngine?.takeTurn("endTurn");
+        console.log("ended turn", player);
       }
 
       // After the action, update the game engine to reflect the battle state change
@@ -237,6 +251,7 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
       setWaitingOnAutoAction(true); // Indicate we are processing an auto action
 
       setTimeout(() => {
+        console.log("Taking auto turn", currentPlayer);
         onAutoTurn(currentPlayer);
       }, AUTO_WAIT_TIME);
     }
@@ -715,7 +730,7 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
                     {StatIcons[boost.statType]}
                     <span className="ml-1">
                       {formatStatValue(boost, equipment.level, true)}{" "}
-                      {StatType[boost.statType]}
+                      {STAT_READABLE_STRING[boost.statType]}
                     </span>
                   </div>
                 ))}
@@ -736,7 +751,7 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
                     {StatIcons[boost.statType]}
                     <span className="ml-1">
                       {formatStatValue(boost, equipment.level, false)}{" "}
-                      {StatType[boost.statType]}
+                      {STAT_READABLE_STRING[boost.statType]}
                     </span>
                   </div>
                 ))}
@@ -892,14 +907,13 @@ const BattleDisplay: React.FC<BattleDisplayProps> = ({
           {auto ? "Auto: ON" : "Auto: OFF"}
         </button>
         <button
-          onClick={() => {
-            if (onFlee) onFlee();
-          }}
+          onClick={handlFree}
           className="
             bg-gray-700 hover:bg-gray-600 text-white font-bold
             rounded-lg min-w-[7.5rem] min-h-[2.5rem] border-none cursor-pointer
             shadow-md transition-colors duration-200
           "
+          disabled={auto}
         >
           Flee
         </button>

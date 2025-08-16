@@ -207,27 +207,13 @@ const CharacterCollection: React.FC<CharacterCollectionProps> = ({
 
   return (
     <div className="min-h-screen bg-blue-900 text-white font-inter flex flex-col items-center p-4 sm:p-8">
-      {/* Back Button */}
-      <div className="w-full max-w-4xl flex justify-start mb-8">
-        <button
-          className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors duration-200"
-          onClick={onBack}
-        >
-          &larr; Back
-        </button>
-      </div>
-
-      <h1 className="text-4xl font-bold mb-8 text-yellow-400">
-        Character Collection
-      </h1>
-
       {/* Character Selection (Reusable Component) */}
       <CharacterSelection
         characters={ownedDisplayCharacters} // Pass the characters to display
         selectedCharacters={[]} // No selection in collection view
         onCharacterSelect={undefined} // Disable selection functionality
         maxSelection={0} // No max selection as it's a display
-        title="Your Roster"
+        title=""
         showPagination={true}
         charactersPerPage={12} // Show more characters per page for collection
         showViewDetailsButton={true}

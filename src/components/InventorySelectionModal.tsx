@@ -1,22 +1,13 @@
 import { useState, useEffect } from "react";
-import {
-  EquipmentType,
-  EquipmentItem,
-  EquipmentItemBoost,
-} from "types/inventory";
+import { EquipmentType, EquipmentItem } from "types/inventory";
 import {
   getRarityTextColorClass,
   StatIcons,
   RarityIcons,
   EQUIPMENT_TYPE_ICONS,
 } from "./utils";
-import { ModifierType } from "types/skillTypes";
 import { useGameEngine } from "context/GameEngineContext";
-import {
-  calculateLeveledEquipmentValue,
-  formatStatValue,
-  getAllEquipment,
-} from "data/inventory/equipmentUtil";
+import { formatStatValue } from "data/inventory/equipmentUtil";
 
 // --- InventorySelectionModal Component (now embedded) ---
 interface InventorySelectionModalProps {

@@ -1,7 +1,7 @@
 import { CharacterProgress } from "../types/game";
 
 export const BASE_XP_TO_NEXT_LEVEL = 50;
-export const XP_GROWTH_RATE = 2;
+export const XP_GROWTH_RATE = 1.5;
 
 export function getXpToNextLevel(level: number): number {
   return Math.floor(BASE_XP_TO_NEXT_LEVEL * XP_GROWTH_RATE ** (level - 1));

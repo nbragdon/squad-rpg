@@ -205,17 +205,6 @@ const DungeonMode: React.FC<DungeonProps> = ({ onBack }) => {
 
   return (
     <div className="min-h-screen bg-blue-900 text-white font-inter flex flex-col items-center p-8">
-      {/* Back Button */}
-      <div className="w-full max-w-4xl flex justify-start mb-8">
-        <button
-          onClick={onBack}
-          className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors duration-200"
-        >
-          &larr; Back
-        </button>
-      </div>
-
-      <h1 className="text-4xl font-bold mb-8 text-yellow-400">Dungeon Mode</h1>
       {battleEngine === null && (
         <>
           <div className="w-full max-w-4xl mb-8">

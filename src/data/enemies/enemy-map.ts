@@ -16,9 +16,11 @@ import {
   ENEMY_BEAST_TITAN,
   ENEMY_VOID_TITAN,
   ENEMY_CHAOS_TITAN,
-} from "./common-titans";
+  ENEMY_TEXTILE_TITAN,
+  ENEMY_SPIRIT_TITAN,
+} from "./titan-enemies";
 import { BattleInitEnemy } from "battle/battleTypes";
-import { ENEMY_IRON_MIMIC_CHEST } from "./common-mimics";
+import { ENEMY_IRON_MIMIC_CHEST } from "./raid-enemies";
 import { ALL_DUNGEON_TEAMS } from "./dungeon-teams";
 import {
   ENEMY_TEMPORAL_HORROR,
@@ -72,31 +74,11 @@ import {
 export const ALL_ENEMIES = [...COMMON_ENEMIES];
 
 export const TITAN_ENEMY = {
-  [Rarity.COMMON]: [
-    { id: ENEMY_BEAST_TITAN, level: 5 },
-    { id: ENEMY_VOID_TITAN, level: 10 },
-    { id: ENEMY_CHAOS_TITAN, level: 15 },
-  ],
-  [Rarity.UNCOMMON]: [
-    { id: ENEMY_BEAST_TITAN, level: 10 },
-    { id: ENEMY_VOID_TITAN, level: 20 },
-    { id: ENEMY_CHAOS_TITAN, level: 30 },
-  ],
-  [Rarity.RARE]: [
-    { id: ENEMY_BEAST_TITAN, level: 25 },
-    { id: ENEMY_VOID_TITAN, level: 35 },
-    { id: ENEMY_CHAOS_TITAN, level: 50 },
-  ],
-  [Rarity.EPIC]: [
-    { id: ENEMY_BEAST_TITAN, level: 50 },
-    { id: ENEMY_VOID_TITAN, level: 60 },
-    { id: ENEMY_CHAOS_TITAN, level: 80 },
-  ],
-  [Rarity.LEGENDARY]: [
-    { id: ENEMY_BEAST_TITAN, level: 90 },
-    { id: ENEMY_VOID_TITAN, level: 110 },
-    { id: ENEMY_CHAOS_TITAN, level: 150 },
-  ],
+  [Rarity.COMMON]: { id: ENEMY_BEAST_TITAN, level: 5 },
+  [Rarity.UNCOMMON]: { id: ENEMY_VOID_TITAN, level: 15 },
+  [Rarity.RARE]: { id: ENEMY_CHAOS_TITAN, level: 25 },
+  [Rarity.EPIC]: { id: ENEMY_TEXTILE_TITAN, level: 40 },
+  [Rarity.LEGENDARY]: { id: ENEMY_SPIRIT_TITAN, level: 60 },
 };
 
 // Map of chapter 1 stage number (1-10) to a unique enemy
@@ -209,11 +191,8 @@ export function getEnemyByChapterAndStage(chapter: number, stage: number) {
   return [{ id: enemyId, level }];
 }
 
-export const generateTitan = (
-  rarity: Rarity,
-  level: number,
-): BattleInitEnemy[] => {
-  return [TITAN_ENEMY[rarity][level - 1]];
+export const generateTitan = (rarity: Rarity): BattleInitEnemy[] => {
+  return [TITAN_ENEMY[rarity]];
 };
 
 export function getRandomEnemy(level: number, rarity: Rarity) {

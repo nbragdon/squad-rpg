@@ -67,31 +67,21 @@ export const getCompletedThresholdRewards = (battleState: BattleState) => {
 };
 
 const BASE_TICKET_REWARD = 2;
-const BASE_DAMAGE_THRESHOLD = 1000;
-const DAMAGE_THRESHOLD_MUTIPLIER = 1.5;
-const LEVEL_DAMAGE_THRESHOLD_MULTIPLIER = 1.2;
+const DAMAGE_THRESHOLDS = [1000, 2000, 4000, 6000, 9000];
 
-export function generateTitanVictoryThresholds(rarity: Rarity, level: number) {
+export function generateTitanVictoryThresholds(rarity: Rarity) {
   const victoryThresholds: VictoryThreshold[] = [];
-  const baseTicketReward =
-    BASE_TICKET_REWARD + RARITY_ORDER.indexOf(rarity) + (level - 1);
-  const baseDamageThreshold =
-    BASE_DAMAGE_THRESHOLD * (RARITY_ORDER.indexOf(rarity) + 1);
 
   for (let i = 0; i < 5; i++) {
     victoryThresholds.push({
       type: DamageRecordType.ALL_DAMAGE,
-      amount: Math.ceil(
-        baseDamageThreshold *
-          Math.pow(DAMAGE_THRESHOLD_MUTIPLIER, i) *
-          Math.pow(LEVEL_DAMAGE_THRESHOLD_MULTIPLIER, level - 1),
-      ),
+      amount: DAMAGE_THRESHOLDS[i],
       reward: {
         type: RewardType.item,
         item: {
           id: RARITY_TO_TICKET_ID[rarity],
           name: snakeCaseToCapitalizedWords(RARITY_TO_TICKET_ID[rarity]),
-          quantity: i === 0 ? baseTicketReward : 1,
+          quantity: i === 0 ? BASE_TICKET_REWARD : 1,
           rarity: rarity,
         },
       },

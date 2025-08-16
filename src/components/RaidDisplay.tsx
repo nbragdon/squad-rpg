@@ -41,6 +41,12 @@ const BASE_LEVEL_BY_RARITY = {
   [Rarity.LEGENDARY]: 80,
 };
 
+function getCoinBonusMultiplier(level: number, rarity: Rarity) {
+  let bonus = RARITY_ORDER.indexOf(rarity);
+  bonus += level * 0.1;
+  return bonus;
+}
+
 function getRaidLevelNumber(level: number, rarity: Rarity) {
   let levelNumber = level;
   const endIndex = RARITY_ORDER.indexOf(rarity);
@@ -153,17 +159,6 @@ const RaidMode: React.FC<RaidProps> = ({ onBack }) => {
 
   return (
     <div className="min-h-screen bg-blue-900 text-white font-inter flex flex-col items-center p-8">
-      {/* Back Button */}
-      <div className="w-full max-w-4xl flex justify-start mb-8">
-        <button
-          onClick={onBack}
-          className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors duration-200"
-        >
-          &larr; Back
-        </button>
-      </div>
-
-      <h1 className="text-4xl font-bold mb-8 text-yellow-400">Raid Mode</h1>
       {battleEngine === null && (
         <>
           {/* Rarity Selection */}
@@ -308,7 +303,10 @@ const RaidMode: React.FC<RaidProps> = ({ onBack }) => {
             },
             {
               type: RewardType.coins_status_effect,
-              multiplier: ticketsToUse + 1,
+              multiplier:
+                ticketsToUse +
+                1 +
+                getCoinBonusMultiplier(selectedLevel, selectedRarity),
             },
           ]}
           onVictory={() => {

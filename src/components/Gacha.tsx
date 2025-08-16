@@ -191,16 +191,6 @@ const Gacha: React.FC<GachaProps> = ({ onBack }) => {
   return (
     <div className="relative flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 to-blue-900 text-white p-4 font-inter">
       <style>{globalStyles}</style> {/* Inject global animations */}
-      <button
-        className="absolute top-6 left-6 px-6 py-2 bg-gray-700 text-white rounded-lg shadow-md hover:bg-gray-600 transition-colors duration-200 z-10"
-        onClick={onBack}
-        disabled={isSummoning || isRevealing}
-      >
-        &larr; Back
-      </button>
-      <h2 className="text-5xl font-extrabold text-yellow-400 mb-8 drop-shadow-lg">
-        Gacha Summon
-      </h2>
       <div className="bg-gray-800 p-6 rounded-xl shadow-2xl mb-8 border border-blue-700 text-center">
         <div className="text-2xl font-bold text-yellow-300 mb-4">
           Crystals: {player.crystals ?? 0}

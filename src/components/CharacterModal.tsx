@@ -9,6 +9,7 @@ import {
   EQUIPMENT_TYPE_ICONS,
   getRarityTextColorClass,
   RarityIcons,
+  STAT_READABLE_STRING,
   StatIcons,
 } from "./utils";
 import { EquipmentItem, EquipmentType } from "types/inventory";
@@ -252,7 +253,9 @@ const CharacterModal: React.FC<CharacterModalProps> = ({
                 <span className="mr-2 text-yellow-300">
                   {StatIcons[statType]}
                 </span>
-                <span className="capitalize mr-2">{statType}:</span>
+                <span className="capitalize mr-2">
+                  {STAT_READABLE_STRING[statType]}:
+                </span>
                 <b className="text-white">
                   {calculateStat(statType, {
                     stats: displayCharacter.stats,

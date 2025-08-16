@@ -3,7 +3,6 @@ import { useState, useMemo, useEffect } from "react";
 import { PlayerCharacter } from "types/character";
 import { EquipmentType, EquipmentItem } from "types/inventory";
 import { Rarity } from "types/rarity";
-import { StatType } from "types/stats";
 import {
   RARITY_COLORS,
   getRarityTextColorClass,
@@ -11,13 +10,13 @@ import {
   EQUIPMENT_TYPE_ICONS,
   StatIcons,
   COIN_ICON,
+  STAT_READABLE_STRING,
 } from "./utils";
 import { getOwnedCharacters } from "data/characters/charUtil";
 import {
   applyRandomSubstatIncrease,
   calculateLevelUpCost,
   formatStatValue,
-  generateSubStatEquipmentBoosts,
   getEquipmentValue,
   getLeveledEquipmentValue,
   MAX_EQUIPMENT_LEVELS,
@@ -439,7 +438,7 @@ const EquipmentManagementPage: React.FC<EquipmentManagementPageProps> = ({
                           {formatStatValue(boost, item.level, true)}{" "}
                           {item.level > 1 &&
                             `(${getLeveledEquipmentValue(boost, 1, true)}) `}
-                          {StatType[boost.statType]}
+                          {STAT_READABLE_STRING[boost.statType]}
                         </span>
                       </div>
                     ))}
@@ -460,7 +459,7 @@ const EquipmentManagementPage: React.FC<EquipmentManagementPageProps> = ({
                           {/* Invoking the function */}
                           <span className="ml-1">
                             {formatStatValue(boost, item.level, false)}{" "}
-                            {StatType[boost.statType]}
+                            {STAT_READABLE_STRING[boost.statType]}
                           </span>
                         </div>
                       ))}

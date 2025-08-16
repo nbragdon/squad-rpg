@@ -27,6 +27,18 @@ export enum GameScreen {
   TITAN = "titan",
 }
 
+const SCREEN_TO_PAGE_NAME = {
+  [GameScreen.COLLECTION]: "Characters",
+  [GameScreen.DUNGEON]: "Dungeon",
+  [GameScreen.EQUIPMENT]: "Equipment",
+  [GameScreen.GACHA]: "Summon",
+  [GameScreen.MENU]: "Squad Rpg",
+  [GameScreen.RAID]: "Raid",
+  [GameScreen.SOLO]: "Solo",
+  [GameScreen.TEAM]: "Team",
+  [GameScreen.TITAN]: "Titan",
+};
+
 function App() {
   const [currentScreen, setCurrentScreen] = useState<GameScreen>(
     GameScreen.MENU,
@@ -78,7 +90,10 @@ function App() {
   return (
     <div className="App">
       <main className="App-main">
-        <TopBar />
+        <TopBar
+          pageName={SCREEN_TO_PAGE_NAME[currentScreen]}
+          onBack={() => handleNavigate(GameScreen.MENU)}
+        />
         {renderScreen()}
       </main>
     </div>
